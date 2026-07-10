@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+
+# Ortam değişkenleri / sırlar (ASLA repoya girmemeli)
+.env
+.env.*
+*.key
+*.pem
+
+# Bağımlılıklar
+node_modules/
+
+# Log & geçici
+*.log
+tmp/
