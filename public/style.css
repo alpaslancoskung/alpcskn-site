@@ -1,71 +1,82 @@
-:root {
-  --bg-1: #0f172a;
-  --bg-2: #1e293b;
-  --accent: #38bdf8;
-  --text: #e2e8f0;
-  --muted: #94a3b8;
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  min-height: 100vh;
+  font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #201f1e;
+  background: #faf9f8;
+  line-height: 1.5;
   display: flex;
   flex-direction: column;
+  min-height: 100vh;
+}
+
+.container {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.topbar {
+  background: #ffffff;
+  border-top: 3px solid #0078d4;
+  border-bottom: 1px solid #edebe9;
+  padding: 14px 0;
+}
+
+.brand {
+  font-size: 18px;
+  font-weight: 600;
+  color: #201f1e;
+}
+
+main {
+  flex: 1;
+  display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 2rem;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-  color: var(--text);
-  background: radial-gradient(1200px 600px at 50% -10%, #1e40af33, transparent),
-              linear-gradient(160deg, var(--bg-1), var(--bg-2));
-  padding: 1.5rem;
+  padding: 48px 0;
 }
 
-.card {
-  max-width: 560px;
-  text-align: center;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px;
-  padding: 3rem 2.5rem;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-}
-
-.logo {
-  font-size: 1.1rem;
-  font-weight: 700;
-  letter-spacing: 0.35em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 1.5rem;
+.panel {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #edebe9;
+  border-radius: 4px;
+  padding: 40px;
+  box-shadow: 0 1.6px 3.6px rgba(0, 0, 0, 0.08), 0 0.3px 0.9px rgba(0, 0, 0, 0.06);
 }
 
 h1 {
-  font-size: clamp(1.5rem, 4vw, 2.25rem);
-  line-height: 1.2;
-  margin-bottom: 1rem;
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 12px;
 }
 
 p {
-  color: var(--muted);
-  font-size: 1.05rem;
-  line-height: 1.6;
-  margin-bottom: 2rem;
+  font-size: 15px;
+  color: #605e5c;
 }
 
-.badge {
-  display: inline-block;
-  font-size: 0.85rem;
-  color: var(--text);
-  background: rgba(56, 189, 248, 0.12);
-  border: 1px solid rgba(56, 189, 248, 0.3);
-  border-radius: 999px;
-  padding: 0.5rem 1rem;
+hr {
+  border: none;
+  border-top: 1px solid #edebe9;
+  margin: 24px 0;
+}
+
+.meta {
+  font-size: 13px;
 }
 
 footer {
-  color: var(--muted);
-  font-size: 0.85rem;
+  background: #ffffff;
+  border-top: 1px solid #edebe9;
+  padding: 16px 0;
+}
+
+footer p {
+  font-size: 13px;
 }

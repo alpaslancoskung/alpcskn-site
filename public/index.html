@@ -3,20 +3,32 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>alpcsk.com</title>
-  <meta name="description" content="alpcsk.com — yakında." />
+  <title>alpcsk</title>
+  <meta name="description" content="alpcsk.com" />
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
-  <main class="card">
-    <div class="logo">alpcsk</div>
-    <h1>Yakında burada bir şeyler olacak 🚀</h1>
-    <p>Bu site şu an geliştiriliyor. Çok yakında geri gel!</p>
-    <div class="badge">🟢 Sunucu çalışıyor · alpcsk.com</div>
+  <header class="topbar">
+    <div class="container">
+      <span class="brand">alpcsk</span>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="panel">
+      <h1>Site yapım aşamasında</h1>
+      <p>alpcsk.com üzerinde çalışıyoruz. Bu sayfa yakında güncellenecek.</p>
+      <hr />
+      <p class="meta">Sunucu çalışıyor — alpcsk.com</p>
+    </section>
   </main>
+
   <footer>
-    <span>© <span id="year"></span> alpcsk</span>
+    <div class="container">
+      <p>&copy; <span id="year"></span> alpcsk. Tüm hakları saklıdır.</p>
+    </div>
   </footer>
+
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
   </script>
