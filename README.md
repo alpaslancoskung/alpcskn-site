@@ -1,6 +1,6 @@
 # alpcskn-site
 
-[alpcskn.com](https://alpcskn.com) web sitesi.
+[alpcsk.com](https://alpcsk.com) web sitesi.
 
 ## 📁 Yapı
 - `public/` — yayınlanan dosyalar (HTML/CSS). Nginx bu klasörü sunar.
