@@ -98,6 +98,60 @@
   .kral-satiri {
     display: flex; justify-content: space-between; align-items: center;
     gap: 12px; margin-bottom: 6px;
+    position: relative;   /* uçan sayı/patlama bu satırın içine yerleşsin */
+  }
+
+  /* Havaya uçan hasar/iyileşme sayısı (örn: -14, +7) */
+  .ucan-sayi {
+    position: absolute; left: 50%; top: -6px;
+    font-weight: 800; font-size: 22px; pointer-events: none; z-index: 5;
+    text-shadow: 0 1px 2px rgba(255,255,255,.8);
+    animation: ucus 1s ease-out forwards;
+  }
+  .ucan-sayi.kritik { font-size: 32px; }
+  @keyframes ucus {
+    0%   { transform: translateX(-50%) translateY(6px); opacity: 0; }
+    25%  { opacity: 1; }
+    100% { transform: translateX(-50%) translateY(-42px); opacity: 0; }
+  }
+
+  /* Uçan mermi (saldıran kartın emojisi) */
+  .mermi {
+    position: absolute; left: 50%; top: -4px;
+    font-size: 30px; pointer-events: none; z-index: 4;
+    animation: mermiUcus .5s ease-in forwards;
+  }
+  @keyframes mermiUcus {
+    0%   { transform: translateX(-50%) translateY(46px) scale(.5); opacity: 0; }
+    30%  { opacity: 1; }
+    100% { transform: translateX(-50%) translateY(-4px) scale(1.15); opacity: 0; }
+  }
+
+  /* Patlama parıltısı */
+  .patlama {
+    position: absolute; left: 50%; top: -8px;
+    font-size: 34px; pointer-events: none; z-index: 6;
+    animation: patla .6s ease-out forwards;
+  }
+  @keyframes patla {
+    0%   { transform: translateX(-50%) scale(.3); opacity: 0; }
+    40%  { transform: translateX(-50%) scale(1.4); opacity: 1; }
+    100% { transform: translateX(-50%) scale(1); opacity: 0; }
+  }
+
+  /* Vurulan can barı bir an parlar */
+  .can-flash { animation: canflash .45s; }
+  @keyframes canflash {
+    0%,100% { filter: none; }
+    50%     { filter: brightness(1.7) saturate(1.6); }
+  }
+
+  /* Oynanan kart kısa bir zıplama yapar */
+  .kart.oynandi { animation: kartVur .4s; }
+  @keyframes kartVur {
+    0%   { transform: translateY(0)    scale(1);    }
+    40%  { transform: translateY(-14px) scale(1.12); }
+    100% { transform: translateY(0)    scale(1);    }
   }
   .can-cubuk {
     height: 16px; background: #e6e6e6; border-radius: 8px; overflow: hidden;
@@ -251,12 +305,13 @@
 
   // ---- ARENALAR (sefer sırası) ----
   // Her arenanın kendi düşman canı ve bonusu var. Sona doğru zorlaşır.
+  // Canlar büyük tutuldu ki savaşlar daha uzun ve heyecanlı sürsün.
   const arenalar = [
-    { ad:"Karlı Dağ",      emoji:"❄️", dusmanCan:26, benimBonusCan:5, gucBonus:0,
-      not:"Soğuk seni korur: +5 can bonusu." },
-    { ad:"Kızgın Çöl",     emoji:"🏜️", dusmanCan:32, benimBonusCan:0, gucBonus:2,
+    { ad:"Karlı Dağ",      emoji:"❄️", dusmanCan:58, benimBonusCan:10, gucBonus:0,
+      not:"Soğuk seni korur: +10 can bonusu." },
+    { ad:"Kızgın Çöl",     emoji:"🏜️", dusmanCan:72, benimBonusCan:0,  gucBonus:2,
       not:"Sıcak seni öfkelendirir: kartların +2 güç." },
-    { ad:"Volkan Kalesi",  emoji:"🌋", dusmanCan:42, benimBonusCan:0, gucBonus:0,
+    { ad:"Volkan Kalesi",  emoji:"🌋", dusmanCan:92, benimBonusCan:0,  gucBonus:0,
       not:"FİNAL! Düşman kral burada çok güçlü." },
   ];
 
@@ -318,7 +373,7 @@
     const benKirmizi = oyun.takim === "kirmizi";
 
     // Canları taze doldur (her arenaya dinç başlarsın)
-    oyun.benimMax  = 30 + arena.benimBonusCan;
+    oyun.benimMax  = 70 + arena.benimBonusCan;
     oyun.benimCan  = oyun.benimMax;
     oyun.dusmanMax = arena.dusmanCan;
     oyun.dusmanCan = arena.dusmanCan;
@@ -391,10 +446,14 @@
     const kartlar = oyun.takim === "kirmizi" ? kirmiziKartlar : maviKartlar;
     const kart = kartlar[sira];
 
+    // Oynanan kart zıplasın (görsel geri bildirim)
+    const kartEl = document.querySelectorAll("#el .kart")[sira];
+    if (kartEl) { kartEl.classList.remove("oynandi"); void kartEl.offsetWidth; kartEl.classList.add("oynandi"); }
+
     if (kart.iyilesme) {
       oyun.benimCan = Math.min(oyun.benimMax, oyun.benimCan + kart.iyilesme);
       gunlugeYaz("💚 " + kart.isim + " kralını " + kart.iyilesme + " iyileştirdi!");
-      sarsit("benim-satiri"); // (iyileşince de küçük bir hareket, keyifli olsun)
+      iyilesmeEfekti("benim-satiri", kart.iyilesme);
     } else {
       // Hasar hesapla + KRİTİK VURUŞ şansı (%25)
       let hasar = kart.guc + oyun.gucBonus;
@@ -403,15 +462,15 @@
       oyun.dusmanCan = Math.max(0, oyun.dusmanCan - hasar);
       gunlugeYaz((kritik ? "💥 KRİTİK! " : "⚔️ ") +
                  kart.isim + " düşmana " + hasar + " hasar vurdu!");
-      sarsit("dusman-satiri");
+      vurusEfekti("dusman-satiri", kart.emoji, hasar, kritik);
     }
 
     canlariGuncelle();
     if (oyun.dusmanCan <= 0) return arenaKazanildi();
 
-    // Sıra düşmanda
+    // Sıra düşmanda (animasyonun bitmesini bekle)
     oyun.kilitli = true;
-    setTimeout(dusmanSaldir, 800);
+    setTimeout(dusmanSaldir, 1100);
   }
 
   // ---- AKILLI DÜŞMAN ----
@@ -423,18 +482,20 @@
     if (iyilesmeKart && oyun.dusmanCan < oyun.dusmanMax / 2 && Math.random() < 0.7) {
       oyun.dusmanCan = Math.min(oyun.dusmanMax, oyun.dusmanCan + iyilesmeKart.iyilesme);
       gunlugeYaz("💙 Düşman " + iyilesmeKart.isim + " ile " + iyilesmeKart.iyilesme + " iyileşti.");
-      sarsit("dusman-satiri");
+      iyilesmeEfekti("dusman-satiri", iyilesmeKart.iyilesme);
     } else {
-      // Yoksa: en güçlü saldırı kartıyla vur
+      // Saldırı kartlarından birini seç: %50 en güçlü, %50 rastgele
+      // (böylece savaş hep aynı olmaz ve daha uzun/dengeli sürer)
       const saldiriKartlari = kartlar.filter(k => !k.iyilesme);
       const enGuclu = saldiriKartlari.reduce((a, b) => (b.guc > a.guc ? b : a));
-      let hasar = enGuclu.guc;
+      const kart = Math.random() < 0.5 ? enGuclu : rastgele(saldiriKartlari);
+      let hasar = kart.guc;
       const kritik = Math.random() < 0.25;
       if (kritik) hasar = hasar * 2;
       oyun.benimCan = Math.max(0, oyun.benimCan - hasar);
       gunlugeYaz((kritik ? "💥 KRİTİK! " : "🔥 ") +
-                 "Düşman " + enGuclu.isim + " ile sana " + hasar + " hasar verdi!");
-      sarsit("benim-satiri");
+                 "Düşman " + kart.isim + " ile sana " + hasar + " hasar verdi!");
+      vurusEfekti("benim-satiri", kart.emoji, hasar, kritik);
     }
 
     canlariGuncelle();
@@ -474,6 +535,56 @@
     el.classList.remove("sarsil");
     void el.offsetWidth;         // tarayıcıyı "yeniden başlat"maya zorlayan küçük hile
     el.classList.add("sarsil");
+  }
+
+  // Küçük yardımcı: bir satıra geçici bir animasyon parçası (mermi/patlama/sayı) ekler.
+  // Animasyon bitince kendini otomatik siler ki ekran birikmesin.
+  function efektEkle(satir, sinif, icerik, gecikmeMs, yasamMs) {
+    const e = document.createElement("div");
+    e.className = sinif;
+    e.textContent = icerik;
+    if (gecikmeMs) e.style.animationDelay = gecikmeMs + "ms";
+    satir.appendChild(e);
+    setTimeout(() => e.remove(), gecikmeMs + yasamMs);
+  }
+
+  // ---- VURUŞ EFEKTİ (saldırı animasyonu) ----
+  // satirId: kimin vurulduğu ("dusman-satiri"/"benim-satiri")
+  function vurusEfekti(satirId, emoji, hasar, kritik) {
+    const satir = document.getElementById(satirId);
+    sarsit(satirId);
+    canFlash(satirId);
+    efektEkle(satir, "mermi", emoji, 0, 600);                       // uçan kart emojisi
+    efektEkle(satir, "patlama", kritik ? "💥" : "✨", 250, 700);     // patlama
+    // Havaya uçan hasar sayısı
+    const s = document.createElement("div");
+    s.className = "ucan-sayi" + (kritik ? " kritik" : "");
+    s.style.color = kritik ? "#b8860b" : "#c0392b";
+    s.style.animationDelay = "250ms";
+    s.textContent = "-" + hasar;
+    satir.appendChild(s);
+    setTimeout(() => s.remove(), 1300);
+  }
+
+  // ---- İYİLEŞME EFEKTİ ----
+  function iyilesmeEfekti(satirId, miktar) {
+    const satir = document.getElementById(satirId);
+    efektEkle(satir, "patlama", "💚", 0, 700);
+    const s = document.createElement("div");
+    s.className = "ucan-sayi";
+    s.style.color = "#2e7d32";
+    s.textContent = "+" + miktar;
+    satir.appendChild(s);
+    setTimeout(() => s.remove(), 1300);
+  }
+
+  // Vurulan can barını bir an parlat.
+  function canFlash(satirId) {
+    const canId = satirId.replace("-satiri", "-can");
+    const el = document.getElementById(canId);
+    el.classList.remove("can-flash");
+    void el.offsetWidth;
+    el.classList.add("can-flash");
   }
 
   // ---- GÜNLÜK ----
