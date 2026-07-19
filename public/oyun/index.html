@@ -169,8 +169,8 @@
       Ama büyük bir kavga çıktı ve dostluk bozuldu...
     </p>
     <p>
-      Kırmızı klanın başında <b>çok güçlü</b> Karanlık Kral,
-      Mavi klanın başında ise <b>çok zeki</b> Bilge Kral var.
+      Kırmızı klanın başında <b>çok güçlü Karanlık Kral Alaz</b>,
+      Mavi klanın başında ise <b>çok zeki Bilge Kral Aras</b> var.
       Seçtiğin klanla <b>3 arenayı</b> sırayla geçip krallığı kazanacaksın!
       <br><b>Sen hangi tarafta savaşacaksın?</b>
     </p>
@@ -186,12 +186,12 @@
       <div class="secim kirmizi" onclick="takimSec('kirmizi')">
         <div class="buyuk-emoji">🔴</div>
         <h3 style="color:var(--kirmizi)">Kırmızı Klan</h3>
-        <p>Karanlık Kral · Çok Güçlü<br>Sert vuran saldırı kartları.</p>
+        <p>Karanlık Kral Alaz · Çok Güçlü<br>Sert vuran saldırı kartları.</p>
       </div>
       <div class="secim mavi" onclick="takimSec('mavi')">
         <div class="buyuk-emoji">🔵</div>
         <h3 style="color:var(--mavi)">Mavi Klan</h3>
-        <p>Bilge Kral · Çok Zeki<br>İyileştirme kartı var.</p>
+        <p>Bilge Kral Aras · Çok Zeki<br>İyileştirme kartı var.</p>
       </div>
     </div>
   </section>
@@ -260,20 +260,32 @@
       not:"FİNAL! Düşman kral burada çok güçlü." },
   ];
 
+  // ---- KRALLARIN İSİMLERİ ----
+  // (İstersen bu iki ismi değiştir; oyunun her yerinde otomatik değişir.)
+  const KIRMIZI_KRAL = "Karanlık Kral Alaz";
+  const MAVI_KRAL    = "Bilge Kral Aras";
+
   // ---- KARTLAR ----
+  // Her takımın 8 kartı var: sıradan (gri), ender (mor), destansı (altın).
   const kirmiziKartlar = [
     { emoji:"⚔️", isim:"Kızıl Asker",      guc:4,  rutbe:"siradan"  },
     { emoji:"🏹", isim:"Ateş Okçusu",      guc:5,  rutbe:"siradan"  },
+    { emoji:"🔥", isim:"Alev Cini",        guc:6,  rutbe:"siradan"  },
+    { emoji:"🐺", isim:"Kor Kurdu",        guc:7,  rutbe:"siradan"  },
     { emoji:"🌋", isim:"Lav Devi",         guc:8,  rutbe:"ender"    },
     { emoji:"🗡️", isim:"Karanlık Şövalye", guc:9,  rutbe:"ender"    },
+    { emoji:"👹", isim:"Ateş İfriti",      guc:10, rutbe:"ender"    },
     { emoji:"🐉", isim:"Ateş Ejderhası",   guc:12, rutbe:"destansi" },
   ];
   const maviKartlar = [
-    { emoji:"❄️", isim:"Buz Askeri",  guc:4,      rutbe:"siradan"  },
-    { emoji:"🏹", isim:"Bilge Okçu",  guc:5,      rutbe:"siradan"  },
-    { emoji:"⛄", isim:"Kar Devi",    guc:8,      rutbe:"ender"    },
-    { emoji:"🧙", isim:"Zeki Büyücü", iyilesme:7, rutbe:"ender"    },
-    { emoji:"🦅", isim:"Buz Anka",    guc:11,     rutbe:"destansi" },
+    { emoji:"❄️", isim:"Buz Askeri",     guc:4,      rutbe:"siradan"  },
+    { emoji:"🏹", isim:"Bilge Okçu",     guc:5,      rutbe:"siradan"  },
+    { emoji:"🌊", isim:"Su Perisi",      guc:6,      rutbe:"siradan"  },
+    { emoji:"🐧", isim:"Kutup Muhafızı", guc:7,      rutbe:"siradan"  },
+    { emoji:"⛄", isim:"Kar Devi",       guc:8,      rutbe:"ender"    },
+    { emoji:"🧙", isim:"Zeki Büyücü",    iyilesme:7, rutbe:"ender"    },
+    { emoji:"🐋", isim:"Ayaz Krakeni",   guc:10,     rutbe:"ender"    },
+    { emoji:"🦅", isim:"Buz Anka",       guc:12,     rutbe:"destansi" },
   ];
 
   // Küçük yardımcı: bir listeden rastgele eleman seç.
@@ -312,11 +324,11 @@
     oyun.dusmanCan = arena.dusmanCan;
     oyun.gucBonus  = arena.gucBonus;
 
-    // İsimler
+    // İsimler (kralların adlarını kullan)
     document.getElementById("benim-isim").textContent =
-      benKirmizi ? "🔴 Senin Karanlık Kralın" : "🔵 Senin Bilge Kralın";
+      benKirmizi ? "🔴 " + KIRMIZI_KRAL + " (sen)" : "🔵 " + MAVI_KRAL + " (sen)";
     document.getElementById("dusman-isim").textContent =
-      benKirmizi ? "🔵 Düşman Bilge Kral" : "🔴 Düşman Karanlık Kral";
+      benKirmizi ? "🔵 " + MAVI_KRAL : "🔴 " + KIRMIZI_KRAL;
 
     // Can bar renkleri (önce eski rengi temizle, sonra ekle)
     const benCan = document.getElementById("benim-can");
