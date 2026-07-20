@@ -418,6 +418,17 @@
   .rutbe.siradan  { color: #b7c2d2; }
   .rutbe.ender    { color: #c79bff; }
   .rutbe.destansi { color: var(--altin); }
+  /* Kart maliyet etiketi (altın olarak fiyatı) */
+  .kart-maliyet {
+    margin-top: 6px; padding: 2px 8px; display: inline-block;
+    background: linear-gradient(180deg, #4b3d1d, #2b220f);
+    border: 1px solid var(--altin); color: var(--altin);
+    border-radius: 12px; font-size: 12px; font-weight: 700;
+    text-shadow: 0 1px 2px #000;
+  }
+  /* Altının yetmediği kart soluk ve tıklanmaz */
+  .kart.yetersiz { opacity: .35; filter: grayscale(.7); cursor: not-allowed; }
+  .kart.yetersiz:hover { transform: none; }
   .kart.oynandi { animation: kartVur .4s; }
   @keyframes kartVur {
     0%   { transform: translateY(0) scale(1); }
@@ -443,6 +454,7 @@
     <div class="menu-butonlar">
       <button class="buyuk" onclick="yeniOyun()">🆕 Yeni Oyun</button>
       <button class="buyuk" id="devam-btn" onclick="devamEt()">▶️ Devam Et</button>
+      <button id="takim-degistir-btn" onclick="takimDegistir()" style="display:none;font-size:14px;padding:8px 16px;">🔄 Takımı Değiştir</button>
     </div>
   </section>
 
@@ -554,10 +566,12 @@
     altin: 0,          // bu seferde toplanmış altın
   };
 
-  const KAYIT_ANAHTARI = "klanlarSavasi";
-  const ALTIN_ANAHTARI = "klanlarSavasiAltin"; // toplam altın (oyun bitse de kalır)
-  const KUPA_ANAHTARI  = "klanlarSavasiKupa";  // toplam kupa (hedef 15000)
-  const KUPA_HEDEF     = 15000;
+  const KAYIT_ANAHTARI  = "klanlarSavasi";
+  const ALTIN_ANAHTARI  = "klanlarSavasiAltin"; // toplam altın (oyun bitse de kalır)
+  const KUPA_ANAHTARI   = "klanlarSavasiKupa";  // toplam kupa (hedef 15000)
+  const TAKIM_ANAHTARI  = "klanlarSavasiTakim"; // seçtiğin takım kalıcı
+  const KUPA_HEDEF      = 15000;
+  const BASLANGIC_ALTIN = 10000;
 
   // ---- ARENALAR ---- (canlar büyük -> savaşlar uzun ve heyecanlı)
   const arenalar = [
@@ -607,6 +621,15 @@
 
   function rastgele(liste) { return liste[Math.floor(Math.random() * liste.length)]; }
 
+  // ---- KART MALİYETİ ----
+  // Kartın gücüne + rütbesine göre altın maliyeti.
+  // Güçlü kart daha pahalı → sürekli aynı kartı oynayamazsın.
+  function kartMaliyet(kart) {
+    if (kart.iyilesme) return 80;
+    const carpan = kart.rutbe === "destansi" ? 30 : kart.rutbe === "ender" ? 20 : 12;
+    return kart.guc * carpan;
+  }
+
   // ---- EKRAN DEĞİŞTİR ----
   function ekranGoster(id) {
     document.querySelectorAll(".ekran").forEach(e => e.classList.remove("aktif"));
@@ -617,6 +640,7 @@
   function takimSec(takim) {
     oyun.takim = takim;
     oyun.arenaSira = 0;
+    try { localStorage.setItem(TAKIM_ANAHTARI, takim); } catch (e) {}
     arenayiKur();
     ekranGoster("ekran-savas");
   }
@@ -636,6 +660,7 @@
     oyun.dusmanCan = arena.dusmanCan;
     oyun.gucBonus  = arena.gucBonus;
     oyun.durum     = "savas";
+    oyun.kilitli   = false; // yeni arena = kilit açık
 
     document.getElementById("gunluk").innerHTML = "";
     gunlugeYaz("⚔️ " + arena.ad + " savaşı başladı!");
@@ -701,18 +726,22 @@
     const kartlar = oyun.takim === "kirmizi" ? kirmiziKartlar : maviKartlar;
     const el = document.getElementById("el");
     el.innerHTML = "";
+    const altinim = toplamAltin();
     kartlar.forEach((kart, sira) => {
       const rutbeYazi = { siradan:"Sıradan", ender:"Ender", destansi:"Destansı" }[kart.rutbe];
       const guclu = kart.iyilesme
         ? "İyileştir +" + kart.iyilesme
         : "Güç " + (kart.guc + oyun.gucBonus);
+      const maliyet = kartMaliyet(kart);
+      const yetersiz = altinim < maliyet;
       const div = document.createElement("div");
-      div.className = "kart " + kart.rutbe;
+      div.className = "kart " + kart.rutbe + (yetersiz ? " yetersiz" : "");
       div.innerHTML =
         '<div class="emoji">' + kart.emoji + '</div>' +
         '<div class="isim">' + kart.isim + '</div>' +
         '<div class="guc">' + guclu + '</div>' +
-        '<div class="rutbe ' + kart.rutbe + '">' + rutbeYazi + '</div>';
+        '<div class="rutbe ' + kart.rutbe + '">' + rutbeYazi + '</div>' +
+        '<div class="kart-maliyet">🪙 ' + maliyet + '</div>';
       div.onclick = () => kartOyna(sira);
       // Sürükle-bırak: kartı savaş sahnesine sürükleyip bırakınca da oynanır
       div.draggable = true;
@@ -731,9 +760,19 @@
   // İki asker ortada karşılaşır, dövüşür, kazanan krala ulaşır.
   function kartOyna(sira) {
     if (oyun.kilitli) return;
-    oyun.kilitli = true;
     const kartlar = oyun.takim === "kirmizi" ? kirmiziKartlar : maviKartlar;
     const benimKart = kartlar[sira];
+
+    // Altın maliyeti kontrol et
+    const maliyet = kartMaliyet(benimKart);
+    if (toplamAltin() < maliyet) {
+      gunlugeYaz("⚠️ " + benimKart.isim + " için altının yetmiyor! (gereken: " + maliyet + " 🪙)");
+      return;
+    }
+
+    oyun.kilitli = true;
+    altinHarca(maliyet); // KART OYNAMAK PARA GERİKTİRİR
+    kartlariDiz(); // altın azaldı → yetersiz kartları soluklaştır
 
     // Oynanan kart zıplasın
     const kartEl = document.querySelectorAll("#el .kart")[sira];
@@ -882,9 +921,10 @@
   // ---- ARENA KAZANILDI ----
   function arenaKazanildi() {
     altinEkle(50); // arena zaferi bonusu
+    oyun.kilitli = false; // BUG FIX: arena bitince kilidi aç
     const sonMu = oyun.arenaSira >= arenalar.length - 1;
     if (sonMu) {
-      altinEkle(200); // TÜM sefer bitirme ekstra bonusu
+      altinEkle(200);
       oyunuBitir(true);
     } else {
       oyun.durum = "ara";
@@ -1053,10 +1093,16 @@
     return parseInt(localStorage.getItem(ALTIN_ANAHTARI) || "0", 10);
   }
   function altinYaz(x) { try { localStorage.setItem(ALTIN_ANAHTARI, String(x)); } catch (e) {} }
+  function altinHarca(miktar) {
+    altinYaz(Math.max(0, toplamAltin() - miktar));
+    altinGoster();
+  }
   function altinEkle(miktar) {
     const yeni = toplamAltin() + miktar;
     altinYaz(yeni);
     altinGoster();
+    // Altın arttı — belki daha önce yetmeyen kartlar artık atılabilir
+    if (document.querySelector(".ekran.aktif")?.id === "ekran-savas") kartlariDiz();
     // Ekranda kısa "+N" animasyonu
     const kutu = document.getElementById("savas-altin");
     if (kutu) {
@@ -1088,6 +1134,21 @@
   function yeniOyun() {
     kayitSil();
     oyun.durum = "menu";
+    oyun.kilitli = false;
+    // Takım kaydı varsa: direkt savaşa gir. Yoksa: hikaye+takım seç.
+    const kayitliTakim = localStorage.getItem(TAKIM_ANAHTARI);
+    if (kayitliTakim === "kirmizi" || kayitliTakim === "mavi") {
+      takimSec(kayitliTakim);
+    } else {
+      ekranGoster("ekran-hikaye");
+    }
+  }
+
+  // "Takımı değiştir" — sadece takım seçilmişse görünür buton çağırır
+  function takimDegistir() {
+    try { localStorage.removeItem(TAKIM_ANAHTARI); } catch (e) {}
+    kayitSil();
+    oyun.kilitli = false;
     ekranGoster("ekran-hikaye");
   }
 
@@ -1113,10 +1174,25 @@
   }
 
   function menuyuHazirla() {
+    // İLK KEZ AÇILIŞ: hiç altın kaydı yoksa 10.000 altınla başla
+    if (localStorage.getItem(ALTIN_ANAHTARI) === null) altinYaz(BASLANGIC_ALTIN);
+
     const veri = kayitOku();
     const btn = document.getElementById("devam-btn");
     if (veri && veri.takim) { btn.disabled = false; btn.textContent = "▶️ Devam Et"; }
     else { btn.disabled = true; btn.textContent = "▶️ Devam Et (kayıt yok)"; }
+
+    // Takım seçilmişse "Takımı değiştir" butonu görünsün
+    const takimBtn = document.getElementById("takim-degistir-btn");
+    const kayitliTakim = localStorage.getItem(TAKIM_ANAHTARI);
+    if (kayitliTakim === "kirmizi" || kayitliTakim === "mavi") {
+      takimBtn.style.display = "inline-block";
+      const isim = kayitliTakim === "kirmizi" ? "🔴 Kırmızı" : "🔵 Mavi";
+      takimBtn.textContent = "🔄 Takımı Değiştir (şu an: " + isim + ")";
+    } else {
+      takimBtn.style.display = "none";
+    }
+
     altinGoster();
     kupaGoster();
   }
