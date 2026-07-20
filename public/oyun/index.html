@@ -115,7 +115,17 @@
     box-shadow: 0 2px 0 rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.15);
     text-shadow: 0 1px 2px #000;
   }
-  #menu-altin { margin: 6px auto 4px; }
+  /* Kupa rozeti (altın gibi ama gümüş-gök çerçeveli) */
+  .kupa-rozet {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: linear-gradient(180deg, #204060, #12233a);
+    border: 2px solid #7cc4ff; color: #cfe8ff;
+    padding: 4px 12px; border-radius: 20px; font-weight: 800; font-size: 15px;
+    box-shadow: 0 2px 0 rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.15);
+    text-shadow: 0 1px 2px #000;
+  }
+  .rozet-satiri { display: flex; justify-content: center; gap: 10px; margin: 6px auto 4px; flex-wrap: wrap; }
+  #menu-altin { margin: 0; }
   .ust-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 8px; flex-wrap: wrap; }
   .altin-artis {
     color: var(--altin); font-weight: 800; margin-left: 6px;
@@ -266,6 +276,75 @@
     font-size: 64px; pointer-events: none;
     filter: drop-shadow(0 6px 8px rgba(0,0,0,.6));
   }
+  /* ORTAYA KOŞ (karakter savaşı için): ilk yarıda hızla ortaya, orada kavga anı */
+  .asker.kos-yukari { animation: kosYukari .6s ease-out forwards; }
+  .asker.kos-asagi  { animation: kosAsagi  .6s ease-out forwards; }
+  @keyframes kosYukari {
+    0%   { transform: translate(-50%, 130px) scale(.5) rotate(-6deg); opacity: 0; }
+    15%  { transform: translate(-52%, 110px) scale(.75) rotate(4deg); opacity: 1; }
+    35%  { transform: translate(-48%, 70px) scale(.95) rotate(-3deg) scaleY(.85); }
+    60%  { transform: translate(-52%, 35px) scale(1.05) rotate(3deg); }
+    85%  { transform: translate(-58%, 12px) scale(1.15) rotate(-2deg) scaleY(.9); }
+    100% { transform: translate(-62%, 0px)  scale(1.2)  rotate(0); opacity: 1; }
+  }
+  @keyframes kosAsagi {
+    0%   { transform: translate(-50%, -130px) scale(.5) rotate(6deg); opacity: 0; }
+    15%  { transform: translate(-48%, -110px) scale(.75) rotate(-4deg); opacity: 1; }
+    35%  { transform: translate(-52%, -70px)  scale(.95) rotate(3deg) scaleY(.85); }
+    60%  { transform: translate(-48%, -35px)  scale(1.05) rotate(-3deg); }
+    85%  { transform: translate(-42%, -12px) scale(1.15) rotate(2deg) scaleY(.9); }
+    100% { transform: translate(-38%, 0px)   scale(1.2) rotate(0); opacity: 1; }
+  }
+  /* KAVGA ANI: iki asker birbirini titreterek dövüşür */
+  .asker.dovus { animation: dovus .8s ease-in-out; }
+  @keyframes dovus {
+    0%,100% { transform: translate(-62%, 0px) scale(1.2); }
+    15% { transform: translate(-40%, -5px) scale(1.25) rotate(-8deg); }
+    30% { transform: translate(-70%, 5px)  scale(1.25) rotate(8deg); }
+    45% { transform: translate(-45%, -3px) scale(1.28) rotate(-6deg); }
+    60% { transform: translate(-65%, 4px)  scale(1.28) rotate(6deg); }
+    75% { transform: translate(-50%, 0px) scale(1.3) rotate(0); }
+  }
+  .asker.dovus-alt { animation: dovusAlt .8s ease-in-out; }
+  @keyframes dovusAlt {
+    0%,100% { transform: translate(-38%, 0px) scale(1.2); }
+    15% { transform: translate(-60%, 5px)  scale(1.25) rotate(8deg); }
+    30% { transform: translate(-30%, -5px) scale(1.25) rotate(-8deg); }
+    45% { transform: translate(-55%, 3px)  scale(1.28) rotate(6deg); }
+    60% { transform: translate(-35%, -4px) scale(1.28) rotate(-6deg); }
+    75% { transform: translate(-50%, 0px) scale(1.3) rotate(0); }
+  }
+  /* KAZANAN krala doğru koşar (final darbe için) */
+  .asker.zafer-yukari { animation: zaferYukari .5s ease-in forwards; }
+  .asker.zafer-asagi  { animation: zaferAsagi .5s ease-in forwards; }
+  @keyframes zaferYukari {
+    0% { transform: translate(-50%, 0px) scale(1.3); opacity: 1; }
+    100% { transform: translate(-50%, -110px) scale(1.5) rotate(0); opacity: 0; }
+  }
+  @keyframes zaferAsagi {
+    0% { transform: translate(-50%, 0px) scale(1.3); opacity: 1; }
+    100% { transform: translate(-50%, 110px) scale(1.5) rotate(0); opacity: 0; }
+  }
+  /* KAYBEDEN küçülüp dumana dönüşerek yok olur */
+  .asker.olum { animation: askerOl .5s ease-out forwards; }
+  @keyframes askerOl {
+    0%   { opacity: 1; transform: translate(-50%, 0) scale(1.2) rotate(0); }
+    50%  { opacity: .7; filter: hue-rotate(-40deg) brightness(1.4); }
+    100% { opacity: 0; transform: translate(-50%, 20px) scale(.4) rotate(45deg); }
+  }
+  /* Kılıç sesi efekti (kavga anında) */
+  .kavga-sesi {
+    position: absolute; left: 50%; top: 50%; z-index: 15;
+    font-size: 40px; font-weight: 900; color: #ffd75e;
+    text-shadow: 0 0 12px #ff8a00, 0 2px 4px #000;
+    pointer-events: none;
+    animation: sesPatla .6s ease-out forwards;
+  }
+  @keyframes sesPatla {
+    0%   { transform: translate(-50%, -50%) scale(.4) rotate(-15deg); opacity: 0; }
+    30%  { transform: translate(-50%, -50%) scale(1.4) rotate(10deg); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(1.1) rotate(-5deg); opacity: 0; }
+  }
   /* Aşağıdan yukarı yürüyen kendi askerim (sıçraya sallanaya) */
   .asker.yukari { animation: askerYuru 1.2s ease-out forwards; }
   @keyframes askerYuru {
@@ -356,8 +435,11 @@
   <!-- EKRAN 0: Ana Menü -->
   <section id="ekran-menu" class="ekran aktif merkez">
     <h1>⚔️ Klanlar Savaşı</h1>
-    <p>İki klan, üç arena, tek zafer. Hazır mısın?</p>
-    <div class="altin-rozet" id="menu-altin">🪙 <span id="menu-altin-yazi">0</span></div>
+    <p>İki klan, üç arena, tek zafer.<br>Kartın askerin senin — düşmanın askeriyle savaş, kazanan krala ulaşır!</p>
+    <div class="rozet-satiri">
+      <div class="altin-rozet" id="menu-altin">🪙 <span id="menu-altin-yazi">0</span></div>
+      <div class="kupa-rozet" id="menu-kupa">🏆 <span id="menu-kupa-yazi">0</span> / 15000</div>
+    </div>
     <div class="menu-butonlar">
       <button class="buyuk" onclick="yeniOyun()">🆕 Yeni Oyun</button>
       <button class="buyuk" id="devam-btn" onclick="devamEt()">▶️ Devam Et</button>
@@ -403,7 +485,10 @@
   <section id="ekran-savas" class="ekran">
     <div class="ust-bar">
       <div id="harita"></div>
-      <div class="altin-rozet" id="savas-altin">🪙 <span id="savas-altin-yazi">0</span></div>
+      <div class="rozet-satiri">
+        <div class="altin-rozet" id="savas-altin">🪙 <span id="savas-altin-yazi">0</span></div>
+        <div class="kupa-rozet" id="savas-kupa">🏆 <span id="savas-kupa-yazi">0</span></div>
+      </div>
     </div>
     <div class="arena-bilgi" id="arena-yazi"></div>
 
@@ -471,6 +556,8 @@
 
   const KAYIT_ANAHTARI = "klanlarSavasi";
   const ALTIN_ANAHTARI = "klanlarSavasiAltin"; // toplam altın (oyun bitse de kalır)
+  const KUPA_ANAHTARI  = "klanlarSavasiKupa";  // toplam kupa (hedef 15000)
+  const KUPA_HEDEF     = 15000;
 
   // ---- ARENALAR ---- (canlar büyük -> savaşlar uzun ve heyecanlı)
   const arenalar = [
@@ -488,11 +575,12 @@
   const KIRMIZI_YUZ  = "👹";  // güçlü/karanlık kral
   const MAVI_YUZ     = "🧙";  // zeki/bilge kral
 
-  // ---- KARTLAR (her takım 10 kart) ----
+  // ---- KARTLAR (her takım 12 kart — 4 yeni eklendi) ----
   const kirmiziKartlar = [
     { emoji:"⚔️", isim:"Kızıl Asker",      guc:4,  rutbe:"siradan"  },
     { emoji:"🏹", isim:"Ateş Okçusu",      guc:5,  rutbe:"siradan"  },
     { emoji:"🛡️", isim:"Şövalye",          guc:5,  rutbe:"siradan"  },
+    { emoji:"🧟", isim:"Zombi Asker",      guc:6,  rutbe:"siradan"  }, // YENİ
     { emoji:"🔥", isim:"Alev Cini",        guc:6,  rutbe:"siradan"  },
     { emoji:"🐺", isim:"Kor Kurdu",        guc:7,  rutbe:"siradan"  },
     { emoji:"🌋", isim:"Lav Devi",         guc:8,  rutbe:"ender"    },
@@ -500,6 +588,7 @@
     { emoji:"👹", isim:"Ateş İfriti",      guc:10, rutbe:"ender"    },
     { emoji:"🐉", isim:"Ateş Ejderhası",   guc:12, rutbe:"destansi" },
     { emoji:"⛏️", isim:"İkizler",          guc:13, rutbe:"destansi" },
+    { emoji:"🦁", isim:"Aslan Kral",       guc:14, rutbe:"destansi" }, // YENİ
   ];
   const maviKartlar = [
     { emoji:"❄️", isim:"Buz Askeri",     guc:4,      rutbe:"siradan"  },
@@ -509,9 +598,11 @@
     { emoji:"🐧", isim:"Kutup Muhafızı", guc:7,      rutbe:"siradan"  },
     { emoji:"⛄", isim:"Kar Devi",       guc:8,      rutbe:"ender"    },
     { emoji:"🧙", isim:"Zeki Büyücü",    iyilesme:7, rutbe:"ender"    },
+    { emoji:"🌪️", isim:"Kum Fırtınası",  guc:9,      rutbe:"ender"    }, // YENİ
     { emoji:"🐋", isim:"Ayaz Krakeni",   guc:10,     rutbe:"ender"    },
     { emoji:"🦅", isim:"Buz Anka",       guc:12,     rutbe:"destansi" },
     { emoji:"⛏️", isim:"İkizler",        guc:13,     rutbe:"destansi" },
+    { emoji:"🤖", isim:"Robot Şövalye",  guc:13,     rutbe:"destansi" }, // YENİ
   ];
 
   function rastgele(liste) { return liste[Math.floor(Math.random() * liste.length)]; }
@@ -588,6 +679,7 @@
     siraGoster("benim");         // savaş başlarken sıra sende
     partikulleriBaslat();        // arenaya göre kar/kum/kıvılcım
     altinGoster();               // savaş üstündeki altın rozeti
+    kupaGoster();                // kupa rozeti
   }
 
   // ---- SEFER HARİTASI ----
@@ -634,49 +726,119 @@
     });
   }
 
-  // ---- BİR KART OYNA (senin sıran) ----
+  // ---- BİR KART OYNA (KARAKTER SAVAŞI!) ----
+  // Sen bir kart oynayınca düşman da aynı anda bir kart çıkarır.
+  // İki asker ortada karşılaşır, dövüşür, kazanan krala ulaşır.
   function kartOyna(sira) {
     if (oyun.kilitli) return;
+    oyun.kilitli = true;
     const kartlar = oyun.takim === "kirmizi" ? kirmiziKartlar : maviKartlar;
-    const kart = kartlar[sira];
+    const benimKart = kartlar[sira];
 
     // Oynanan kart zıplasın
     const kartEl = document.querySelectorAll("#el .kart")[sira];
     if (kartEl) { kartEl.classList.remove("oynandi"); void kartEl.offsetWidth; kartEl.classList.add("oynandi"); }
 
-    if (kart.iyilesme) {
-      oyun.benimCan = Math.min(oyun.benimMax, oyun.benimCan + kart.iyilesme);
-      gunlugeYaz("💚 " + kart.isim + " kralını " + kart.iyilesme + " iyileştirdi!");
-      iyilesmeEfekti("benim-satiri", kart.iyilesme);
-    } else {
-      let hasar = kart.guc + oyun.gucBonus;
-      const kritik = Math.random() < 0.25;
-      if (kritik) hasar = hasar * 2;
-      oyun.dusmanCan = Math.max(0, oyun.dusmanCan - hasar);
-      gunlugeYaz((kritik ? "💥 KRİTİK! " : "⚔️ ") + kart.isim + " düşmana " + hasar + " hasar vurdu!");
-      altinEkle(kritik ? 5 : 1); // saldırıdan altın (kritik daha çok)
-      saldiriAnim("yukari", kart.emoji);
-      // Asker düşmana ulaştığında patla (animasyon %85 ~= 1000ms)
-      setTimeout(() => {
-        vurusEfekti("dusman-satiri", hasar, kritik);
-        canlariGuncelle();
-        if (oyun.dusmanCan <= 0) arenaKazanildi();
-      }, 1000);
+    // İyileşme kartı = koşmaz, direkt iyileştirir, düşman ayrıca saldırır
+    if (benimKart.iyilesme) {
+      oyun.benimCan = Math.min(oyun.benimMax, oyun.benimCan + benimKart.iyilesme);
+      gunlugeYaz("💚 " + benimKart.isim + " kralını " + benimKart.iyilesme + " iyileştirdi!");
+      iyilesmeEfekti("benim-satiri", benimKart.iyilesme);
+      canlariGuncelle();
       kaydet();
-      oyun.kilitli = true;
-      siraGoster("dusman");
-      // Düşman biraz bekleyip cevaben saldırsın (asker animasyonu bitsin diye)
-      if (oyun.dusmanCan > 0) setTimeout(dusmanSaldir, 1600);
+      setTimeout(dusmanSaldir, 900);
       return;
     }
 
-    canlariGuncelle();
-    if (oyun.dusmanCan <= 0) return arenaKazanildi();
+    // DÜŞMAN da aynı anda kartını çıkarır
+    const dusmanKartlar = oyun.takim === "kirmizi" ? maviKartlar : kirmiziKartlar;
+    const dusmanSaldiriKartlari = dusmanKartlar.filter(k => !k.iyilesme);
+    const enGuclu = dusmanSaldiriKartlari.reduce((a, b) => (b.guc > a.guc ? b : a));
+    const dusmanKart = Math.random() < 0.5 ? enGuclu : rastgele(dusmanSaldiriKartlari);
 
-    kaydet();
-    oyun.kilitli = true;
-    siraGoster("dusman");
-    setTimeout(dusmanSaldir, 1100);
+    // Güçleri kritiklerle hesapla
+    const benimKritik  = Math.random() < 0.25;
+    const dusmanKritik = Math.random() < 0.25;
+    const benimGuc  = (benimKart.guc + oyun.gucBonus) * (benimKritik ? 2 : 1);
+    const dusmanGuc = dusmanKart.guc * (dusmanKritik ? 2 : 1);
+
+    // İki asker sahneye çıksın ve ortaya koşsun
+    const benimAsker  = askerOlustur("kos-yukari", benimKart.emoji);
+    const dusmanAsker = askerOlustur("kos-asagi",  dusmanKart.emoji);
+
+    gunlugeYaz("⚔️ " + benimKart.isim + " (⚡" + benimGuc + (benimKritik ? " KRİTİK" : "") +
+               ") vs " + dusmanKart.isim + " (⚡" + dusmanGuc + (dusmanKritik ? " KRİTİK" : "") + ")");
+
+    // Adım 1 (600ms sonra): Ortada karşılaşma başlar, kavga animasyonu
+    setTimeout(() => {
+      benimAsker.classList.remove("kos-yukari");   benimAsker.classList.add("dovus");
+      dusmanAsker.classList.remove("kos-asagi");   dusmanAsker.classList.add("dovus-alt");
+      kavgaSesi();
+      setTimeout(kavgaSesi, 250); // ikinci kılıç sesi
+    }, 600);
+
+    // Adım 2 (1400ms sonra): Kavga biter — kim kazandı?
+    setTimeout(() => {
+      const fark = Math.abs(benimGuc - dusmanGuc);
+      const kralHasari = Math.max(1, fark); // en az 1 hasar
+      if (benimGuc >= dusmanGuc) {
+        // BEN KAZANDIM! Düşman asker öldü, benimki krala koşar
+        dusmanAsker.classList.remove("dovus-alt"); dusmanAsker.classList.add("olum");
+        setTimeout(() => dusmanAsker.remove(), 500);
+        benimAsker.classList.remove("dovus"); benimAsker.classList.add("zafer-yukari");
+        oyun.dusmanCan = Math.max(0, oyun.dusmanCan - kralHasari);
+        gunlugeYaz("🎉 " + benimKart.isim + " kazandı! Düşman krala " + kralHasari + " hasar.");
+        altinEkle(benimKritik ? 5 : 1);
+        setTimeout(() => {
+          vurusEfekti("dusman-satiri", kralHasari, benimKritik);
+          canlariGuncelle();
+          benimAsker.remove();
+          if (oyun.dusmanCan <= 0) return arenaKazanildi();
+          kaydet();
+          oyun.kilitli = false;
+          siraGoster("benim");
+        }, 480);
+      } else {
+        // DÜŞMAN KAZANDI! Benim asker öldü, düşmanınki bana koşar
+        benimAsker.classList.remove("dovus");   benimAsker.classList.add("olum");
+        setTimeout(() => benimAsker.remove(), 500);
+        dusmanAsker.classList.remove("dovus-alt"); dusmanAsker.classList.add("zafer-asagi");
+        oyun.benimCan = Math.max(0, oyun.benimCan - kralHasari);
+        gunlugeYaz("😢 " + dusmanKart.isim + " kazandı! Sana " + kralHasari + " hasar.");
+        setTimeout(() => {
+          vurusEfekti("benim-satiri", kralHasari, dusmanKritik);
+          canlariGuncelle();
+          dusmanAsker.remove();
+          if (oyun.benimCan <= 0) return oyunuBitir(false);
+          kaydet();
+          oyun.kilitli = false;
+          siraGoster("benim");
+        }, 480);
+      }
+    }, 1400);
+  }
+
+  // Yardımcı: sahnede asker (kart karakteri) oluştur
+  function askerOlustur(sinif, emoji) {
+    const sahne = document.getElementById("sahne");
+    const e = document.createElement("div");
+    e.className = "asker " + sinif;
+    e.textContent = emoji;
+    sahne.appendChild(e);
+    return e;
+  }
+
+  // Kavga anında kılıç sesi efekti
+  function kavgaSesi() {
+    const sahne = document.getElementById("sahne");
+    const sesler = ["⚔️", "💥", "BAM!", "CLANG!", "💢", "⚡"];
+    const s = document.createElement("div");
+    s.className = "kavga-sesi";
+    s.textContent = sesler[Math.floor(Math.random() * sesler.length)];
+    s.style.left = (40 + Math.random() * 20) + "%";
+    s.style.top = (40 + Math.random() * 20) + "%";
+    sahne.appendChild(s);
+    setTimeout(() => s.remove(), 620);
   }
 
   // ---- AKILLI DÜŞMAN ----
@@ -853,12 +1015,15 @@
   function oyunuBitir(kazandinMi) {
     kayitSil();
     oyun.durum = "menu";
+    if (kazandinMi) kupaEkle(10); // Zafer: +10 kupa!
+    const kupa = toplamKupa();
     document.getElementById("sonuc-emoji").textContent = kazandinMi ? "🏆" : "💀";
     document.getElementById("sonuc-baslik").textContent = kazandinMi ? "KRALLIK SENİN!" : "Kaybettin";
-    document.getElementById("sonuc-yazi").textContent =
+    document.getElementById("sonuc-yazi").innerHTML =
       kazandinMi
-        ? "3 arenayı da geçtin ve savaşı kazandın! Efsane bir komutansın."
-        : "Bu sefer olmadı. Tekrar dene — bu kez kazanabilirsin!";
+        ? "3 arenayı da geçtin! <b>+10 kupa</b> kazandın 🏆<br>Toplam: <b>" + kupa + " / " + KUPA_HEDEF + "</b> kupa" +
+          (kupa >= KUPA_HEDEF ? "<br><br>🎉 <b>15.000 KUPAYA ULAŞTIN — SEN EFSANESİN!</b> 🎉" : "")
+        : "Bu sefer olmadı. Kupan aynı kaldı (" + kupa + "). Tekrar dene!";
     ekranGoster("ekran-sonuc");
   }
 
@@ -906,6 +1071,20 @@
     const s = document.getElementById("savas-altin-yazi"); if (s) s.textContent = t;
   }
 
+  // ---- KUPA SİSTEMİ ----
+  function toplamKupa() { return parseInt(localStorage.getItem(KUPA_ANAHTARI) || "0", 10); }
+  function kupaYaz(x) { try { localStorage.setItem(KUPA_ANAHTARI, String(x)); } catch (e) {} }
+  function kupaEkle(miktar) {
+    const yeni = Math.min(KUPA_HEDEF, toplamKupa() + miktar);
+    kupaYaz(yeni);
+    kupaGoster();
+  }
+  function kupaGoster() {
+    const t = toplamKupa();
+    const m = document.getElementById("menu-kupa-yazi"); if (m) m.textContent = t;
+    const s = document.getElementById("savas-kupa-yazi"); if (s) s.textContent = t;
+  }
+
   function yeniOyun() {
     kayitSil();
     oyun.durum = "menu";
@@ -939,6 +1118,7 @@
     if (veri && veri.takim) { btn.disabled = false; btn.textContent = "▶️ Devam Et"; }
     else { btn.disabled = true; btn.textContent = "▶️ Devam Et (kayıt yok)"; }
     altinGoster();
+    kupaGoster();
   }
 
   function anaMenu() {
