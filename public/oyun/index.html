@@ -120,16 +120,53 @@
   .arena-volkan { background: linear-gradient(180deg, #611a1a, #2a0d0d); box-shadow: inset 0 0 60px rgba(255,90,0,.4); }
 
   .taraf { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  /* Karakter: canlı bir idle — nefes alma + sallanma + hafif dönüş birden */
   .karakter {
     font-size: 74px; line-height: 1;
     filter: drop-shadow(0 8px 6px rgba(0,0,0,.45));
-    animation: bob 2.4s ease-in-out infinite;
+    animation: canliIdle 2s ease-in-out infinite;
+    transform-origin: center 90%;   /* alt kısımdan sallansın */
   }
-  @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
-  .karakter.vuruldu { animation: flinch .45s; }
+  @keyframes canliIdle {
+    0%   { transform: translateY(0)    scale(1)    rotate(-3deg); }
+    25%  { transform: translateY(-9px) scale(1.05) rotate(2deg); }
+    50%  { transform: translateY(-4px) scale(1)    rotate(3deg); }
+    75%  { transform: translateY(-9px) scale(1.05) rotate(-2deg); }
+    100% { transform: translateY(0)    scale(1)    rotate(-3deg); }
+  }
+  /* Aktif sıra: karakter enerjik zıplasın + altın parıltı */
+  .karakter.sira {
+    animation: siraZipla .55s ease-in-out infinite;
+    filter: drop-shadow(0 0 14px rgba(255,215,94,.85)) drop-shadow(0 6px 6px rgba(0,0,0,.45));
+  }
+  @keyframes siraZipla {
+    0%,100% { transform: translateY(0) scale(1) rotate(0); }
+    50%     { transform: translateY(-16px) scale(1.12) rotate(0); }
+  }
+  .karakter.vuruldu { animation: flinch .5s; }
   @keyframes flinch {
     0%,100% { transform: translateY(0) scale(1) rotate(0); filter: drop-shadow(0 8px 6px rgba(0,0,0,.45)); }
-    30%     { transform: translateY(5px) scale(.88) rotate(-7deg); filter: drop-shadow(0 0 14px red); }
+    20%     { transform: translateY(6px) scale(.82) rotate(-14deg); filter: drop-shadow(0 0 20px red) hue-rotate(-30deg); }
+    50%     { transform: translateY(3px) scale(.95) rotate(10deg);  filter: drop-shadow(0 0 14px red); }
+  }
+
+  /* Arka plan partikülleri (kar/kum/kıvılcım) — sahnede sürekli düşer */
+  .partikul {
+    position: absolute; top: -20px; z-index: 1; pointer-events: none;
+    font-size: 18px; opacity: .85;
+    animation: dus linear forwards;
+  }
+  @keyframes dus {
+    0%   { transform: translateY(0) rotate(0deg); opacity: 0; }
+    10%  { opacity: .9; }
+    100% { transform: translateY(360px) rotate(360deg); opacity: 0; }
+  }
+  /* Volkan kıvılcımı: aşağıdan yukarı fırlar */
+  .partikul.yukselen { top: auto; bottom: -10px; animation: yuksel linear forwards; }
+  @keyframes yuksel {
+    0%   { transform: translateY(0) scale(1);     opacity: 0; }
+    15%  { opacity: 1; }
+    100% { transform: translateY(-340px) scale(.3); opacity: 0; }
   }
   .isim { font-weight: 700; color: #fff; font-size: 14px; text-shadow: 0 1px 4px rgba(0,0,0,.8); }
   .vs-isaret { color: var(--altin); font-weight: 800; letter-spacing: 2px; text-shadow: 0 0 12px rgba(255,200,60,.7), 0 1px 3px #000; }
@@ -223,7 +260,19 @@
   }
   .kart:hover { transform: translateY(-4px); }
   .kart:active { transform: translateY(1px); box-shadow: 0 2px 0 rgba(0,0,0,.4); }
-  .kart .emoji { font-size: 46px; filter: drop-shadow(0 3px 4px rgba(0,0,0,.55)); }
+  .kart .emoji {
+    font-size: 46px; filter: drop-shadow(0 3px 4px rgba(0,0,0,.55));
+    display: inline-block; animation: kartSallan 2.6s ease-in-out infinite;
+  }
+  /* Her kartın kendi salınma temposu olsun (nth-child gecikmesi) */
+  .kart:nth-child(3n)   .emoji { animation-duration: 3.2s; animation-delay: .3s; }
+  .kart:nth-child(3n+1) .emoji { animation-duration: 2.4s; animation-delay: .1s; }
+  @keyframes kartSallan {
+    0%,100% { transform: translateY(0) rotate(-4deg); }
+    50%     { transform: translateY(-6px) rotate(4deg); }
+  }
+  .kart.destansi .emoji { filter: drop-shadow(0 0 8px rgba(255,215,94,.7)) drop-shadow(0 3px 4px rgba(0,0,0,.55)); }
+  .kart.ender    .emoji { filter: drop-shadow(0 0 6px rgba(161,91,255,.6)) drop-shadow(0 3px 4px rgba(0,0,0,.55)); }
   .kart .isim  { color: #fff; font-weight: 700; margin: 6px 0 4px; font-size: 15px; text-shadow: 0 1px 2px #000; }
   .kart .guc   {
     display: inline-block; font-size: 13px; font-weight: 700; color: #fff;
@@ -477,6 +526,8 @@
     haritayiCiz();
     canlariGuncelle();
     kartlariDiz();
+    siraGoster("benim");         // savaş başlarken sıra sende
+    partikulleriBaslat();        // arenaya göre kar/kum/kıvılcım
   }
 
   // ---- SEFER HARİTASI ----
@@ -544,6 +595,7 @@
 
     kaydet();
     oyun.kilitli = true;
+    siraGoster("dusman");
     setTimeout(dusmanSaldir, 1100);
   }
 
@@ -573,6 +625,7 @@
     oyun.kilitli = false;
     kaydet();
     if (oyun.benimCan <= 0) return oyunuBitir(false);
+    siraGoster("benim");   // sıra tekrar sende
   }
 
   // ---- ARENA KAZANILDI ----
@@ -607,6 +660,43 @@
   function karakterVur(satirId) {
     const k = document.getElementById(satirId.replace("-satiri", "-karakter"));
     k.classList.remove("vuruldu"); void k.offsetWidth; k.classList.add("vuruldu");
+  }
+
+  // ---- SIRA GÖSTERGESİ ----
+  // "benim" ya da "dusman" — o karakter enerjik zıplar + altın parıltı.
+  function siraGoster(kim) {
+    document.getElementById("benim-karakter").classList.toggle("sira",  kim === "benim");
+    document.getElementById("dusman-karakter").classList.toggle("sira", kim === "dusman");
+  }
+
+  // ---- PARTİKÜLLER (arka planda sürekli hareket) ----
+  // Arenaya göre farklı: kar taneleri, kum, kıvılcım.
+  let partikulSayaci = null; // önceki üreticiyi durdurmak için
+  function partikulleriBaslat() {
+    if (partikulSayaci) clearInterval(partikulSayaci);
+    const sahne = document.getElementById("sahne");
+    // Arenaya göre partikül tipi: 0=Kar, 1=Çöl, 2=Volkan
+    const tipler = [
+      { emoji: "❄️",  yukselen: false, aralik: 320, sure: 5000, boy: [14, 22] },
+      { emoji: "•",   yukselen: false, aralik: 220, sure: 3600, boy: [10, 16] }, // kum tozu
+      { emoji: "✨",  yukselen: true,  aralik: 250, sure: 2200, boy: [16, 24] }, // volkan kıvılcımı
+    ];
+    const t = tipler[oyun.arenaSira] || tipler[0];
+
+    partikulSayaci = setInterval(() => {
+      // Sahne aktif değilse üretme (performans)
+      if (document.querySelector(".ekran.aktif").id !== "ekran-savas") return;
+      const p = document.createElement("div");
+      p.className = "partikul" + (t.yukselen ? " yukselen" : "");
+      p.textContent = t.emoji;
+      p.style.left = Math.random() * 92 + "%";
+      p.style.fontSize = (t.boy[0] + Math.random() * (t.boy[1] - t.boy[0])) + "px";
+      p.style.animationDuration = (t.sure - 500 + Math.random() * 1000) + "ms";
+      if (t.emoji === "•") p.style.color = "#fff3cf";
+      if (t.emoji === "✨") p.style.color = "#ffbb55";
+      sahne.appendChild(p);
+      setTimeout(() => p.remove(), t.sure + 200);
+    }, t.aralik);
   }
 
   function efektEkle(satir, sinif, icerik, gecikmeMs, yasamMs) {
