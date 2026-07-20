@@ -171,19 +171,20 @@
   }
 
   .taraf { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-  /* Karakter: canlı bir idle — nefes alma + sallanma + hafif dönüş birden */
+  /* Karakter: çok canlı idle — nefes + zıplama + sağa sola bakış */
   .karakter {
     font-size: 74px; line-height: 1;
     filter: drop-shadow(0 8px 6px rgba(0,0,0,.45));
-    animation: canliIdle 2s ease-in-out infinite;
-    transform-origin: center 90%;   /* alt kısımdan sallansın */
+    animation: canliIdle 1.2s ease-in-out infinite;
+    transform-origin: center 90%;
   }
   @keyframes canliIdle {
-    0%   { transform: translateY(0)    scale(1)    rotate(-3deg); }
-    25%  { transform: translateY(-9px) scale(1.05) rotate(2deg); }
-    50%  { transform: translateY(-4px) scale(1)    rotate(3deg); }
-    75%  { transform: translateY(-9px) scale(1.05) rotate(-2deg); }
-    100% { transform: translateY(0)    scale(1)    rotate(-3deg); }
+    0%   { transform: translateY(0)    scale(1, 1)     rotate(-5deg); }
+    20%  { transform: translateY(-12px) scale(1.1, .9)  rotate(3deg); }
+    40%  { transform: translateY(0)     scale(.95, 1.05) rotate(5deg); }
+    60%  { transform: translateY(-8px) scale(1.05, .95) rotate(-3deg); }
+    80%  { transform: translateY(-3px) scale(1, 1)     rotate(4deg); }
+    100% { transform: translateY(0)    scale(1, 1)     rotate(-5deg); }
   }
   /* Aktif sıra: karakter enerjik zıplasın + altın parıltı */
   .karakter.sira {
@@ -276,43 +277,45 @@
     font-size: 64px; pointer-events: none;
     filter: drop-shadow(0 6px 8px rgba(0,0,0,.6));
   }
-  /* ORTAYA KOŞ (karakter savaşı için): ilk yarıda hızla ortaya, orada kavga anı */
-  .asker.kos-yukari { animation: kosYukari .6s ease-out forwards; }
-  .asker.kos-asagi  { animation: kosAsagi  .6s ease-out forwards; }
+  /* ORTAYA KOŞ (adım adım zıplayarak) */
+  .asker.kos-yukari { animation: kosYukari .6s linear forwards; }
+  .asker.kos-asagi  { animation: kosAsagi  .6s linear forwards; }
   @keyframes kosYukari {
-    0%   { transform: translate(-50%, 130px) scale(.5) rotate(-6deg); opacity: 0; }
-    15%  { transform: translate(-52%, 110px) scale(.75) rotate(4deg); opacity: 1; }
-    35%  { transform: translate(-48%, 70px) scale(.95) rotate(-3deg) scaleY(.85); }
-    60%  { transform: translate(-52%, 35px) scale(1.05) rotate(3deg); }
-    85%  { transform: translate(-58%, 12px) scale(1.15) rotate(-2deg) scaleY(.9); }
-    100% { transform: translate(-62%, 0px)  scale(1.2)  rotate(0); opacity: 1; }
+    0%   { transform: translate(-50%, 130px) scale(.5, .5); opacity: 0; }
+    10%  { transform: translate(-50%, 118px) scale(1, .7); opacity: 1; }        /* iniş */
+    20%  { transform: translate(-52%, 95px)  scale(.9, 1.1) rotate(-10deg); }   /* zıplama */
+    30%  { transform: translate(-48%, 80px)  scale(1, .7) rotate(5deg); }
+    40%  { transform: translate(-50%, 65px)  scale(.9, 1.1); }
+    50%  { transform: translate(-52%, 50px)  scale(1, .7) rotate(-8deg); }
+    60%  { transform: translate(-48%, 35px)  scale(.9, 1.1) rotate(6deg); }
+    70%  { transform: translate(-50%, 22px)  scale(1, .7); }
+    80%  { transform: translate(-52%, 12px)  scale(.9, 1.1) rotate(-5deg); }
+    90%  { transform: translate(-56%, 4px)   scale(1.05, .95); }
+    100% { transform: translate(-62%, 0px)   scale(1.2, 1.2); opacity: 1; }
   }
   @keyframes kosAsagi {
-    0%   { transform: translate(-50%, -130px) scale(.5) rotate(6deg); opacity: 0; }
-    15%  { transform: translate(-48%, -110px) scale(.75) rotate(-4deg); opacity: 1; }
-    35%  { transform: translate(-52%, -70px)  scale(.95) rotate(3deg) scaleY(.85); }
-    60%  { transform: translate(-48%, -35px)  scale(1.05) rotate(-3deg); }
-    85%  { transform: translate(-42%, -12px) scale(1.15) rotate(2deg) scaleY(.9); }
-    100% { transform: translate(-38%, 0px)   scale(1.2) rotate(0); opacity: 1; }
+    0%   { transform: translate(-50%, -130px) scale(.5, .5); opacity: 0; }
+    10%  { transform: translate(-50%, -118px) scale(1, .7); opacity: 1; }
+    20%  { transform: translate(-48%, -95px)  scale(.9, 1.1) rotate(10deg); }
+    30%  { transform: translate(-52%, -80px)  scale(1, .7) rotate(-5deg); }
+    40%  { transform: translate(-50%, -65px)  scale(.9, 1.1); }
+    50%  { transform: translate(-48%, -50px)  scale(1, .7) rotate(8deg); }
+    60%  { transform: translate(-52%, -35px)  scale(.9, 1.1) rotate(-6deg); }
+    70%  { transform: translate(-50%, -22px)  scale(1, .7); }
+    80%  { transform: translate(-48%, -12px)  scale(.9, 1.1) rotate(5deg); }
+    90%  { transform: translate(-44%, -4px)   scale(1.05, .95); }
+    100% { transform: translate(-38%, 0px)    scale(1.2, 1.2); opacity: 1; }
   }
-  /* KAVGA ANI: iki asker birbirini titreterek dövüşür */
-  .asker.dovus { animation: dovus .8s ease-in-out; }
+  /* KAVGA ANI: iki asker kılıç sallayarak birbirine tekrar tekrar çarpar */
+  .asker.dovus { animation: dovus .18s ease-in-out infinite; }
   @keyframes dovus {
-    0%,100% { transform: translate(-62%, 0px) scale(1.2); }
-    15% { transform: translate(-40%, -5px) scale(1.25) rotate(-8deg); }
-    30% { transform: translate(-70%, 5px)  scale(1.25) rotate(8deg); }
-    45% { transform: translate(-45%, -3px) scale(1.28) rotate(-6deg); }
-    60% { transform: translate(-65%, 4px)  scale(1.28) rotate(6deg); }
-    75% { transform: translate(-50%, 0px) scale(1.3) rotate(0); }
+    0%,100% { transform: translate(-62%, 0px) scale(1.2) rotate(-8deg); }
+    50%     { transform: translate(-52%, -8px) scale(1.35) rotate(12deg); }
   }
-  .asker.dovus-alt { animation: dovusAlt .8s ease-in-out; }
+  .asker.dovus-alt { animation: dovusAlt .18s ease-in-out infinite; }
   @keyframes dovusAlt {
-    0%,100% { transform: translate(-38%, 0px) scale(1.2); }
-    15% { transform: translate(-60%, 5px)  scale(1.25) rotate(8deg); }
-    30% { transform: translate(-30%, -5px) scale(1.25) rotate(-8deg); }
-    45% { transform: translate(-55%, 3px)  scale(1.28) rotate(6deg); }
-    60% { transform: translate(-35%, -4px) scale(1.28) rotate(-6deg); }
-    75% { transform: translate(-50%, 0px) scale(1.3) rotate(0); }
+    0%,100% { transform: translate(-38%, 0px) scale(1.2) rotate(8deg); }
+    50%     { transform: translate(-48%, 8px) scale(1.35) rotate(-12deg); }
   }
   /* KAZANAN krala doğru koşar (final darbe için) */
   .asker.zafer-yukari { animation: zaferYukari .5s ease-in forwards; }
@@ -809,15 +812,20 @@
     gunlugeYaz("⚔️ " + benimKart.isim + " (⚡" + benimGuc + (benimKritik ? " KRİTİK" : "") +
                ") vs " + dusmanKart.isim + " (⚡" + dusmanGuc + (dusmanKritik ? " KRİTİK" : "") + ")");
 
-    // Adım 1 (600ms sonra): Ortada karşılaşma başlar, kavga animasyonu
+    // Adım 1 (600ms sonra): Ortada karşılaşma başlar, kavga animasyonu (infinite döngü)
     setTimeout(() => {
       benimAsker.classList.remove("kos-yukari");   benimAsker.classList.add("dovus");
       dusmanAsker.classList.remove("kos-asagi");   dusmanAsker.classList.add("dovus-alt");
+      // Kavga süresince (1600ms) her ~180ms'de bir kılıç sesi
       kavgaSesi();
-      setTimeout(kavgaSesi, 250); // ikinci kılıç sesi
+      setTimeout(kavgaSesi, 200);
+      setTimeout(kavgaSesi, 500);
+      setTimeout(kavgaSesi, 800);
+      setTimeout(kavgaSesi, 1100);
+      setTimeout(kavgaSesi, 1400);
     }, 600);
 
-    // Adım 2 (1400ms sonra): Kavga biter — kim kazandı?
+    // Adım 2 (2200ms sonra): Kavga biter — kim kazandı?
     setTimeout(() => {
       const fark = Math.abs(benimGuc - dusmanGuc);
       const kralHasari = Math.max(1, fark); // en az 1 hasar
@@ -855,7 +863,7 @@
           siraGoster("benim");
         }, 480);
       }
-    }, 1400);
+    }, 2200);
   }
 
   // Yardımcı: sahnede asker (kart karakteri) oluştur
