@@ -106,6 +106,31 @@
 
   .arena-bilgi { text-align: center; font-size: 13px; color: #bcb6e0; margin-bottom: 10px; }
 
+  /* Altın rozeti */
+  .altin-rozet {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: linear-gradient(180deg, #4b3d1d, #2b220f);
+    border: 2px solid var(--altin); color: var(--altin);
+    padding: 4px 12px; border-radius: 20px; font-weight: 800; font-size: 15px;
+    box-shadow: 0 2px 0 rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.15);
+    text-shadow: 0 1px 2px #000;
+  }
+  #menu-altin { margin: 6px auto 4px; }
+  .ust-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 8px; flex-wrap: wrap; }
+  .altin-artis {
+    color: var(--altin); font-weight: 800; margin-left: 6px;
+    animation: altinArt .8s ease-out forwards; display: inline-block;
+  }
+  @keyframes altinArt {
+    0% { transform: translateY(0); opacity: 0; }
+    30% { opacity: 1; }
+    100% { transform: translateY(-14px); opacity: 0; }
+  }
+
+  /* Sürükle-bırak: sahne hedefe dönüşürken parlar */
+  .sahne.drop-hedef { outline: 3px dashed var(--altin); outline-offset: -6px; filter: brightness(1.15); }
+  .kart.suruklenen { opacity: .5; transform: scale(.95); }
+
   /* ---- SAVAŞ SAHNESİ ---- */
   .sahne {
     position: relative; border-radius: 16px; padding: 14px 12px 16px;
@@ -114,10 +139,26 @@
     display: flex; flex-direction: column; align-items: center; gap: 8px;
     box-shadow: inset 0 0 40px rgba(0,0,0,.35);
   }
-  /* Arenaya göre arka plan */
-  .arena-kar    { background: linear-gradient(180deg, #bfe6ff, #6fa6dc); }
-  .arena-col    { background: linear-gradient(180deg, #ffd889, #e2943f); }
-  .arena-volkan { background: linear-gradient(180deg, #611a1a, #2a0d0d); box-shadow: inset 0 0 60px rgba(255,90,0,.4); }
+  /* Arenaya göre arka plan — SVG manzara ile detaylı */
+  /* Karlı Dağ: karla kaplı sivri dağlar + çam ağaçları */
+  .arena-kar {
+    background:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 200' preserveAspectRatio='none'><defs><radialGradient id='g' cx='50%25' cy='30%25'><stop offset='0' stop-color='%23fff9d1'/><stop offset='1' stop-color='%23bfe6ff' stop-opacity='0'/></radialGradient></defs><circle cx='320' cy='40' r='24' fill='url(%23g)'/><circle cx='320' cy='40' r='14' fill='%23fff2b0'/><polygon points='0,200 60,90 130,150 180,60 260,140 340,80 400,200' fill='%235d7fa5'/><polygon points='60,90 90,140 40,140' fill='%23fff'/><polygon points='180,60 220,120 150,120' fill='%23fff'/><polygon points='340,80 380,150 300,150' fill='%23fff'/><g fill='%232d4a2b'><polygon points='40,200 25,155 55,155'/><polygon points='40,175 20,130 60,130'/><polygon points='100,200 85,160 115,160'/><polygon points='100,180 85,140 115,140'/><polygon points='250,200 235,160 265,160'/><polygon points='250,180 235,140 265,140'/><polygon points='360,200 345,165 375,165'/></g><rect x='0' y='190' width='400' height='10' fill='%23fff'/></svg>") no-repeat bottom center / 100% 55%,
+      linear-gradient(180deg, #bfe6ff 0%, #d9f0ff 60%);
+  }
+  /* Kızgın Çöl: kum tepeleri + güneş + palmiye + piramit */
+  .arena-col {
+    background:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 200' preserveAspectRatio='none'><defs><radialGradient id='s' cx='50%25' cy='40%25'><stop offset='0' stop-color='%23fff2a0'/><stop offset='1' stop-color='%23ffb54f' stop-opacity='0'/></radialGradient></defs><circle cx='90' cy='45' r='45' fill='url(%23s)'/><circle cx='90' cy='45' r='22' fill='%23ffe27a'/><polygon points='260,200 300,110 340,200' fill='%23b57432'/><polygon points='300,110 320,155 280,155' fill='%23d59054'/><path d='M0,200 Q100,140 200,170 T400,150 L400,200 Z' fill='%23e5a24d'/><path d='M0,200 Q80,175 160,185 T400,180 L400,200 Z' fill='%23c47f2d'/><g transform='translate(60,140)'><rect x='-2' y='0' width='4' height='60' fill='%236b4a1e'/><ellipse cx='0' cy='-2' rx='22' ry='7' fill='%234a7a3a'/><ellipse cx='-14' cy='2' rx='16' ry='5' fill='%234a7a3a' transform='rotate(-25 -14 2)'/><ellipse cx='14' cy='2' rx='16' ry='5' fill='%234a7a3a' transform='rotate(25 14 2)'/></g></svg>") no-repeat bottom center / 100% 70%,
+      linear-gradient(180deg, #ffd889 0%, #ffb968 55%, #e2943f 100%);
+  }
+  /* Volkan Kalesi: volkan konisi + akan lav + karanlık kayalar */
+  .arena-volkan {
+    background:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 200' preserveAspectRatio='none'><defs><radialGradient id='l' cx='50%25' cy='0%25'><stop offset='0' stop-color='%23fff08a'/><stop offset='.4' stop-color='%23ff6d2e'/><stop offset='1' stop-color='%23611a1a' stop-opacity='0'/></radialGradient></defs><circle cx='200' cy='40' r='90' fill='url(%23l)' opacity='.6'/><polygon points='120,200 200,50 280,200' fill='%232a1010'/><polygon points='170,90 200,50 230,90 215,120 185,120' fill='%23ff5a1a'/><path d='M195,90 Q190,140 175,180 L185,200 L215,200 L225,180 Q210,140 205,90 Z' fill='%23ff8033'/><path d='M195,110 Q190,150 180,190 L200,200 L220,190 Q210,150 205,110 Z' fill='%23ffb35a' opacity='.8'/><polygon points='0,200 40,160 80,190 120,170 120,200' fill='%231a0a0a'/><polygon points='280,200 320,175 360,195 400,170 400,200' fill='%231a0a0a'/><circle cx='60' cy='180' r='4' fill='%23ff6a1a'/><circle cx='340' cy='185' r='3' fill='%23ff8a3a'/></svg>") no-repeat bottom center / 100% 90%,
+      linear-gradient(180deg, #611a1a, #2a0d0d);
+    box-shadow: inset 0 0 60px rgba(255,90,0,.4);
+  }
 
   .taraf { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 4px; }
   /* Karakter: canlı bir idle — nefes alma + sallanma + hafif dönüş birden */
@@ -219,23 +260,35 @@
     40% { transform: translateX(-50%) scale(1.5); opacity: 1; }
     100% { transform: translateX(-50%) scale(1); opacity: 0; }
   }
-  /* Sahnede karşıya uçan saldırı (kartın karakteri) */
-  .saldiri-mermi {
+  /* Sahnede YÜRÜYEN ASKER (kartın karakteri büyük halde) */
+  .asker {
     position: absolute; left: 50%; top: 50%; z-index: 12;
-    font-size: 46px; pointer-events: none;
-    filter: drop-shadow(0 4px 6px rgba(0,0,0,.5));
+    font-size: 64px; pointer-events: none;
+    filter: drop-shadow(0 6px 8px rgba(0,0,0,.6));
   }
-  .saldiri-mermi.yukari { animation: ucusYukari .55s ease-in forwards; }
-  .saldiri-mermi.asagi  { animation: ucusAsagi  .55s ease-in forwards; }
-  @keyframes ucusYukari {
-    0%   { transform: translate(-50%, 95px) scale(.6) rotate(-15deg); opacity: 0; }
-    25%  { opacity: 1; }
-    100% { transform: translate(-50%, -95px) scale(1.25) rotate(15deg); opacity: 0; }
+  /* Aşağıdan yukarı yürüyen kendi askerim (sıçraya sallanaya) */
+  .asker.yukari { animation: askerYuru 1.2s ease-out forwards; }
+  @keyframes askerYuru {
+    0%   { transform: translate(-50%, 130px) scale(.5) rotate(-6deg); opacity: 0; }
+    10%  { transform: translate(-52%, 110px) scale(.7) rotate(4deg);  opacity: 1; }
+    25%  { transform: translate(-46%, 70px)  scale(.9) rotate(-4deg) scaleY(.85); }
+    40%  { transform: translate(-54%, 30px)  scale(1.0) rotate(4deg); }
+    55%  { transform: translate(-46%, -10px) scale(1.05) rotate(-4deg) scaleY(.85); }
+    70%  { transform: translate(-54%, -50px) scale(1.1) rotate(4deg); }
+    85%  { transform: translate(-50%, -90px) scale(1.25) rotate(0); opacity: 1; }
+    100% { transform: translate(-50%, -110px) scale(1.4) rotate(0); opacity: 0; }
   }
-  @keyframes ucusAsagi {
-    0%   { transform: translate(-50%, -95px) scale(.6) rotate(15deg); opacity: 0; }
-    25%  { opacity: 1; }
-    100% { transform: translate(-50%, 95px) scale(1.25) rotate(-15deg); opacity: 0; }
+  /* Yukarıdan aşağı yürüyen düşman askeri */
+  .asker.asagi { animation: askerYuruTers 1.2s ease-out forwards; }
+  @keyframes askerYuruTers {
+    0%   { transform: translate(-50%, -130px) scale(.5) rotate(6deg); opacity: 0; }
+    10%  { transform: translate(-48%, -110px) scale(.7) rotate(-4deg); opacity: 1; }
+    25%  { transform: translate(-54%, -70px)  scale(.9) rotate(4deg) scaleY(.85); }
+    40%  { transform: translate(-46%, -30px)  scale(1.0) rotate(-4deg); }
+    55%  { transform: translate(-54%, 10px)   scale(1.05) rotate(4deg) scaleY(.85); }
+    70%  { transform: translate(-46%, 50px)   scale(1.1) rotate(-4deg); }
+    85%  { transform: translate(-50%, 90px)   scale(1.25) rotate(0); opacity: 1; }
+    100% { transform: translate(-50%, 110px)  scale(1.4) rotate(0); opacity: 0; }
   }
 
   /* Savaş günlüğü */
@@ -304,6 +357,7 @@
   <section id="ekran-menu" class="ekran aktif merkez">
     <h1>⚔️ Klanlar Savaşı</h1>
     <p>İki klan, üç arena, tek zafer. Hazır mısın?</p>
+    <div class="altin-rozet" id="menu-altin">🪙 <span id="menu-altin-yazi">0</span></div>
     <div class="menu-butonlar">
       <button class="buyuk" onclick="yeniOyun()">🆕 Yeni Oyun</button>
       <button class="buyuk" id="devam-btn" onclick="devamEt()">▶️ Devam Et</button>
@@ -347,7 +401,10 @@
 
   <!-- EKRAN 3: Savaş -->
   <section id="ekran-savas" class="ekran">
-    <div id="harita"></div>
+    <div class="ust-bar">
+      <div id="harita"></div>
+      <div class="altin-rozet" id="savas-altin">🪙 <span id="savas-altin-yazi">0</span></div>
+    </div>
     <div class="arena-bilgi" id="arena-yazi"></div>
 
     <div id="sahne" class="sahne">
@@ -409,9 +466,11 @@
     gucBonus: 0,
     kilitli: false,
     durum: "menu",     // "menu" / "savas" / "ara"
+    altin: 0,          // bu seferde toplanmış altın
   };
 
   const KAYIT_ANAHTARI = "klanlarSavasi";
+  const ALTIN_ANAHTARI = "klanlarSavasiAltin"; // toplam altın (oyun bitse de kalır)
 
   // ---- ARENALAR ---- (canlar büyük -> savaşlar uzun ve heyecanlı)
   const arenalar = [
@@ -528,6 +587,7 @@
     kartlariDiz();
     siraGoster("benim");         // savaş başlarken sıra sende
     partikulleriBaslat();        // arenaya göre kar/kum/kıvılcım
+    altinGoster();               // savaş üstündeki altın rozeti
   }
 
   // ---- SEFER HARİTASI ----
@@ -562,6 +622,14 @@
         '<div class="guc">' + guclu + '</div>' +
         '<div class="rutbe ' + kart.rutbe + '">' + rutbeYazi + '</div>';
       div.onclick = () => kartOyna(sira);
+      // Sürükle-bırak: kartı savaş sahnesine sürükleyip bırakınca da oynanır
+      div.draggable = true;
+      div.ondragstart = (ev) => {
+        div.classList.add("suruklenen");
+        ev.dataTransfer.effectAllowed = "move";
+        ev.dataTransfer.setData("text/plain", String(sira));
+      };
+      div.ondragend = () => div.classList.remove("suruklenen");
       el.appendChild(div);
     });
   }
@@ -586,8 +654,20 @@
       if (kritik) hasar = hasar * 2;
       oyun.dusmanCan = Math.max(0, oyun.dusmanCan - hasar);
       gunlugeYaz((kritik ? "💥 KRİTİK! " : "⚔️ ") + kart.isim + " düşmana " + hasar + " hasar vurdu!");
-      saldiriAnim("yukari", kart.emoji);              // karakterin karşıya uçması
-      vurusEfekti("dusman-satiri", hasar, kritik);    // patlama + hasar sayısı
+      altinEkle(kritik ? 5 : 1); // saldırıdan altın (kritik daha çok)
+      saldiriAnim("yukari", kart.emoji);
+      // Asker düşmana ulaştığında patla (animasyon %85 ~= 1000ms)
+      setTimeout(() => {
+        vurusEfekti("dusman-satiri", hasar, kritik);
+        canlariGuncelle();
+        if (oyun.dusmanCan <= 0) arenaKazanildi();
+      }, 1000);
+      kaydet();
+      oyun.kilitli = true;
+      siraGoster("dusman");
+      // Düşman biraz bekleyip cevaben saldırsın (asker animasyonu bitsin diye)
+      if (oyun.dusmanCan > 0) setTimeout(dusmanSaldir, 1600);
+      return;
     }
 
     canlariGuncelle();
@@ -618,7 +698,16 @@
       oyun.benimCan = Math.max(0, oyun.benimCan - hasar);
       gunlugeYaz((kritik ? "💥 KRİTİK! " : "🔥 ") + "Düşman " + kart.isim + " ile sana " + hasar + " hasar verdi!");
       saldiriAnim("asagi", kart.emoji);
-      vurusEfekti("benim-satiri", hasar, kritik);
+      // Düşman askeri sana ulaştığında patla
+      setTimeout(() => {
+        vurusEfekti("benim-satiri", hasar, kritik);
+        canlariGuncelle();
+        kaydet();
+        if (oyun.benimCan <= 0) return oyunuBitir(false);
+        oyun.kilitli = false;
+        siraGoster("benim");
+      }, 1000);
+      return;
     }
 
     canlariGuncelle();
@@ -630,15 +719,17 @@
 
   // ---- ARENA KAZANILDI ----
   function arenaKazanildi() {
+    altinEkle(50); // arena zaferi bonusu
     const sonMu = oyun.arenaSira >= arenalar.length - 1;
     if (sonMu) {
+      altinEkle(200); // TÜM sefer bitirme ekstra bonusu
       oyunuBitir(true);
     } else {
       oyun.durum = "ara";
       kaydet();
       const sonraki = arenalar[oyun.arenaSira + 1];
       document.getElementById("ara-yazi").textContent =
-        "Sıradaki arena: " + sonraki.emoji + " " + sonraki.ad + ". Kralın dinlenip tam cana döndü!";
+        "🪙 +50 altın! Sıradaki arena: " + sonraki.emoji + " " + sonraki.ad + ". Kralın tam cana döndü!";
       ekranGoster("ekran-ara");
     }
   }
@@ -707,14 +798,14 @@
     setTimeout(() => e.remove(), gecikmeMs + yasamMs);
   }
 
-  // Sahnede karşıya uçan saldırı (kartın karakteri)
+  // Sahnede karşıya YÜRÜYEN ASKER (kartın karakteri büyük halde)
   function saldiriAnim(yon, emoji) {
     const sahne = document.getElementById("sahne");
     const e = document.createElement("div");
-    e.className = "saldiri-mermi " + yon;
+    e.className = "asker " + yon;
     e.textContent = emoji;
     sahne.appendChild(e);
-    setTimeout(() => e.remove(), 620);
+    setTimeout(() => e.remove(), 1250);
   }
 
   // Vuruş: patlama + havaya uçan hasar sayısı + sarsılma + karakter irkilme
@@ -791,6 +882,30 @@
     try { localStorage.removeItem(KAYIT_ANAHTARI); } catch (e) {}
   }
 
+  // ---- ALTIN SİSTEMİ ----
+  // Toplam altını localStorage'da tutuyoruz (oyun bitse de kalır).
+  function toplamAltin() {
+    return parseInt(localStorage.getItem(ALTIN_ANAHTARI) || "0", 10);
+  }
+  function altinYaz(x) { try { localStorage.setItem(ALTIN_ANAHTARI, String(x)); } catch (e) {} }
+  function altinEkle(miktar) {
+    const yeni = toplamAltin() + miktar;
+    altinYaz(yeni);
+    altinGoster();
+    // Ekranda kısa "+N" animasyonu
+    const kutu = document.getElementById("savas-altin");
+    if (kutu) {
+      const a = document.createElement("span");
+      a.className = "altin-artis"; a.textContent = "+" + miktar;
+      kutu.appendChild(a); setTimeout(() => a.remove(), 900);
+    }
+  }
+  function altinGoster() {
+    const t = toplamAltin();
+    const m = document.getElementById("menu-altin-yazi"); if (m) m.textContent = t;
+    const s = document.getElementById("savas-altin-yazi"); if (s) s.textContent = t;
+  }
+
   function yeniOyun() {
     kayitSil();
     oyun.durum = "menu";
@@ -823,12 +938,29 @@
     const btn = document.getElementById("devam-btn");
     if (veri && veri.takim) { btn.disabled = false; btn.textContent = "▶️ Devam Et"; }
     else { btn.disabled = true; btn.textContent = "▶️ Devam Et (kayıt yok)"; }
+    altinGoster();
   }
 
   function anaMenu() {
     menuyuHazirla();
     ekranGoster("ekran-menu");
   }
+
+  // ---- SÜRÜKLE-BIRAK: Sahne'yi drop hedefi olarak bağla ----
+  (function sahneyiDropHedefiYap() {
+    const sahne = document.getElementById("sahne");
+    sahne.addEventListener("dragover", (ev) => {
+      ev.preventDefault();  // drop'a izin ver
+      sahne.classList.add("drop-hedef");
+    });
+    sahne.addEventListener("dragleave", () => sahne.classList.remove("drop-hedef"));
+    sahne.addEventListener("drop", (ev) => {
+      ev.preventDefault();
+      sahne.classList.remove("drop-hedef");
+      const sira = parseInt(ev.dataTransfer.getData("text/plain"), 10);
+      if (!isNaN(sira)) kartOyna(sira);
+    });
+  })();
 
   // Sayfa açılınca menüyü hazırla
   menuyuHazirla();
