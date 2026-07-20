@@ -570,6 +570,7 @@
   const ALTIN_ANAHTARI  = "klanlarSavasiAltin"; // toplam altın (oyun bitse de kalır)
   const KUPA_ANAHTARI   = "klanlarSavasiKupa";  // toplam kupa (hedef 15000)
   const TAKIM_ANAHTARI  = "klanlarSavasiTakim"; // seçtiğin takım kalıcı
+  const HEDIYE_ANAHTARI = "klanlarSavasiBaslangicHediyesi"; // 10k altın verildi mi
   const KUPA_HEDEF      = 15000;
   const BASLANGIC_ALTIN = 10000;
 
@@ -1174,8 +1175,12 @@
   }
 
   function menuyuHazirla() {
-    // İLK KEZ AÇILIŞ: hiç altın kaydı yoksa 10.000 altınla başla
-    if (localStorage.getItem(ALTIN_ANAHTARI) === null) altinYaz(BASLANGIC_ALTIN);
+    // BAŞLANGIÇ HEDİYESİ: Bir kez, 10.000 altını tüm oyunculara ver.
+    // (Eski oyuncular için: mevcut altın 10k'dan az ise 10k'ya yükseltir.)
+    if (!localStorage.getItem(HEDIYE_ANAHTARI)) {
+      altinYaz(Math.max(BASLANGIC_ALTIN, toplamAltin()));
+      try { localStorage.setItem(HEDIYE_ANAHTARI, "1"); } catch (e) {}
+    }
 
     const veri = kayitOku();
     const btn = document.getElementById("devam-btn");
