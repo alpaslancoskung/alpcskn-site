@@ -441,6 +441,78 @@
 
   .buyuk-emoji-orta { font-size: 64px; }
 
+  /* ---- Elmas & Level rozetleri ---- */
+  .elmas-rozet {
+    background: linear-gradient(180deg, #6ecff5, #2a7fb8);
+    color: #fff; padding: 6px 12px; border-radius: 999px;
+    font-weight: 700; box-shadow: 0 3px 0 #164a70, 0 5px 8px rgba(0,0,0,.35);
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .level-rozet {
+    background: linear-gradient(180deg, #b47cff, #6a3ac0);
+    color: #fff; padding: 6px 12px; border-radius: 999px;
+    font-weight: 700; box-shadow: 0 3px 0 #391878, 0 5px 8px rgba(0,0,0,.35);
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+
+  /* ---- Mağaza sandıkları ---- */
+  .sandiklar {
+    display: flex; gap: 12px; flex-wrap: wrap; margin: 16px 0;
+    justify-content: center;
+  }
+  .sandik {
+    flex: 1 1 180px; max-width: 220px;
+    padding: 18px 12px; border-radius: 16px; text-align: center;
+    background: linear-gradient(180deg, #3a3268, #29234f);
+    border: 2px solid #5b4fa0; color: #fff;
+    box-shadow: 0 5px 0 rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.1);
+    cursor: pointer; transition: transform .12s;
+  }
+  .sandik:hover { transform: translateY(-3px); }
+  .sandik.pahali { opacity: .5; cursor: not-allowed; }
+  .sandik.pahali:hover { transform: none; }
+  .sandik-emoji { font-size: 56px; filter: drop-shadow(0 4px 5px rgba(0,0,0,.5)); }
+  .sandik h3 { margin: 6px 0; color: #ffe27a; }
+  .sandik-fiyat {
+    background: linear-gradient(180deg, #6ecff5, #2a7fb8);
+    color: #fff; padding: 5px 12px; border-radius: 999px;
+    font-weight: 700; display: inline-block; margin-top: 6px;
+  }
+  .sandik-not { font-size: 12px; color: #d7d2f0; margin-top: 6px; }
+
+  /* Sandık açılma sonucu */
+  #magaza-sonuc {
+    max-width: 340px; margin: 14px auto;
+    padding: 18px; border-radius: 16px; text-align: center;
+    background: linear-gradient(180deg, #ffe08a, #f2b23a); color: #3a2600;
+    box-shadow: 0 6px 20px rgba(0,0,0,.5);
+    animation: acilis .5s ease-out;
+  }
+  @keyframes acilis {
+    0%   { transform: scale(.3) rotate(-10deg); opacity: 0; }
+    60%  { transform: scale(1.15) rotate(3deg); }
+    100% { transform: scale(1) rotate(0); opacity: 1; }
+  }
+  #magaza-sonuc .odul-emoji { font-size: 64px; }
+  #magaza-sonuc .odul-ad { font-weight: 700; font-size: 18px; margin: 6px 0; }
+  #magaza-sonuc .odul-icerik { font-size: 16px; margin-top: 4px; }
+
+  /* Level up bildirimi */
+  .level-up-bildirim {
+    position: fixed; top: 20%; left: 50%; transform: translateX(-50%);
+    background: linear-gradient(180deg, #b47cff, #6a3ac0);
+    color: #fff; padding: 20px 30px; border-radius: 20px;
+    font-size: 24px; font-weight: 900; text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,.6);
+    z-index: 999; animation: levelUpAnim 2.5s ease-out forwards;
+  }
+  @keyframes levelUpAnim {
+    0%   { transform: translateX(-50%) scale(.3); opacity: 0; }
+    20%  { transform: translateX(-50%) scale(1.1); opacity: 1; }
+    80%  { transform: translateX(-50%) scale(1); opacity: 1; }
+    100% { transform: translateX(-50%) scale(.9); opacity: 0; }
+  }
+
   /* ---- Avatar (oyuncu fotoğrafı) ---- */
   .avatar-mini {
     width: 42px; height: 42px; border-radius: 50%;
@@ -510,7 +582,9 @@
     <p>İki taraf, üç arena, tek zafer.<br>Kartın askerin senin — düşmanın askeriyle savaş, kazanan karşı tarafa ulaşır!</p>
     <div class="rozet-satiri">
       <div class="altin-rozet" id="menu-altin">🪙 <span id="menu-altin-yazi">0</span></div>
-      <div class="kupa-rozet" id="menu-kupa">🏆 <span id="menu-kupa-yazi">0</span> / 15000</div>
+      <div class="kupa-rozet" id="menu-kupa">🏆 <span id="menu-kupa-yazi">0</span></div>
+      <div class="elmas-rozet" id="menu-elmas">💎 <span id="menu-elmas-yazi">0</span></div>
+      <div class="level-rozet" id="menu-level">Lv <span id="menu-level-yazi">1</span></div>
     </div>
     <div id="isim-satiri" style="margin:8px 0;display:flex;align-items:center;justify-content:center;gap:10px;">
       <div id="menu-avatar" class="avatar-mini">🙂</div>
@@ -518,8 +592,24 @@
     </div>
     <div class="menu-butonlar">
       <button class="buyuk" onclick="botEkraniAc()">🤖 Bot ile Maç</button>
-      <button class="buyuk" onclick="profilAc()">👤 Profilim (İsim + Fotoğraf)</button>
+      <button class="buyuk" onclick="magazaAc()">🛒 Mağaza</button>
+      <button class="buyuk" onclick="profilAc()">👤 Profilim</button>
       <button id="takim-degistir-btn" onclick="takimDegistir()" style="display:none;font-size:14px;padding:8px 16px;">🔄 Tarafı Değiştir</button>
+    </div>
+  </section>
+
+  <!-- EKRAN: Mağaza -->
+  <section id="ekran-magaza" class="ekran">
+    <h2>🛒 Mağaza</h2>
+    <div class="rozet-satiri merkez" style="justify-content:center;margin-bottom:8px;">
+      <div class="elmas-rozet">💎 <span id="magaza-elmas-yazi">0</span></div>
+      <div class="level-rozet">Lv <span id="magaza-level-yazi">1</span></div>
+    </div>
+    <p class="merkez" style="color:#cfc9ec;margin-top:4px;">Her sandıkta <b>20 farklı ödül</b> var — toplam 60. Elması bot maçlarından ve level atlayınca kazanırsın.</p>
+    <div id="sandiklar" class="sandiklar"></div>
+    <div id="magaza-sonuc" style="display:none;"></div>
+    <div class="merkez" style="margin-top:14px;">
+      <button onclick="anaMenu()">← Menüye Dön</button>
     </div>
   </section>
 
@@ -664,6 +754,10 @@
   const TAKIM_ANAHTARI  = "klanlarSavasiTakim"; // seçtiğin takım kalıcı
   const ISIM_ANAHTARI   = "klanlarSavasiIsim";  // oyuncu ismi
   const FOTO_ANAHTARI   = "klanlarSavasiFoto";  // oyuncu avatar fotoğrafı (base64)
+  const ELMAS_ANAHTARI  = "klanlarSavasiElmas"; // mağaza para birimi
+  const XP_ANAHTARI     = "klanlarSavasiXP";    // level için deneyim
+  const MAX_LEVEL       = 20;
+  const LEVEL_XP        = 300;                  // her level için gereken XP
   const HEDIYE_ANAHTARI = "klanlarSavasiBaslangicHediyesi2"; // 50k altın verildi mi (v2)
   const KUPA_HEDEF      = 15000;
   const BASLANGIC_ALTIN = 50000;
@@ -753,6 +847,150 @@
   function fotoSil() {
     guvenliSil(FOTO_ANAHTARI);
     profilOnizlemeGuncelle();
+  }
+
+  // ---- ELMAS (2. para birimi, sadece mağaza) ----
+  function toplamElmas() { return parseInt(guvenliOku(ELMAS_ANAHTARI) || "0", 10); }
+  function elmasYaz(x)   { guvenliYaz(ELMAS_ANAHTARI, String(x)); }
+  function elmasEkle(m)  { elmasYaz(toplamElmas() + m); elmasGoster(); }
+  function elmasCikar(m) { elmasYaz(Math.max(0, toplamElmas() - m)); elmasGoster(); }
+  function elmasGoster() {
+    const t = toplamElmas();
+    const m = document.getElementById("menu-elmas-yazi"); if (m) m.textContent = t;
+    const g = document.getElementById("magaza-elmas-yazi"); if (g) g.textContent = t;
+  }
+
+  // ---- LEVEL SİSTEMİ (1..MAX_LEVEL, her level LEVEL_XP kadar XP) ----
+  function toplamXP()   { return parseInt(guvenliOku(XP_ANAHTARI) || "0", 10); }
+  function xpYaz(x)     { guvenliYaz(XP_ANAHTARI, String(x)); }
+  function seviye()     { return Math.min(MAX_LEVEL, Math.floor(toplamXP() / LEVEL_XP) + 1); }
+  function xpEkle(miktar) {
+    const eski = seviye();
+    xpYaz(toplamXP() + miktar);
+    const yeni = seviye();
+    levelGoster();
+    if (yeni > eski) {
+      // Level atlama! Elmas bonusu: yeni level * 10
+      const bonus = yeni * 10;
+      elmasEkle(bonus);
+      levelUpBildirim(yeni, bonus);
+    }
+  }
+  function levelGoster() {
+    const l = seviye();
+    const m = document.getElementById("menu-level-yazi"); if (m) m.textContent = l;
+    const g = document.getElementById("magaza-level-yazi"); if (g) g.textContent = l;
+  }
+  function levelUpBildirim(yeniLevel, bonusElmas) {
+    const d = document.createElement("div");
+    d.className = "level-up-bildirim";
+    d.innerHTML = "🎉 LEVEL " + yeniLevel + "! 🎉<br><span style='font-size:18px'>+" + bonusElmas + " 💎 kazandın</span>";
+    document.body.appendChild(d);
+    setTimeout(() => d.remove(), 2500);
+  }
+
+  // ---- MAĞAZA: 3 sandık × 20 ödül = 60 ödül ----
+  const SANDIKLAR = [
+    { id:"kucuk", ad:"Ahşap Sandık", emoji:"📦", fiyat:20,  not:"20 ödülden birini kazan" },
+    { id:"orta",  ad:"Gümüş Sandık", emoji:"🎁", fiyat:50,  not:"20 daha büyük ödül" },
+    { id:"buyuk", ad:"Altın Sandık", emoji:"🏆", fiyat:100, not:"20 destansı ödül" },
+  ];
+
+  // Her sandık için 20 ödül üret (toplam 60)
+  function sandikOdulleri(tier) {
+    const oduller = [];
+    if (tier === "kucuk") {
+      for (let i = 1; i <= 20; i++) {
+        oduller.push({
+          ad:"Küçük Kart #" + i,
+          emoji:["🪙","💰","🎈","🧸","🍬","⭐","🔔","🎯","🪄","🍀"][i % 10],
+          altin: 20 + i * 8,
+          elmas: (i % 5 === 0) ? 3 : 0,
+        });
+      }
+    } else if (tier === "orta") {
+      for (let i = 1; i <= 20; i++) {
+        oduller.push({
+          ad:"Gümüş Kart #" + i,
+          emoji:["🥈","💠","🔮","🎁","🌟","🗝️","🎖️","🛡️","⚗️","🏵️"][i % 10],
+          altin: 150 + i * 25,
+          elmas: 5 + Math.floor(i / 3),
+        });
+      }
+    } else {
+      for (let i = 1; i <= 20; i++) {
+        oduller.push({
+          ad:"Altın Kart #" + i,
+          emoji:["🏆","👑","💎","🔥","⚡","🐉","🌈","🦁","🌋","🗡️"][i % 10],
+          altin: 600 + i * 60,
+          elmas: 20 + i * 2,
+        });
+      }
+    }
+    return oduller;
+  }
+
+  function magazaAc() {
+    elmasGoster();
+    levelGoster();
+    document.getElementById("magaza-sonuc").style.display = "none";
+    const kutu = document.getElementById("sandiklar");
+    const elmas = toplamElmas();
+    kutu.innerHTML = "";
+    SANDIKLAR.forEach(s => {
+      const pahali = elmas < s.fiyat;
+      const d = document.createElement("div");
+      d.className = "sandik" + (pahali ? " pahali" : "");
+      d.innerHTML =
+        '<div class="sandik-emoji">' + s.emoji + '</div>' +
+        '<h3>' + s.ad + '</h3>' +
+        '<div class="sandik-fiyat">💎 ' + s.fiyat + '</div>' +
+        '<div class="sandik-not">' + s.not + '</div>';
+      if (!pahali) d.onclick = () => sandikAc(s);
+      kutu.appendChild(d);
+    });
+    ekranGoster("ekran-magaza");
+  }
+
+  function sandikAc(sandik) {
+    if (toplamElmas() < sandik.fiyat) return;
+    elmasCikar(sandik.fiyat);
+    const havuz = sandikOdulleri(sandik.id);
+    const odul = havuz[Math.floor(Math.random() * havuz.length)];
+    // Ödülü ver
+    if (odul.altin) altinEkle(odul.altin);
+    if (odul.elmas) elmasEkle(odul.elmas);
+    // Göster
+    const kutu = document.getElementById("magaza-sonuc");
+    kutu.style.display = "block";
+    kutu.innerHTML =
+      '<div class="odul-emoji">' + odul.emoji + '</div>' +
+      '<div class="odul-ad">' + sandik.ad + " açıldı!</div>" +
+      '<div class="odul-ad">🎊 ' + odul.ad + ' 🎊</div>' +
+      '<div class="odul-icerik">🪙 +' + odul.altin +
+      (odul.elmas ? '  ·  💎 +' + odul.elmas : '') + '</div>';
+    // Sandık listesini yeniden çiz (elmas azaldı, bazıları pahalı olabilir)
+    setTimeout(() => magazaCiz(), 100);
+  }
+
+  // magazaAc'ın sadece kutu çizim kısmı (sonuç kutusunu silmez)
+  function magazaCiz() {
+    elmasGoster(); levelGoster();
+    const kutu = document.getElementById("sandiklar");
+    const elmas = toplamElmas();
+    kutu.innerHTML = "";
+    SANDIKLAR.forEach(s => {
+      const pahali = elmas < s.fiyat;
+      const d = document.createElement("div");
+      d.className = "sandik" + (pahali ? " pahali" : "");
+      d.innerHTML =
+        '<div class="sandik-emoji">' + s.emoji + '</div>' +
+        '<h3>' + s.ad + '</h3>' +
+        '<div class="sandik-fiyat">💎 ' + s.fiyat + '</div>' +
+        '<div class="sandik-not">' + s.not + '</div>';
+      if (!pahali) d.onclick = () => sandikAc(s);
+      kutu.appendChild(d);
+    });
   }
 
   function profilKaydet() {
@@ -1131,16 +1369,23 @@
   function arenaKazanildi() {
     oyun.kilitli = false; // BUG FIX: arena bitince kilidi aç
 
-    // Bot modunda: kupa+altın ver, menüye dön
+    // Bot modunda: kupa+altın+elmas+XP ver, menüye dön
     if (oyun.mod === "bot" && oyun.aktifBot) {
       const bot = oyun.aktifBot;
+      // Bot zorluğuna göre ödül: kupaMin arttıkça artar
+      const kazaniElmas = 5 + Math.floor(bot.kupaMin / 500) * 2; // 5, 7, 13, 25, 45
+      const kazaniXP = 100;
       kupaEkle(50);
       altinEkle(100);
-      gunlugeYaz("🏆 " + bot.ad + "'ı yendin! +50 kupa, +100 altın.");
+      elmasEkle(kazaniElmas);
+      xpEkle(kazaniXP); // level atlama burada tetiklenir
+      gunlugeYaz("🏆 " + bot.ad + "'ı yendin! +50 kupa, +100 altın, +" + kazaniElmas + " 💎, +" + kazaniXP + " XP.");
       document.getElementById("sonuc-emoji").textContent = "🏆";
       document.getElementById("sonuc-baslik").textContent = "BOT MAÇI KAZANILDI!";
-      document.getElementById("sonuc-yazi").textContent =
-        bot.emoji + " " + bot.ad + " yenildi! +50 kupa, +100 altın kazandın.";
+      document.getElementById("sonuc-yazi").innerHTML =
+        bot.emoji + " " + bot.ad + " yenildi!<br>" +
+        "🏆 +50 kupa · 🪙 +100 altın · 💎 +" + kazaniElmas + " elmas · +" + kazaniXP + " XP<br>" +
+        "Level: <b>" + seviye() + "</b> / " + MAX_LEVEL;
       oyun.mod = "sefer"; oyun.aktifBot = null;
       oyun.durum = "menu";
       ekranGoster("ekran-sonuc");
@@ -1279,15 +1524,16 @@
 
   // ---- OYUNU BİTİR ----
   function oyunuBitir(kazandinMi) {
-    // Bot maçında kaybettin → kupa düş, menüye dön
+    // Bot maçında kaybettin → kupa düş, biraz XP ver (deneyim), menüye dön
     if (oyun.mod === "bot" && oyun.aktifBot) {
       const bot = oyun.aktifBot;
       kupaCikar(20);
+      xpEkle(25); // Kaybetsen bile biraz deneyim
       const kupa = toplamKupa();
       document.getElementById("sonuc-emoji").textContent = "💀";
       document.getElementById("sonuc-baslik").textContent = "Kaybettin";
       document.getElementById("sonuc-yazi").innerHTML =
-        bot.emoji + " " + bot.ad + " seni yendi. <b>-20 kupa</b><br>Toplam: <b>" + kupa + "</b> kupa";
+        bot.emoji + " " + bot.ad + " seni yendi.<br><b>-20 kupa</b> · +25 XP (deneyim)<br>Toplam: <b>" + kupa + "</b> kupa · Level <b>" + seviye() + "</b>";
       oyun.mod = "sefer"; oyun.aktifBot = null;
       oyun.durum = "menu";
       ekranGoster("ekran-sonuc");
@@ -1518,6 +1764,8 @@
 
     altinGoster();
     kupaGoster();
+    elmasGoster();
+    levelGoster();
   }
 
   function anaMenu() {
