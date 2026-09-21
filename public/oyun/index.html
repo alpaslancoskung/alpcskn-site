@@ -441,6 +441,38 @@
 
   .buyuk-emoji-orta { font-size: 64px; }
 
+  /* ---- Destem ekranı: kart listesi ---- */
+  #destem-liste {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px; margin: 10px 0;
+  }
+  .destem-kart {
+    background: linear-gradient(180deg, #2a2450, #1a1638);
+    border: 2px solid #4a3f7a; border-radius: 12px;
+    padding: 10px; text-align: center; color: #fff;
+    position: relative;
+  }
+  .destem-kart.aktif { border-color: #4dd070; box-shadow: 0 0 12px rgba(77,208,112,.4); }
+  .destem-kart.pasif { opacity: .55; }
+  .destem-kart .em { font-size: 32px; margin: 4px 0; }
+  .destem-kart .ad { font-weight: 700; font-size: 13px; margin-bottom: 3px; }
+  .destem-kart .lv-yazi { color: #ffe27a; font-weight: 700; font-size: 12px; }
+  .destem-kart .guc-yazi { color: #6facff; font-size: 12px; margin: 3px 0; }
+  .destem-kart .btn-satir { display: flex; gap: 4px; margin-top: 6px; }
+  .destem-kart button { font-size: 11px; padding: 6px 8px; flex: 1; box-shadow: 0 2px 0 #b9791a; }
+  .destem-kart button.aktif-btn.aktif { background: linear-gradient(180deg,#a8ffb0,#4dd070); color:#0a3010; box-shadow:0 2px 0 #1a6030; }
+  .destem-kart button:disabled { opacity: .5; }
+
+  /* Kart üstündeki mini Lv etiketi (savaş elinde) */
+  .kart-lv {
+    position: absolute; top: 4px; right: 6px;
+    background: #ffe27a; color: #3a2600;
+    font-weight: 900; font-size: 10px;
+    padding: 2px 5px; border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.4);
+  }
+  .kart { position: relative; }
+
   /* ---- Elmas & Level rozetleri ---- */
   .elmas-rozet {
     background: linear-gradient(180deg, #6ecff5, #2a7fb8);
@@ -592,9 +624,24 @@
     </div>
     <div class="menu-butonlar">
       <button class="buyuk" onclick="botEkraniAc()">🤖 Bot ile Maç</button>
+      <button class="buyuk" onclick="destemAc()">📋 Destem</button>
       <button class="buyuk" onclick="magazaAc()">🛒 Mağaza</button>
       <button class="buyuk" onclick="profilAc()">👤 Profilim</button>
       <button id="takim-degistir-btn" onclick="takimDegistir()" style="display:none;font-size:14px;padding:8px 16px;">🔄 Tarafı Değiştir</button>
+    </div>
+  </section>
+
+  <!-- EKRAN: Destem (kart aktif/pasif + level yükseltme) -->
+  <section id="ekran-destem" class="ekran">
+    <h2>📋 Destem</h2>
+    <div class="rozet-satiri merkez" style="justify-content:center;margin-bottom:8px;">
+      <div class="altin-rozet">🪙 <span id="destem-altin-yazi">0</span></div>
+      <div id="destem-taraf-etiketi" style="color:#ffe27a;font-weight:700;padding:6px 12px;">🔴 Kırmızı</div>
+    </div>
+    <p class="merkez" style="color:#cfc9ec;font-size:13px;">Kartlara tıklayıp destene ekle/çıkar (min <b>4</b>). "Yükselt" ile güç arttır (max Lv <b>5</b>).</p>
+    <div id="destem-liste"></div>
+    <div class="merkez" style="margin-top:14px;">
+      <button onclick="anaMenu()">← Menüye Dön</button>
     </div>
   </section>
 
@@ -756,8 +803,13 @@
   const FOTO_ANAHTARI   = "klanlarSavasiFoto";  // oyuncu avatar fotoğrafı (base64)
   const ELMAS_ANAHTARI  = "klanlarSavasiElmas"; // mağaza para birimi
   const XP_ANAHTARI     = "klanlarSavasiXP";    // level için deneyim
+  const KART_LV_ANAHTARI = "klanlarSavasiKartLv"; // kart level'ları (JSON)
+  const DESTE_ANAHTARI   = "klanlarSavasiDeste";  // aktif kart indeksleri (JSON)
   const MAX_LEVEL       = 20;
   const LEVEL_XP        = 300;                  // her level için gereken XP
+  const KART_MAX_LV     = 5;                    // kart max level
+  const KART_YUKSELT_UCRET = [0, 300, 800, 1800, 4000]; // Lv1→2, 2→3, 3→4, 4→5
+  const DESTE_MIN       = 4;                    // destede minimum kart sayısı
   const HEDIYE_ANAHTARI = "klanlarSavasiBaslangicHediyesi2"; // 50k altın verildi mi (v2)
   const KUPA_HEDEF      = 15000;
   const BASLANGIC_ALTIN = 50000;
@@ -889,6 +941,60 @@
     setTimeout(() => d.remove(), 2500);
   }
 
+  // ---- KART LEVEL (her kart 1..5, +1 güç per level) ----
+  function kartLevelleri() {
+    try { return JSON.parse(guvenliOku(KART_LV_ANAHTARI) || "{}"); }
+    catch (e) { return {}; }
+  }
+  function kartLevelYaz(o) { guvenliYaz(KART_LV_ANAHTARI, JSON.stringify(o)); }
+  function kartLevel(side, idx) {
+    const l = kartLevelleri();
+    return l[side + "_" + idx] || 1;
+  }
+  function kartLevelArttir(side, idx) {
+    const l = kartLevelleri();
+    const k = side + "_" + idx;
+    l[k] = Math.min(KART_MAX_LV, (l[k] || 1) + 1);
+    kartLevelYaz(l);
+  }
+  // Kartın efektif gücü (level bonusuyla)
+  function kartGuc(side, idx, kart) {
+    if (kart.iyilesme) return 0; // iyileşme kartları güç değil
+    return kart.guc + (kartLevel(side, idx) - 1); // her level +1 güç
+  }
+  function kartIyilesme(side, idx, kart) {
+    if (!kart.iyilesme) return 0;
+    return kart.iyilesme + (kartLevel(side, idx) - 1) * 2; // her level +2 iyileşme
+  }
+
+  // ---- DESTE (aktif kart indeksleri) ----
+  function tumDestelerObj() {
+    try { return JSON.parse(guvenliOku(DESTE_ANAHTARI) || "{}"); }
+    catch (e) { return {}; }
+  }
+  function desteYaz(o) { guvenliYaz(DESTE_ANAHTARI, JSON.stringify(o)); }
+  function aktifDesteIdx(side) {
+    const d = tumDestelerObj();
+    if (!Array.isArray(d[side])) {
+      const kartlar = side === "kirmizi" ? kirmiziKartlar : maviKartlar;
+      return kartlar.map((_, i) => i); // default: hepsi aktif
+    }
+    return d[side];
+  }
+  function desteToggle(side, idx) {
+    const d = tumDestelerObj();
+    if (!Array.isArray(d[side])) d[side] = aktifDesteIdx(side);
+    const yer = d[side].indexOf(idx);
+    if (yer >= 0) {
+      if (d[side].length <= DESTE_MIN) return "❌ Deste " + DESTE_MIN + " karttan az olamaz!";
+      d[side].splice(yer, 1);
+    } else {
+      d[side].push(idx);
+    }
+    desteYaz(d);
+    return null;
+  }
+
   // ---- MAĞAZA: 3 sandık × 20 ödül = 60 ödül ----
   const SANDIKLAR = [
     { id:"kucuk", ad:"Ahşap Sandık", emoji:"📦", fiyat:20,  not:"20 ödülden birini kazan" },
@@ -896,38 +1002,55 @@
     { id:"buyuk", ad:"Altın Sandık", emoji:"🏆", fiyat:100, not:"20 destansı ödül" },
   ];
 
-  // Her sandık için 20 ödül üret (toplam 60)
+  // 60 BENZERSİZ ÖDÜL — her sandıkta 20 farklı isim (tekrar yok)
+  const AHSAP_ODULLER = [
+    {ad:"Meşe Yaprağı",  emoji:"🍂"}, {ad:"Ceviz",         emoji:"🌰"},
+    {ad:"Ağaç Dalı",     emoji:"🪵"}, {ad:"Mantar",        emoji:"🍄"},
+    {ad:"Sincap",        emoji:"🐿️"}, {ad:"Uğur Böceği",   emoji:"🐞"},
+    {ad:"Papatya",       emoji:"🌼"}, {ad:"Kuş Tüyü",      emoji:"🪶"},
+    {ad:"Kelebek",       emoji:"🦋"}, {ad:"Böcek",         emoji:"🐛"},
+    {ad:"Balık",         emoji:"🐟"}, {ad:"Kar Tanesi",    emoji:"❄️"},
+    {ad:"Elma",          emoji:"🍎"}, {ad:"Bal Kavanozu",  emoji:"🍯"},
+    {ad:"Küçük Kese",    emoji:"👝"}, {ad:"Deniz Kabuğu",  emoji:"🐚"},
+    {ad:"Balmumu",       emoji:"🕯️"}, {ad:"Küçük Taş",     emoji:"🪨"},
+    {ad:"Yulaf",         emoji:"🌾"}, {ad:"Odun Kömürü",   emoji:"⚫"},
+  ];
+  const GUMUS_ODULLER = [
+    {ad:"Ay Taşı",       emoji:"🌙"}, {ad:"Gümüş Halka",   emoji:"💍"},
+    {ad:"Kristal Küre",  emoji:"🔮"}, {ad:"Sihirli Değnek",emoji:"🪄"},
+    {ad:"Anahtar",       emoji:"🗝️"}, {ad:"Kadeh",         emoji:"🏆"},
+    {ad:"Peri Tozu",     emoji:"✨"}, {ad:"Gümüş Ok",      emoji:"🏹"},
+    {ad:"Zümrüt",        emoji:"💚"}, {ad:"Safir",         emoji:"💙"},
+    {ad:"Miğfer",        emoji:"⛑️"}, {ad:"Kalkan",        emoji:"🛡️"},
+    {ad:"Fener",         emoji:"🏮"}, {ad:"Büyü Kitabı",   emoji:"📖"},
+    {ad:"Kum Saati",     emoji:"⏳"}, {ad:"İksir",         emoji:"⚗️"},
+    {ad:"Yıldız Taşı",   emoji:"🌟"}, {ad:"Baltacı",       emoji:"🪓"},
+    {ad:"Gümüş Kılıç",   emoji:"⚔️"}, {ad:"Kanatlı At",    emoji:"🦄"},
+  ];
+  const ALTIN_ODULLER = [
+    {ad:"Ejder Dişi",    emoji:"🐉"}, {ad:"Anka Kuşu",     emoji:"🦅"},
+    {ad:"Kutsal Kılıç",  emoji:"⚔️"}, {ad:"Kral Tacı",     emoji:"👑"},
+    {ad:"Altın Kupa",    emoji:"🏆"}, {ad:"Elmas Küpe",    emoji:"💎"},
+    {ad:"Işık Topu",     emoji:"⚡"}, {ad:"Ateş Kalbi",    emoji:"🔥"},
+    {ad:"Aslan Yelesi",  emoji:"🦁"}, {ad:"Kaplan Pençesi",emoji:"🐯"},
+    {ad:"Kartal Gözü",   emoji:"🦅"}, {ad:"Kutsal Zırh",   emoji:"🛡️"},
+    {ad:"Zaman Taşı",    emoji:"⏱️"}, {ad:"Yıldız Kılıcı", emoji:"🌟"},
+    {ad:"Kader Rünü",    emoji:"🔯"}, {ad:"Efsane Yayı",   emoji:"🏹"},
+    {ad:"Volkan Kalbi",  emoji:"🌋"}, {ad:"Gökkuşağı Kanadı",emoji:"🌈"},
+    {ad:"Kutsal Kase",   emoji:"🍷"}, {ad:"Güneş Madalyası",emoji:"🥇"},
+  ];
+
   function sandikOdulleri(tier) {
-    const oduller = [];
-    if (tier === "kucuk") {
-      for (let i = 1; i <= 20; i++) {
-        oduller.push({
-          ad:"Küçük Kart #" + i,
-          emoji:["🪙","💰","🎈","🧸","🍬","⭐","🔔","🎯","🪄","🍀"][i % 10],
-          altin: 20 + i * 8,
-          elmas: (i % 5 === 0) ? 3 : 0,
-        });
-      }
-    } else if (tier === "orta") {
-      for (let i = 1; i <= 20; i++) {
-        oduller.push({
-          ad:"Gümüş Kart #" + i,
-          emoji:["🥈","💠","🔮","🎁","🌟","🗝️","🎖️","🛡️","⚗️","🏵️"][i % 10],
-          altin: 150 + i * 25,
-          elmas: 5 + Math.floor(i / 3),
-        });
-      }
-    } else {
-      for (let i = 1; i <= 20; i++) {
-        oduller.push({
-          ad:"Altın Kart #" + i,
-          emoji:["🏆","👑","💎","🔥","⚡","🐉","🌈","🦁","🌋","🗡️"][i % 10],
-          altin: 600 + i * 60,
-          elmas: 20 + i * 2,
-        });
-      }
-    }
-    return oduller;
+    let havuz, altinTaban, altinCarpan, elmasTaban, elmasBonus;
+    if (tier === "kucuk")      { havuz = AHSAP_ODULLER; altinTaban = 20;  altinCarpan = 8;  elmasTaban = 0;  elmasBonus = 3; }
+    else if (tier === "orta")  { havuz = GUMUS_ODULLER; altinTaban = 150; altinCarpan = 25; elmasTaban = 5;  elmasBonus = 2; }
+    else                       { havuz = ALTIN_ODULLER; altinTaban = 600; altinCarpan = 60; elmasTaban = 20; elmasBonus = 2; }
+    return havuz.map((o, i) => ({
+      ad: o.ad,
+      emoji: o.emoji,
+      altin: altinTaban + (i + 1) * altinCarpan,
+      elmas: (tier === "kucuk") ? ((i % 5 === 4) ? 3 : 0) : (elmasTaban + Math.floor(i * elmasBonus / 3)),
+    }));
   }
 
   function magazaAc() {
@@ -991,6 +1114,72 @@
       if (!pahali) d.onclick = () => sandikAc(s);
       kutu.appendChild(d);
     });
+  }
+
+  // ---- DESTEM EKRANI (kart aktif/pasif + level yükseltme) ----
+  function destemAc() {
+    const t = guvenliOku(TAKIM_ANAHTARI);
+    if (t !== "kirmizi" && t !== "mavi") {
+      ekranGoster("ekran-takim");
+      return;
+    }
+    oyun.takim = t;
+    destemCiz();
+    ekranGoster("ekran-destem");
+  }
+
+  function destemCiz() {
+    const side = oyun.takim;
+    const kartlar = side === "kirmizi" ? kirmiziKartlar : maviKartlar;
+    const aktifSet = new Set(aktifDesteIdx(side));
+    document.getElementById("destem-altin-yazi").textContent = toplamAltin();
+    document.getElementById("destem-taraf-etiketi").textContent =
+      side === "kirmizi" ? "🔴 Kırmızı Taraf" : "🔵 Mavi Taraf";
+    const liste = document.getElementById("destem-liste");
+    liste.innerHTML = "";
+    kartlar.forEach((kart, i) => {
+      const aktif = aktifSet.has(i);
+      const lv = kartLevel(side, i);
+      const gucYazi = kart.iyilesme
+        ? "💚 +" + kartIyilesme(side, i, kart)
+        : "⚡ " + kartGuc(side, i, kart);
+      const ucret = KART_YUKSELT_UCRET[lv] || 0;
+      const enUst = lv >= KART_MAX_LV;
+      const yeterAltin = toplamAltin() >= ucret;
+      const div = document.createElement("div");
+      div.className = "destem-kart " + (aktif ? "aktif" : "pasif");
+      div.innerHTML =
+        '<div class="lv-yazi">Lv ' + lv + '/' + KART_MAX_LV + '</div>' +
+        '<div class="em">' + kart.emoji + '</div>' +
+        '<div class="ad">' + kart.isim + '</div>' +
+        '<div class="guc-yazi">' + gucYazi + '</div>' +
+        '<div class="btn-satir">' +
+          '<button class="aktif-btn ' + (aktif ? "aktif" : "") + '" onclick="destemToggle(' + i + ')">' +
+            (aktif ? '✅ Destede' : '➕ Ekle') +
+          '</button>' +
+          (enUst
+            ? '<button disabled>🌟 MAX</button>'
+            : '<button ' + (yeterAltin ? '' : 'disabled ') + 'onclick="kartYukselt(' + i + ')">🔥 Yükselt (🪙' + ucret + ')</button>'
+          ) +
+        '</div>';
+      liste.appendChild(div);
+    });
+  }
+
+  function destemToggle(i) {
+    const hata = desteToggle(oyun.takim, i);
+    if (hata) alert(hata);
+    destemCiz();
+  }
+
+  function kartYukselt(i) {
+    const lv = kartLevel(oyun.takim, i);
+    if (lv >= KART_MAX_LV) return;
+    const ucret = KART_YUKSELT_UCRET[lv];
+    if (toplamAltin() < ucret) { alert("Yeterli altının yok!"); return; }
+    altinHarca(ucret);
+    kartLevelArttir(oyun.takim, i);
+    destemCiz();
   }
 
   function profilKaydet() {
@@ -1162,26 +1351,29 @@
   // ---- KARTLARI DİZ ----
   function kartlariDiz() {
     const kartlar = oyun.takim === "kirmizi" ? kirmiziKartlar : maviKartlar;
+    const aktifIdx = aktifDesteIdx(oyun.takim); // sadece destede olan kartlar
     const el = document.getElementById("el");
     el.innerHTML = "";
     const altinim = toplamAltin();
     kartlar.forEach((kart, sira) => {
+      if (aktifIdx.indexOf(sira) < 0) return; // pasif kartları atla
+      const lv = kartLevel(oyun.takim, sira);
       const rutbeYazi = { siradan:"Sıradan", ender:"Ender", destansi:"Destansı" }[kart.rutbe];
       const guclu = kart.iyilesme
-        ? "İyileştir +" + kart.iyilesme
-        : "Güç " + (kart.guc + oyun.gucBonus);
+        ? "İyileştir +" + kartIyilesme(oyun.takim, sira, kart)
+        : "Güç " + (kartGuc(oyun.takim, sira, kart) + oyun.gucBonus);
       const maliyet = kartMaliyet(kart);
       const yetersiz = altinim < maliyet;
       const div = document.createElement("div");
       div.className = "kart " + kart.rutbe + (yetersiz ? " yetersiz" : "");
       div.innerHTML =
+        '<div class="kart-lv">Lv' + lv + '</div>' +
         '<div class="emoji">' + kart.emoji + '</div>' +
         '<div class="isim">' + kart.isim + '</div>' +
         '<div class="guc">' + guclu + '</div>' +
         '<div class="rutbe ' + kart.rutbe + '">' + rutbeYazi + '</div>' +
         '<div class="kart-maliyet">🪙 ' + maliyet + '</div>';
       div.onclick = () => kartOyna(sira);
-      // Sürükle-bırak: kartı savaş sahnesine sürükleyip bırakınca da oynanır
       div.draggable = true;
       div.ondragstart = (ev) => {
         div.classList.add("suruklenen");
@@ -1218,9 +1410,10 @@
 
     // İyileşme kartı = koşmaz, direkt iyileştirir, düşman ayrıca saldırır
     if (benimKart.iyilesme) {
-      oyun.benimCan = Math.min(oyun.benimMax, oyun.benimCan + benimKart.iyilesme);
-      gunlugeYaz("💚 " + benimKart.isim + " tarafını " + benimKart.iyilesme + " iyileştirdi!");
-      iyilesmeEfekti("benim-satiri", benimKart.iyilesme);
+      const iyi = kartIyilesme(oyun.takim, sira, benimKart);
+      oyun.benimCan = Math.min(oyun.benimMax, oyun.benimCan + iyi);
+      gunlugeYaz("💚 " + benimKart.isim + " tarafını " + iyi + " iyileştirdi! (Lv" + kartLevel(oyun.takim, sira) + ")");
+      iyilesmeEfekti("benim-satiri", iyi);
       canlariGuncelle();
       kaydet();
       setTimeout(dusmanSaldir, 900);
@@ -1235,10 +1428,11 @@
     const enGuclu = dusmanSaldiriKartlari.reduce((a, b) => (b.guc > a.guc ? b : a));
     const dusmanKart = Math.random() < 0.5 ? enGuclu : rastgele(dusmanSaldiriKartlari);
 
-    // Güçleri kritiklerle hesapla
+    // Güçleri kritiklerle hesapla (senin kartın level bonusu alır)
     const benimKritik  = Math.random() < 0.25;
     const dusmanKritik = Math.random() < 0.25;
-    const benimGuc  = (benimKart.guc + oyun.gucBonus) * (benimKritik ? 2 : 1);
+    const benimEsasGuc = kartGuc(oyun.takim, sira, benimKart) + oyun.gucBonus;
+    const benimGuc  = benimEsasGuc * (benimKritik ? 2 : 1);
     const dusmanGuc = dusmanKart.guc * (dusmanKritik ? 2 : 1);
 
     // İki asker sahneye çıksın ve ortaya koşsun
@@ -1743,13 +1937,18 @@
       guvenliYaz(HEDIYE_ANAHTARI, "1");
     }
 
-    // İlk açılışta isim yoksa profil ekranını aç
+    // İsim yoksa varsayılan "Oyuncu" olarak sakla — profil ekranını otomatik açma
     if (!guvenliOku(ISIM_ANAHTARI)) {
-      isimGoster();
-      profilAc();
-      return;
+      guvenliYaz(ISIM_ANAHTARI, "Oyuncu");
     }
     isimGoster();
+
+    // 40k altın iadesi (bir kez)
+    const IADE_ANAHTARI = "klanlarSavasiIade40k";
+    if (!guvenliOku(IADE_ANAHTARI)) {
+      altinYaz(toplamAltin() + 40000);
+      guvenliYaz(IADE_ANAHTARI, "1");
+    }
 
     // Takım seçilmişse "Tarafı değiştir" butonu görünsün
     const takimBtn = document.getElementById("takim-degistir-btn");
