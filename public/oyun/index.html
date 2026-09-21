@@ -440,6 +440,27 @@
   }
 
   .buyuk-emoji-orta { font-size: 64px; }
+
+  /* ---- ANA MENÜ: Amazon ormanı arka planı ---- */
+  #ekran-menu.aktif {
+    position: relative;
+    background:
+      linear-gradient(180deg, rgba(10,30,15,.35), rgba(5,20,10,.85)),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 500' preserveAspectRatio='xMidYMid slice'><defs><radialGradient id='sun' cx='50%25' cy='15%25'><stop offset='0' stop-color='%23fff3a8'/><stop offset='.5' stop-color='%23f0d060' stop-opacity='.4'/><stop offset='1' stop-color='%23f0d060' stop-opacity='0'/></radialGradient><linearGradient id='sky' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='%23a8d97a'/><stop offset='.5' stop-color='%234e8a3d'/><stop offset='1' stop-color='%231e4a1a'/></linearGradient></defs><rect width='400' height='500' fill='url(%23sky)'/><circle cx='200' cy='80' r='120' fill='url(%23sun)'/><g fill='%232d5f2a' opacity='.85'><ellipse cx='40' cy='120' rx='70' ry='90'/><ellipse cx='90' cy='90' rx='55' ry='70'/><ellipse cx='310' cy='130' rx='75' ry='95'/><ellipse cx='370' cy='100' rx='50' ry='65'/></g><g fill='%231d4a1a'><ellipse cx='20' cy='250' rx='90' ry='130'/><ellipse cx='380' cy='260' rx='95' ry='140'/><ellipse cx='80' cy='340' rx='75' ry='100'/><ellipse cx='330' cy='360' rx='80' ry='110'/></g><g fill='%23133a13'><ellipse cx='0' cy='450' rx='140' ry='120'/><ellipse cx='400' cy='460' rx='150' ry='130'/><ellipse cx='200' cy='480' rx='180' ry='80'/></g><g stroke='%234a2f1a' stroke-width='6' fill='none' opacity='.7'><path d='M60 500 Q65 400 55 300 Q50 220 62 140'/><path d='M340 500 Q335 380 345 280 Q350 200 340 130'/><path d='M180 500 Q182 450 175 400'/><path d='M225 500 Q220 460 228 420'/></g><g fill='%2373b840' opacity='.8'><path d='M55 145 Q30 130 20 100 Q40 115 55 145 Z'/><path d='M62 145 Q80 130 95 105 Q80 130 62 145 Z'/><path d='M340 130 Q315 110 305 85 Q325 105 340 130 Z'/><path d='M348 130 Q365 110 375 85 Q365 110 348 130 Z'/></g><g fill='%23ffd94a'><circle cx='150' cy='60' r='2'/><circle cx='250' cy='90' r='2.5'/><circle cx='200' cy='40' r='2'/><circle cx='170' cy='110' r='1.5'/><circle cx='230' cy='70' r='1.5'/></g></svg>") center / cover no-repeat;
+    padding: 26px 20px;
+    border-radius: 14px;
+    box-shadow: inset 0 0 60px rgba(0,0,0,.55);
+    overflow: hidden;
+  }
+  #ekran-menu.aktif h1 {
+    color: #ffe27a;
+    text-shadow: 0 2px 0 #3a2600, 0 0 25px rgba(0,0,0,.8);
+  }
+  #ekran-menu.aktif p {
+    color: #eaf7d5;
+    text-shadow: 0 1px 3px rgba(0,0,0,.9);
+  }
+  #ekran-menu.aktif .rozet-satiri { justify-content: center; }
 </style>
 
 
@@ -449,15 +470,31 @@
   <!-- EKRAN 0: Ana Menü -->
   <section id="ekran-menu" class="ekran aktif merkez">
     <h1>⚔️ Klanlar Savaşı</h1>
-    <p>İki klan, üç arena, tek zafer.<br>Kartın askerin senin — düşmanın askeriyle savaş, kazanan krala ulaşır!</p>
+    <p>İki taraf, üç arena, tek zafer.<br>Kartın askerin senin — düşmanın askeriyle savaş, kazanan karşı tarafa ulaşır!</p>
     <div class="rozet-satiri">
       <div class="altin-rozet" id="menu-altin">🪙 <span id="menu-altin-yazi">0</span></div>
       <div class="kupa-rozet" id="menu-kupa">🏆 <span id="menu-kupa-yazi">0</span> / 15000</div>
     </div>
     <div class="menu-butonlar">
-      <button class="buyuk" onclick="yeniOyun()">🆕 Yeni Oyun</button>
+      <button class="buyuk" onclick="yeniOyun()">🆕 Yeni Oyun (Sefer)</button>
       <button class="buyuk" id="devam-btn" onclick="devamEt()">▶️ Devam Et</button>
-      <button id="takim-degistir-btn" onclick="takimDegistir()" style="display:none;font-size:14px;padding:8px 16px;">🔄 Takımı Değiştir</button>
+      <button class="buyuk" onclick="botEkraniAc()">🤖 Bot ile Maç</button>
+      <button id="takim-degistir-btn" onclick="takimDegistir()" style="display:none;font-size:14px;padding:8px 16px;">🔄 Tarafı Değiştir</button>
+    </div>
+  </section>
+
+  <!-- EKRAN: Bot eşleşme -->
+  <section id="ekran-bot" class="ekran">
+    <h2>🤖 Bot ile Maç</h2>
+    <p class="merkez">Kupa seviyene göre bir rakip seçildi. Kazanırsan <b>+50 kupa</b> + <b>+100 altın</b>, kaybedersen <b>-20 kupa</b>.</p>
+    <div id="bot-karti" class="secim" style="max-width:340px;margin:10px auto;cursor:default;">
+      <div class="buyuk-emoji" id="bot-emoji">🐣</div>
+      <h3 id="bot-ad" style="color:#ffe27a">—</h3>
+      <p id="bot-bilgi">—</p>
+    </div>
+    <div class="merkez" style="margin-top:14px;">
+      <button class="buyuk" onclick="botIleMac()">⚔️ Savaşa Başla</button>
+      <button onclick="anaMenu()" style="display:block;margin:14px auto 0;">← Menüye Dön</button>
     </div>
   </section>
 
@@ -465,13 +502,13 @@
   <section id="ekran-hikaye" class="ekran">
     <h1>⚔️ Klanlar Savaşı</h1>
     <p>
-      Çok eskiden <b>Kırmızı</b> ve <b>Mavi</b> klanlar en yakın dostlardı.
+      Çok eskiden <b>Kırmızı</b> ve <b>Mavi</b> taraflar en yakın dostlardı.
       Ama büyük bir kavga çıktı ve dostluk bozuldu...
     </p>
     <p>
-      Kırmızı klanın başında <b>çok güçlü Karanlık Kral Alaz</b>,
-      Mavi klanın başında ise <b>çok zeki Bilge Kral Aras</b> var.
-      Seçtiğin klanla <b>3 arenayı</b> sırayla geçip krallığı kazanacaksın!
+      <b>Kırmızı taraf</b> çok güçlü — sert vuran saldırı kartları var.
+      <b>Mavi taraf</b> ise çok zeki — iyileştirme kartı var.
+      Seçtiğin tarafla <b>3 arenayı</b> sırayla geçip zaferi kazanacaksın!
       <br><b>Sen hangi tarafta savaşacaksın?</b>
     </p>
     <div class="merkez">
@@ -479,19 +516,19 @@
     </div>
   </section>
 
-  <!-- EKRAN 2: Takım seçimi -->
+  <!-- EKRAN 2: Taraf seçimi -->
   <section id="ekran-takim" class="ekran">
-    <h2>Klanını Seç</h2>
+    <h2>Tarafını Seç</h2>
     <div class="secimler">
       <div class="secim kirmizi" onclick="takimSec('kirmizi')">
-        <div class="buyuk-emoji">👹</div>
-        <h3 style="color:#ff8a7a">Kırmızı Klan</h3>
-        <p>Karanlık Kral Alaz · Çok Güçlü<br>Sert vuran saldırı kartları.</p>
+        <div class="buyuk-emoji">🔴</div>
+        <h3 style="color:#ff8a7a">Kırmızı Taraf</h3>
+        <p>Çok Güçlü<br>Sert vuran saldırı kartları başta senin olur.</p>
       </div>
       <div class="secim mavi" onclick="takimSec('mavi')">
-        <div class="buyuk-emoji">🧙</div>
-        <h3 style="color:#6facff">Mavi Klan</h3>
-        <p>Bilge Kral Aras · Çok Zeki<br>İyileştirme kartı var.</p>
+        <div class="buyuk-emoji">🔵</div>
+        <h3 style="color:#6facff">Mavi Taraf</h3>
+        <p>Çok Zeki<br>İyileştirme kartı dahil mavi destesi senin olur.</p>
       </div>
     </div>
   </section>
@@ -508,22 +545,22 @@
     <div class="arena-bilgi" id="arena-yazi"></div>
 
     <div id="sahne" class="sahne">
-      <!-- Düşman kral (üstte) -->
+      <!-- Düşman taraf (üstte) -->
       <div class="taraf" id="dusman-satiri">
         <div class="can-bar">
           <div class="can-cubuk"><div id="dusman-can" class="can-dolu"></div></div>
           <span id="dusman-can-yazi" class="can-yazi">30 / 30</span>
         </div>
-        <div class="isim" id="dusman-isim">Düşman Kral</div>
-        <div class="karakter" id="dusman-karakter">👑</div>
+        <div class="isim" id="dusman-isim">Düşman Taraf</div>
+        <div class="karakter" id="dusman-karakter">🏳️</div>
       </div>
 
       <div class="vs-isaret">⚔️ VS ⚔️</div>
 
-      <!-- Senin kralın (altta) -->
+      <!-- Senin tarafın (altta) -->
       <div class="taraf" id="benim-satiri">
-        <div class="karakter" id="benim-karakter">👑</div>
-        <div class="isim" id="benim-isim">Senin Kralın</div>
+        <div class="karakter" id="benim-karakter">🏳️</div>
+        <div class="isim" id="benim-isim">Senin Tarafın</div>
         <div class="can-bar">
           <div class="can-cubuk"><div id="benim-can" class="can-dolu"></div></div>
           <span id="benim-can-yazi" class="can-yazi">30 / 30</span>
@@ -567,15 +604,28 @@
     kilitli: false,
     durum: "menu",     // "menu" / "savas" / "ara"
     altin: 0,          // bu seferde toplanmış altın
+    mod: "sefer",      // "sefer" (kampanya) veya "bot" (tek maç)
+    aktifBot: null,    // bot modunda karşındaki bot
   };
 
   const KAYIT_ANAHTARI  = "klanlarSavasi";
   const ALTIN_ANAHTARI  = "klanlarSavasiAltin"; // toplam altın (oyun bitse de kalır)
   const KUPA_ANAHTARI   = "klanlarSavasiKupa";  // toplam kupa (hedef 15000)
   const TAKIM_ANAHTARI  = "klanlarSavasiTakim"; // seçtiğin takım kalıcı
-  const HEDIYE_ANAHTARI = "klanlarSavasiBaslangicHediyesi"; // 10k altın verildi mi
+  const HEDIYE_ANAHTARI = "klanlarSavasiBaslangicHediyesi2"; // 50k altın verildi mi (v2)
   const KUPA_HEDEF      = 15000;
-  const BASLANGIC_ALTIN = 10000;
+  const BASLANGIC_ALTIN = 50000;
+
+  // ---- GÜVENLİ localStorage (bazı tarayıcılarda kapalı olabilir; çökmesin) ----
+  function guvenliOku(anahtar) {
+    try { return localStorage.getItem(anahtar); } catch (e) { return null; }
+  }
+  function guvenliYaz(anahtar, deger) {
+    try { localStorage.setItem(anahtar, deger); } catch (e) {}
+  }
+  function guvenliSil(anahtar) {
+    try { localStorage.removeItem(anahtar); } catch (e) {}
+  }
 
   // ---- ARENALAR ---- (canlar büyük -> savaşlar uzun ve heyecanlı)
   const arenalar = [
@@ -584,14 +634,14 @@
     { ad:"Kızgın Çöl",    emoji:"🏜️", dusmanCan:72, benimBonusCan:0,  gucBonus:2,
       not:"Sıcak seni öfkelendirir: kartların +2 güç." },
     { ad:"Volkan Kalesi", emoji:"🌋", dusmanCan:92, benimBonusCan:0,  gucBonus:0,
-      not:"FİNAL! Düşman kral burada çok güçlü." },
+      not:"FİNAL! Düşman burada çok güçlü." },
   ];
 
-  // ---- KRAL İSİMLERİ ve KARAKTERLERİ ----
-  const KIRMIZI_KRAL = "Karanlık Kral Alaz";
-  const MAVI_KRAL    = "Bilge Kral Aras";
-  const KIRMIZI_YUZ  = "👹";  // güçlü/karanlık kral
-  const MAVI_YUZ     = "🧙";  // zeki/bilge kral
+  // ---- TARAF İSİMLERİ ve SİMGELERİ ----
+  const KIRMIZI_AD  = "Kırmızı Taraf";
+  const MAVI_AD     = "Mavi Taraf";
+  const KIRMIZI_YUZ = "🔴";  // kırmızı taraf simgesi
+  const MAVI_YUZ    = "🔵";  // mavi taraf simgesi
 
   // ---- KARTLAR (her takım 12 kart — 4 yeni eklendi) ----
   const kirmiziKartlar = [
@@ -644,7 +694,9 @@
   function takimSec(takim) {
     oyun.takim = takim;
     oyun.arenaSira = 0;
-    try { localStorage.setItem(TAKIM_ANAHTARI, takim); } catch (e) {}
+    oyun.mod = "sefer";
+    oyun.aktifBot = null;
+    guvenliYaz(TAKIM_ANAHTARI, takim);
     arenayiKur();
     ekranGoster("ekran-savas");
   }
@@ -680,13 +732,17 @@
 
     // İsimler
     document.getElementById("benim-isim").textContent =
-      benKirmizi ? KIRMIZI_KRAL + " (sen)" : MAVI_KRAL + " (sen)";
-    document.getElementById("dusman-isim").textContent =
-      benKirmizi ? MAVI_KRAL : KIRMIZI_KRAL;
-
-    // Kral karakterleri (emoji)
+      benKirmizi ? KIRMIZI_AD + " (sen)" : MAVI_AD + " (sen)";
     document.getElementById("benim-karakter").textContent  = benKirmizi ? KIRMIZI_YUZ : MAVI_YUZ;
-    document.getElementById("dusman-karakter").textContent = benKirmizi ? MAVI_YUZ : KIRMIZI_YUZ;
+
+    // Düşman: bot modundaysa botun ismi/emojisi, değilse karşı taraf
+    if (oyun.mod === "bot" && oyun.aktifBot) {
+      document.getElementById("dusman-isim").textContent = oyun.aktifBot.ad + " (🏆 " + oyun.aktifBot.kupaMin + "+)";
+      document.getElementById("dusman-karakter").textContent = oyun.aktifBot.emoji;
+    } else {
+      document.getElementById("dusman-isim").textContent = benKirmizi ? MAVI_AD : KIRMIZI_AD;
+      document.getElementById("dusman-karakter").textContent = benKirmizi ? MAVI_YUZ : KIRMIZI_YUZ;
+    }
 
     // Can bar renkleri
     const benCan = document.getElementById("benim-can");
@@ -699,10 +755,15 @@
     // Arena arka planı + bilgi yazısı
     const bgler = ["arena-kar", "arena-col", "arena-volkan"];
     document.getElementById("sahne").className = "sahne " + bgler[oyun.arenaSira];
-    document.getElementById("arena-yazi").textContent =
-      arena.emoji + " " + arena.ad + " — " + arena.not;
-
-    haritayiCiz();
+    if (oyun.mod === "bot" && oyun.aktifBot) {
+      document.getElementById("arena-yazi").textContent =
+        "🤖 " + oyun.aktifBot.ad + " — " + oyun.aktifBot.not;
+      document.getElementById("harita").innerHTML = ""; // bot modunda sefer haritası yok
+    } else {
+      document.getElementById("arena-yazi").textContent =
+        arena.emoji + " " + arena.ad + " — " + arena.not;
+      haritayiCiz();
+    }
     canlariGuncelle();
     kartlariDiz();
     siraGoster("benim");         // savaş başlarken sıra sende
@@ -785,7 +846,7 @@
     // İyileşme kartı = koşmaz, direkt iyileştirir, düşman ayrıca saldırır
     if (benimKart.iyilesme) {
       oyun.benimCan = Math.min(oyun.benimMax, oyun.benimCan + benimKart.iyilesme);
-      gunlugeYaz("💚 " + benimKart.isim + " kralını " + benimKart.iyilesme + " iyileştirdi!");
+      gunlugeYaz("💚 " + benimKart.isim + " tarafını " + benimKart.iyilesme + " iyileştirdi!");
       iyilesmeEfekti("benim-satiri", benimKart.iyilesme);
       canlariGuncelle();
       kaydet();
@@ -793,8 +854,10 @@
       return;
     }
 
-    // DÜŞMAN da aynı anda kartını çıkarır
-    const dusmanKartlar = oyun.takim === "kirmizi" ? maviKartlar : kirmiziKartlar;
+    // DÜŞMAN da aynı anda kartını çıkarır (bot modunda botun destesi)
+    const dusmanKartlar = (oyun.mod === "bot" && oyun.aktifBot)
+      ? botDeste(oyun.aktifBot)
+      : (oyun.takim === "kirmizi" ? maviKartlar : kirmiziKartlar);
     const dusmanSaldiriKartlari = dusmanKartlar.filter(k => !k.iyilesme);
     const enGuclu = dusmanSaldiriKartlari.reduce((a, b) => (b.guc > a.guc ? b : a));
     const dusmanKart = Math.random() < 0.5 ? enGuclu : rastgele(dusmanSaldiriKartlari);
@@ -828,17 +891,17 @@
     // Adım 2 (2200ms sonra): Kavga biter — kim kazandı?
     setTimeout(() => {
       const fark = Math.abs(benimGuc - dusmanGuc);
-      const kralHasari = Math.max(1, fark); // en az 1 hasar
+      const tarafHasari = Math.max(1, fark); // en az 1 hasar
       if (benimGuc >= dusmanGuc) {
         // BEN KAZANDIM! Düşman asker öldü, benimki krala koşar
         dusmanAsker.classList.remove("dovus-alt"); dusmanAsker.classList.add("olum");
         setTimeout(() => dusmanAsker.remove(), 500);
         benimAsker.classList.remove("dovus"); benimAsker.classList.add("zafer-yukari");
-        oyun.dusmanCan = Math.max(0, oyun.dusmanCan - kralHasari);
-        gunlugeYaz("🎉 " + benimKart.isim + " kazandı! Düşman krala " + kralHasari + " hasar.");
+        oyun.dusmanCan = Math.max(0, oyun.dusmanCan - tarafHasari);
+        gunlugeYaz("🎉 " + benimKart.isim + " kazandı! Düşman tarafa" + tarafHasari + " hasar.");
         altinEkle(benimKritik ? 5 : 1);
         setTimeout(() => {
-          vurusEfekti("dusman-satiri", kralHasari, benimKritik);
+          vurusEfekti("dusman-satiri", tarafHasari, benimKritik);
           canlariGuncelle();
           benimAsker.remove();
           if (oyun.dusmanCan <= 0) return arenaKazanildi();
@@ -851,10 +914,10 @@
         benimAsker.classList.remove("dovus");   benimAsker.classList.add("olum");
         setTimeout(() => benimAsker.remove(), 500);
         dusmanAsker.classList.remove("dovus-alt"); dusmanAsker.classList.add("zafer-asagi");
-        oyun.benimCan = Math.max(0, oyun.benimCan - kralHasari);
-        gunlugeYaz("😢 " + dusmanKart.isim + " kazandı! Sana " + kralHasari + " hasar.");
+        oyun.benimCan = Math.max(0, oyun.benimCan - tarafHasari);
+        gunlugeYaz("😢 " + dusmanKart.isim + " kazandı! Sana " + tarafHasari + " hasar.");
         setTimeout(() => {
-          vurusEfekti("benim-satiri", kralHasari, dusmanKritik);
+          vurusEfekti("benim-satiri", tarafHasari, dusmanKritik);
           canlariGuncelle();
           dusmanAsker.remove();
           if (oyun.benimCan <= 0) return oyunuBitir(false);
@@ -891,7 +954,9 @@
 
   // ---- AKILLI DÜŞMAN ----
   function dusmanSaldir() {
-    const kartlar = oyun.takim === "kirmizi" ? maviKartlar : kirmiziKartlar;
+    const kartlar = (oyun.mod === "bot" && oyun.aktifBot)
+      ? botDeste(oyun.aktifBot)
+      : (oyun.takim === "kirmizi" ? maviKartlar : kirmiziKartlar);
     const iyilesmeKart = kartlar.find(k => k.iyilesme);
 
     if (iyilesmeKart && oyun.dusmanCan < oyun.dusmanMax / 2 && Math.random() < 0.7) {
@@ -929,8 +994,25 @@
 
   // ---- ARENA KAZANILDI ----
   function arenaKazanildi() {
-    altinEkle(50); // arena zaferi bonusu
     oyun.kilitli = false; // BUG FIX: arena bitince kilidi aç
+
+    // Bot modunda: kupa+altın ver, menüye dön
+    if (oyun.mod === "bot" && oyun.aktifBot) {
+      const bot = oyun.aktifBot;
+      kupaEkle(50);
+      altinEkle(100);
+      gunlugeYaz("🏆 " + bot.ad + "'ı yendin! +50 kupa, +100 altın.");
+      document.getElementById("sonuc-emoji").textContent = "🏆";
+      document.getElementById("sonuc-baslik").textContent = "BOT MAÇI KAZANILDI!";
+      document.getElementById("sonuc-yazi").textContent =
+        bot.emoji + " " + bot.ad + " yenildi! +50 kupa, +100 altın kazandın.";
+      oyun.mod = "sefer"; oyun.aktifBot = null;
+      oyun.durum = "menu";
+      ekranGoster("ekran-sonuc");
+      return;
+    }
+
+    altinEkle(50); // arena zaferi bonusu
     const sonMu = oyun.arenaSira >= arenalar.length - 1;
     if (sonMu) {
       altinEkle(200);
@@ -940,7 +1022,7 @@
       kaydet();
       const sonraki = arenalar[oyun.arenaSira + 1];
       document.getElementById("ara-yazi").textContent =
-        "🪙 +50 altın! Sıradaki arena: " + sonraki.emoji + " " + sonraki.ad + ". Kralın tam cana döndü!";
+        "🪙 +50 altın! Sıradaki arena: " + sonraki.emoji + " " + sonraki.ad + ". Tarafın tam cana döndü!";
       ekranGoster("ekran-ara");
     }
   }
@@ -1062,12 +1144,27 @@
 
   // ---- OYUNU BİTİR ----
   function oyunuBitir(kazandinMi) {
+    // Bot maçında kaybettin → kupa düş, menüye dön
+    if (oyun.mod === "bot" && oyun.aktifBot) {
+      const bot = oyun.aktifBot;
+      kupaCikar(20);
+      const kupa = toplamKupa();
+      document.getElementById("sonuc-emoji").textContent = "💀";
+      document.getElementById("sonuc-baslik").textContent = "Kaybettin";
+      document.getElementById("sonuc-yazi").innerHTML =
+        bot.emoji + " " + bot.ad + " seni yendi. <b>-20 kupa</b><br>Toplam: <b>" + kupa + "</b> kupa";
+      oyun.mod = "sefer"; oyun.aktifBot = null;
+      oyun.durum = "menu";
+      ekranGoster("ekran-sonuc");
+      return;
+    }
+
     kayitSil();
     oyun.durum = "menu";
     if (kazandinMi) kupaEkle(10); // Zafer: +10 kupa!
     const kupa = toplamKupa();
     document.getElementById("sonuc-emoji").textContent = kazandinMi ? "🏆" : "💀";
-    document.getElementById("sonuc-baslik").textContent = kazandinMi ? "KRALLIK SENİN!" : "Kaybettin";
+    document.getElementById("sonuc-baslik").textContent = kazandinMi ? "ZAFER SENİN!" : "Kaybettin";
     document.getElementById("sonuc-yazi").innerHTML =
       kazandinMi
         ? "3 arenayı da geçtin! <b>+10 kupa</b> kazandın 🏆<br>Toplam: <b>" + kupa + " / " + KUPA_HEDEF + "</b> kupa" +
@@ -1099,7 +1196,7 @@
   // ---- ALTIN SİSTEMİ ----
   // Toplam altını localStorage'da tutuyoruz (oyun bitse de kalır).
   function toplamAltin() {
-    return parseInt(localStorage.getItem(ALTIN_ANAHTARI) || "0", 10);
+    return parseInt(guvenliOku(ALTIN_ANAHTARI) || "0", 10);
   }
   function altinYaz(x) { try { localStorage.setItem(ALTIN_ANAHTARI, String(x)); } catch (e) {} }
   function altinHarca(miktar) {
@@ -1127,10 +1224,15 @@
   }
 
   // ---- KUPA SİSTEMİ ----
-  function toplamKupa() { return parseInt(localStorage.getItem(KUPA_ANAHTARI) || "0", 10); }
-  function kupaYaz(x) { try { localStorage.setItem(KUPA_ANAHTARI, String(x)); } catch (e) {} }
+  function toplamKupa() { return parseInt(guvenliOku(KUPA_ANAHTARI) || "0", 10); }
+  function kupaYaz(x) { guvenliYaz(KUPA_ANAHTARI, String(x)); }
   function kupaEkle(miktar) {
     const yeni = Math.min(KUPA_HEDEF, toplamKupa() + miktar);
+    kupaYaz(yeni);
+    kupaGoster();
+  }
+  function kupaCikar(miktar) {
+    const yeni = Math.max(0, toplamKupa() - miktar);
     kupaYaz(yeni);
     kupaGoster();
   }
@@ -1140,12 +1242,83 @@
     const s = document.getElementById("savas-kupa-yazi"); if (s) s.textContent = t;
   }
 
+  // ---- BOT LİSTESİ (kupa seviyesine göre eşleştirilir) ----
+  const BOTLAR = [
+    { ad:"Acemi Ali",     emoji:"🐣", kupaMin:0,     dusmanCan:45,  destesi:"karisik-zayif",
+      not:"Yeni başlayan biri. Kolay yenersin." },
+    { ad:"Nişancı Sena",  emoji:"🎯", kupaMin:500,   dusmanCan:60,  destesi:"karisik",
+      not:"Karışık deste, orta seviye." },
+    { ad:"Büyücü Zeynep", emoji:"🧙", kupaMin:2000,  dusmanCan:75,  destesi:"iyilesme-agir",
+      not:"İyileşme kartı kullanıyor, uzun savaşlar seviyor." },
+    { ad:"Ejder Ege",     emoji:"🐉", kupaMin:5000,  dusmanCan:90,  destesi:"destansi-agir",
+      not:"Destansı kart ağırlıklı, dikkat!" },
+    { ad:"Şampiyon Emre", emoji:"👑", kupaMin:10000, dusmanCan:110, destesi:"en-guclu",
+      not:"En güçlü rakip. Kolay değil!" },
+  ];
+
+  function botBul() {
+    const k = toplamKupa();
+    let uygun = BOTLAR.filter(b => b.kupaMin <= k);
+    if (uygun.length === 0) uygun = [BOTLAR[0]];
+    return uygun[uygun.length - 1];
+  }
+
+  function botDeste(bot) {
+    const hepsi = kirmiziKartlar.concat(maviKartlar);
+    const siradan  = hepsi.filter(k => k.rutbe === "siradan");
+    const ender    = hepsi.filter(k => k.rutbe === "ender");
+    const destansi = hepsi.filter(k => k.rutbe === "destansi");
+    switch (bot.destesi) {
+      case "karisik-zayif":  return siradan;
+      case "karisik":        return siradan.concat(ender);
+      case "iyilesme-agir":  return ender.concat(siradan.slice(0, 4));
+      case "destansi-agir":  return destansi.concat(ender.slice(0, 4));
+      case "en-guclu":       return destansi.concat(ender);
+      default:               return hepsi;
+    }
+  }
+
+  function botEkraniAc() {
+    const t = guvenliOku(TAKIM_ANAHTARI);
+    if (t !== "kirmizi" && t !== "mavi") {
+      // Önce taraf seçtirmemiz gerek
+      alert("Önce bir taraf seç! (Yeni Oyun ile başla)");
+      ekranGoster("ekran-hikaye");
+      return;
+    }
+    oyun.takim = t;
+    oyun.aktifBot = botBul();
+    const b = oyun.aktifBot;
+    document.getElementById("bot-emoji").textContent = b.emoji;
+    document.getElementById("bot-ad").textContent = b.ad + " (🏆 " + b.kupaMin + "+)";
+    document.getElementById("bot-bilgi").textContent = b.not;
+    ekranGoster("ekran-bot");
+  }
+
+  function botIleMac() {
+    if (!oyun.aktifBot) oyun.aktifBot = botBul();
+    oyun.mod = "bot";
+    oyun.arenaSira = 0; // arka plan için ilk arenayı kullan
+    oyun.benimMax = 70; oyun.benimCan = 70;
+    oyun.dusmanMax = oyun.aktifBot.dusmanCan;
+    oyun.dusmanCan = oyun.aktifBot.dusmanCan;
+    oyun.gucBonus = 0;
+    oyun.durum = "savas";
+    oyun.kilitli = false;
+    document.getElementById("gunluk").innerHTML = "";
+    gunlugeYaz("🤖 " + oyun.aktifBot.emoji + " " + oyun.aktifBot.ad + " ile eşleştin! Bol şans.");
+    savasiCiz();
+    ekranGoster("ekran-savas");
+  }
+
   function yeniOyun() {
     kayitSil();
     oyun.durum = "menu";
     oyun.kilitli = false;
+    oyun.mod = "sefer";
+    oyun.aktifBot = null;
     // Takım kaydı varsa: direkt savaşa gir. Yoksa: hikaye+takım seç.
-    const kayitliTakim = localStorage.getItem(TAKIM_ANAHTARI);
+    const kayitliTakim = guvenliOku(TAKIM_ANAHTARI);
     if (kayitliTakim === "kirmizi" || kayitliTakim === "mavi") {
       takimSec(kayitliTakim);
     } else {
@@ -1155,7 +1328,7 @@
 
   // "Takımı değiştir" — sadece takım seçilmişse görünür buton çağırır
   function takimDegistir() {
-    try { localStorage.removeItem(TAKIM_ANAHTARI); } catch (e) {}
+    guvenliSil(TAKIM_ANAHTARI);
     kayitSil();
     oyun.kilitli = false;
     ekranGoster("ekran-hikaye");
@@ -1168,11 +1341,12 @@
     oyun.benimCan = veri.benimCan; oyun.benimMax = veri.benimMax;
     oyun.dusmanCan = veri.dusmanCan; oyun.dusmanMax = veri.dusmanMax;
     oyun.gucBonus = veri.gucBonus; oyun.durum = veri.durum; oyun.kilitli = false;
+    oyun.mod = "sefer"; oyun.aktifBot = null; // Devam et sadece sefer kaydını yükler
 
     if (veri.durum === "ara") {
       const sonraki = arenalar[oyun.arenaSira + 1];
       document.getElementById("ara-yazi").textContent =
-        "Sıradaki arena: " + sonraki.emoji + " " + sonraki.ad + ". Kralın dinlenip tam cana döndü!";
+        "Sıradaki arena: " + sonraki.emoji + " " + sonraki.ad + ". Tarafın dinlenip tam cana döndü!";
       ekranGoster("ekran-ara");
     } else {
       savasiCiz();
@@ -1183,11 +1357,11 @@
   }
 
   function menuyuHazirla() {
-    // BAŞLANGIÇ HEDİYESİ: Bir kez, 10.000 altını tüm oyunculara ver.
-    // (Eski oyuncular için: mevcut altın 10k'dan az ise 10k'ya yükseltir.)
-    if (!localStorage.getItem(HEDIYE_ANAHTARI)) {
+    // BAŞLANGIÇ HEDİYESİ (v2): Bir kez, 50.000 altını tüm oyunculara ver.
+    // (Eski oyuncular için: mevcut altın 50k'dan az ise 50k'ya yükseltir.)
+    if (!guvenliOku(HEDIYE_ANAHTARI)) {
       altinYaz(Math.max(BASLANGIC_ALTIN, toplamAltin()));
-      try { localStorage.setItem(HEDIYE_ANAHTARI, "1"); } catch (e) {}
+      guvenliYaz(HEDIYE_ANAHTARI, "1");
     }
 
     const veri = kayitOku();
@@ -1197,11 +1371,11 @@
 
     // Takım seçilmişse "Takımı değiştir" butonu görünsün
     const takimBtn = document.getElementById("takim-degistir-btn");
-    const kayitliTakim = localStorage.getItem(TAKIM_ANAHTARI);
+    const kayitliTakim = guvenliOku(TAKIM_ANAHTARI);
     if (kayitliTakim === "kirmizi" || kayitliTakim === "mavi") {
       takimBtn.style.display = "inline-block";
       const isim = kayitliTakim === "kirmizi" ? "🔴 Kırmızı" : "🔵 Mavi";
-      takimBtn.textContent = "🔄 Takımı Değiştir (şu an: " + isim + ")";
+      takimBtn.textContent = "🔄 Tarafı Değiştir (şu an: " + isim + ")";
     } else {
       takimBtn.style.display = "none";
     }
