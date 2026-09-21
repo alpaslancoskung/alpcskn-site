@@ -512,6 +512,34 @@
   }
   .sandik-not { font-size: 12px; color: #d7d2f0; margin-top: 6px; }
 
+  /* Sandık sallanma animasyonu (açılırken) */
+  .sandik.sallaniyor { pointer-events: none; }
+  .sandik.sallaniyor .sandik-emoji {
+    display: inline-block;
+    animation: sandikSalla .18s ease-in-out 0s 8;
+    transform-origin: center bottom;
+  }
+  @keyframes sandikSalla {
+    0%   { transform: rotate(0deg) scale(1); }
+    25%  { transform: rotate(-14deg) scale(1.05); }
+    50%  { transform: rotate(0deg) scale(1.1); }
+    75%  { transform: rotate(14deg) scale(1.05); }
+    100% { transform: rotate(0deg) scale(1); }
+  }
+  /* Sandık patlama efekti (açılma anı) */
+  .sandik-patlama {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 70px; pointer-events: none;
+    animation: sandikPatla .5s ease-out forwards;
+  }
+  @keyframes sandikPatla {
+    0%   { transform: scale(.3); opacity: 0; }
+    40%  { transform: scale(1.4); opacity: 1; }
+    100% { transform: scale(2.2); opacity: 0; }
+  }
+  .sandik { position: relative; overflow: hidden; }
+
   /* Sandık açılma sonucu */
   #magaza-sonuc {
     max-width: 340px; margin: 14px auto;
@@ -1077,23 +1105,51 @@
 
   function sandikAc(sandik) {
     if (toplamElmas() < sandik.fiyat) return;
-    elmasCikar(sandik.fiyat);
-    const havuz = sandikOdulleri(sandik.id);
-    const odul = havuz[Math.floor(Math.random() * havuz.length)];
-    // Ödülü ver
-    if (odul.altin) altinEkle(odul.altin);
-    if (odul.elmas) elmasEkle(odul.elmas);
-    // Göster
+    // Tıklanan sandık div'ini bul (o an sallanacak)
+    const sandikDiv = [...document.querySelectorAll("#sandiklar .sandik")]
+      .find(d => d.querySelector("h3")?.textContent === sandik.ad);
+    if (!sandikDiv) return;
+    if (sandikDiv.classList.contains("sallaniyor")) return; // zaten sallanıyor
+
+    // Sonuç kutusunu gizle (eski ödül varsa)
     const kutu = document.getElementById("magaza-sonuc");
-    kutu.style.display = "block";
-    kutu.innerHTML =
-      '<div class="odul-emoji">' + odul.emoji + '</div>' +
-      '<div class="odul-ad">' + sandik.ad + " açıldı!</div>" +
-      '<div class="odul-ad">🎊 ' + odul.ad + ' 🎊</div>' +
-      '<div class="odul-icerik">🪙 +' + odul.altin +
-      (odul.elmas ? '  ·  💎 +' + odul.elmas : '') + '</div>';
-    // Sandık listesini yeniden çiz (elmas azaldı, bazıları pahalı olabilir)
-    setTimeout(() => magazaCiz(), 100);
+    kutu.style.display = "none";
+
+    // Elmas hemen azalt
+    elmasCikar(sandik.fiyat);
+
+    // Sallanmayı başlat
+    sandikDiv.classList.add("sallaniyor");
+
+    // ~1.4s salladıktan sonra patla ve ödülü göster
+    setTimeout(() => {
+      // Patlama efekti
+      const patlama = document.createElement("div");
+      patlama.className = "sandik-patlama";
+      patlama.textContent = "✨";
+      sandikDiv.appendChild(patlama);
+      setTimeout(() => patlama.remove(), 500);
+
+      // Ödülü belirle ve ver
+      const havuz = sandikOdulleri(sandik.id);
+      const odul = havuz[Math.floor(Math.random() * havuz.length)];
+      if (odul.altin) altinEkle(odul.altin);
+      if (odul.elmas) elmasEkle(odul.elmas);
+
+      // Ödül kartını göster (biraz gecikmeyle patlamayla senkron)
+      setTimeout(() => {
+        kutu.style.display = "block";
+        kutu.innerHTML =
+          '<div class="odul-emoji">' + odul.emoji + '</div>' +
+          '<div class="odul-ad">' + sandik.ad + " açıldı!</div>" +
+          '<div class="odul-ad">🎊 ' + odul.ad + ' 🎊</div>' +
+          '<div class="odul-icerik">🪙 +' + odul.altin +
+          (odul.elmas ? '  ·  💎 +' + odul.elmas : '') + '</div>';
+        // Sandık listesini yenile
+        sandikDiv.classList.remove("sallaniyor");
+        magazaCiz();
+      }, 250);
+    }, 1400);
   }
 
   // magazaAc'ın sadece kutu çizim kısmı (sonuç kutusunu silmez)
