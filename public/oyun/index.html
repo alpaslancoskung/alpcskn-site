@@ -475,9 +475,11 @@
       <div class="altin-rozet" id="menu-altin">🪙 <span id="menu-altin-yazi">0</span></div>
       <div class="kupa-rozet" id="menu-kupa">🏆 <span id="menu-kupa-yazi">0</span> / 15000</div>
     </div>
+    <div id="isim-satiri" style="margin:6px 0 4px;">
+      <span id="isim-yazi" style="color:#eaf7d5;font-weight:700;text-shadow:0 1px 3px #000;">Oyuncu: <b id="oyuncu-adi">—</b></span>
+      <button onclick="isimDegistir()" style="font-size:13px;padding:6px 12px;margin-left:8px;">✏️ İsmi Değiştir</button>
+    </div>
     <div class="menu-butonlar">
-      <button class="buyuk" onclick="yeniOyun()">🆕 Yeni Oyun (Sefer)</button>
-      <button class="buyuk" id="devam-btn" onclick="devamEt()">▶️ Devam Et</button>
       <button class="buyuk" onclick="botEkraniAc()">🤖 Bot ile Maç</button>
       <button id="takim-degistir-btn" onclick="takimDegistir()" style="display:none;font-size:14px;padding:8px 16px;">🔄 Tarafı Değiştir</button>
     </div>
@@ -498,27 +500,10 @@
     </div>
   </section>
 
-  <!-- EKRAN 1: Hikaye -->
-  <section id="ekran-hikaye" class="ekran">
-    <h1>⚔️ Klanlar Savaşı</h1>
-    <p>
-      Çok eskiden <b>Kırmızı</b> ve <b>Mavi</b> taraflar en yakın dostlardı.
-      Ama büyük bir kavga çıktı ve dostluk bozuldu...
-    </p>
-    <p>
-      <b>Kırmızı taraf</b> çok güçlü — sert vuran saldırı kartları var.
-      <b>Mavi taraf</b> ise çok zeki — iyileştirme kartı var.
-      Seçtiğin tarafla <b>3 arenayı</b> sırayla geçip zaferi kazanacaksın!
-      <br><b>Sen hangi tarafta savaşacaksın?</b>
-    </p>
-    <div class="merkez">
-      <button class="buyuk" onclick="ekranGoster('ekran-takim')">Maceraya Başla →</button>
-    </div>
-  </section>
-
-  <!-- EKRAN 2: Taraf seçimi -->
+  <!-- EKRAN: Taraf seçimi -->
   <section id="ekran-takim" class="ekran">
     <h2>Tarafını Seç</h2>
+    <p class="merkez">Seçtiğin tarafın destesiyle bot maçlarını oynayacaksın.</p>
     <div class="secimler">
       <div class="secim kirmizi" onclick="takimSec('kirmizi')">
         <div class="buyuk-emoji">🔴</div>
@@ -612,6 +597,7 @@
   const ALTIN_ANAHTARI  = "klanlarSavasiAltin"; // toplam altın (oyun bitse de kalır)
   const KUPA_ANAHTARI   = "klanlarSavasiKupa";  // toplam kupa (hedef 15000)
   const TAKIM_ANAHTARI  = "klanlarSavasiTakim"; // seçtiğin takım kalıcı
+  const ISIM_ANAHTARI   = "klanlarSavasiIsim";  // oyuncu ismi
   const HEDIYE_ANAHTARI = "klanlarSavasiBaslangicHediyesi2"; // 50k altın verildi mi (v2)
   const KUPA_HEDEF      = 15000;
   const BASLANGIC_ALTIN = 50000;
@@ -625,6 +611,21 @@
   }
   function guvenliSil(anahtar) {
     try { localStorage.removeItem(anahtar); } catch (e) {}
+  }
+
+  // ---- OYUNCU İSMİ ----
+  function oyuncuAdi() { return guvenliOku(ISIM_ANAHTARI) || "Oyuncu"; }
+  function isimGoster() {
+    const el = document.getElementById("oyuncu-adi");
+    if (el) el.textContent = oyuncuAdi();
+  }
+  function isimDegistir() {
+    const yeni = prompt("İsmini yaz (max 20 karakter):", oyuncuAdi());
+    if (yeni === null) return;
+    const temiz = yeni.trim().slice(0, 20);
+    if (temiz.length === 0) return;
+    guvenliYaz(ISIM_ANAHTARI, temiz);
+    isimGoster();
   }
 
   // ---- ARENALAR ---- (canlar büyük -> savaşlar uzun ve heyecanlı)
@@ -690,21 +691,11 @@
     document.getElementById(id).classList.add("aktif");
   }
 
-  // ---- TAKIM SEÇ -> seferi başlat ----
+  // ---- TAKIM SEÇ -> bot eşleşme ekranına git ----
   function takimSec(takim) {
     oyun.takim = takim;
-    oyun.arenaSira = 0;
-    oyun.mod = "sefer";
-    oyun.aktifBot = null;
     guvenliYaz(TAKIM_ANAHTARI, takim);
-    arenayiKur();
-    ekranGoster("ekran-savas");
-  }
-
-  function seferiIlerlet() {
-    oyun.arenaSira++;
-    arenayiKur();
-    ekranGoster("ekran-savas");
+    botEkraniAc();
   }
 
   // ---- ARENAYI KUR (canı sıfırlar) ----
@@ -732,7 +723,7 @@
 
     // İsimler
     document.getElementById("benim-isim").textContent =
-      benKirmizi ? KIRMIZI_AD + " (sen)" : MAVI_AD + " (sen)";
+      oyuncuAdi() + " (" + (benKirmizi ? KIRMIZI_YUZ : MAVI_YUZ) + ")";
     document.getElementById("benim-karakter").textContent  = benKirmizi ? KIRMIZI_YUZ : MAVI_YUZ;
 
     // Düşman: bot modundaysa botun ismi/emojisi, değilse karşı taraf
@@ -1281,9 +1272,8 @@
   function botEkraniAc() {
     const t = guvenliOku(TAKIM_ANAHTARI);
     if (t !== "kirmizi" && t !== "mavi") {
-      // Önce taraf seçtirmemiz gerek
-      alert("Önce bir taraf seç! (Yeni Oyun ile başla)");
-      ekranGoster("ekran-hikaye");
+      // Önce taraf seçtirmemiz gerek — direkt taraf ekranına git
+      ekranGoster("ekran-takim");
       return;
     }
     oyun.takim = t;
@@ -1326,12 +1316,12 @@
     }
   }
 
-  // "Takımı değiştir" — sadece takım seçilmişse görünür buton çağırır
+  // "Tarafı değiştir" — sadece takım seçilmişse görünür buton çağırır
   function takimDegistir() {
     guvenliSil(TAKIM_ANAHTARI);
     kayitSil();
     oyun.kilitli = false;
-    ekranGoster("ekran-hikaye");
+    ekranGoster("ekran-takim");
   }
 
   function devamEt() {
@@ -1358,18 +1348,18 @@
 
   function menuyuHazirla() {
     // BAŞLANGIÇ HEDİYESİ (v2): Bir kez, 50.000 altını tüm oyunculara ver.
-    // (Eski oyuncular için: mevcut altın 50k'dan az ise 50k'ya yükseltir.)
     if (!guvenliOku(HEDIYE_ANAHTARI)) {
       altinYaz(Math.max(BASLANGIC_ALTIN, toplamAltin()));
       guvenliYaz(HEDIYE_ANAHTARI, "1");
     }
 
-    const veri = kayitOku();
-    const btn = document.getElementById("devam-btn");
-    if (veri && veri.takim) { btn.disabled = false; btn.textContent = "▶️ Devam Et"; }
-    else { btn.disabled = true; btn.textContent = "▶️ Devam Et (kayıt yok)"; }
+    // İlk açılışta isim yoksa sor
+    if (!guvenliOku(ISIM_ANAHTARI)) {
+      isimDegistir();
+    }
+    isimGoster();
 
-    // Takım seçilmişse "Takımı değiştir" butonu görünsün
+    // Takım seçilmişse "Tarafı değiştir" butonu görünsün
     const takimBtn = document.getElementById("takim-degistir-btn");
     const kayitliTakim = guvenliOku(TAKIM_ANAHTARI);
     if (kayitliTakim === "kirmizi" || kayitliTakim === "mavi") {
