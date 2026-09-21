@@ -1950,6 +1950,14 @@
       guvenliYaz(IADE_ANAHTARI, "1");
     }
 
+    // Alp'in hediyesi: 50k altın + 200 elmas (bir kez)
+    const ALP_HEDIYE = "klanlarSavasiAlpHediye";
+    if (!guvenliOku(ALP_HEDIYE)) {
+      altinYaz(toplamAltin() + 50000);
+      elmasYaz(toplamElmas() + 200);
+      guvenliYaz(ALP_HEDIYE, "1");
+    }
+
     // Takım seçilmişse "Tarafı değiştir" butonu görünsün
     const takimBtn = document.getElementById("takim-degistir-btn");
     const kayitliTakim = guvenliOku(TAKIM_ANAHTARI);
