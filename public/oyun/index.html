@@ -557,6 +557,64 @@
   #magaza-sonuc .odul-ad { font-weight: 700; font-size: 18px; margin: 6px 0; }
   #magaza-sonuc .odul-icerik { font-size: 16px; margin-top: 4px; }
 
+  /* ---- Yeni Kart Açıldı modalı ---- */
+  .kart-acildi-arka {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.75);
+    z-index: 1000;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    animation: modalArkaAcil .3s ease-out;
+  }
+  @keyframes modalArkaAcil { from { opacity: 0; } to { opacity: 1; } }
+  .kart-acildi-icerik {
+    max-width: 340px; width: 100%;
+    background: linear-gradient(180deg, #241d47, #191433);
+    border: 3px solid #ffe27a;
+    border-radius: 20px; padding: 22px; text-align: center;
+    color: #fff;
+    box-shadow: 0 20px 60px rgba(0,0,0,.7), 0 0 40px rgba(255,226,122,.35);
+    animation: kartAc .55s cubic-bezier(.2,1.4,.5,1);
+  }
+  .kart-acildi-icerik.ender    { border-color: #b47cff; box-shadow: 0 20px 60px rgba(0,0,0,.7), 0 0 40px rgba(180,124,255,.5); }
+  .kart-acildi-icerik.destansi { border-color: #ff8a4a; box-shadow: 0 20px 60px rgba(0,0,0,.7), 0 0 55px rgba(255,138,74,.6); }
+  @keyframes kartAc {
+    0%   { transform: scale(.3) rotate(-10deg); opacity: 0; }
+    60%  { transform: scale(1.1) rotate(3deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0); opacity: 1; }
+  }
+  .yeni-etiket {
+    display: inline-block; padding: 6px 14px; border-radius: 999px;
+    background: linear-gradient(180deg,#a8ffb0,#4dd070); color: #0a3010;
+    font-weight: 900; font-size: 14px;
+    box-shadow: 0 3px 0 #1a6030; margin-bottom: 10px;
+    animation: yeniEtiketZipla 1s ease-in-out infinite;
+  }
+  @keyframes yeniEtiketZipla {
+    0%,100% { transform: translateY(0); }
+    50%     { transform: translateY(-4px); }
+  }
+  .tekrar-etiket {
+    display: inline-block; padding: 6px 14px; border-radius: 999px;
+    background: #4a3f7a; color: #fff; font-weight: 700;
+    font-size: 13px; margin-bottom: 10px;
+  }
+  .kart-acildi-icerik .modal-emoji {
+    font-size: 96px; margin: 8px 0;
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,.6));
+    animation: modalEmojiSalla 1.5s ease-in-out infinite;
+  }
+  @keyframes modalEmojiSalla {
+    0%,100% { transform: rotate(-5deg); }
+    50%     { transform: rotate(5deg); }
+  }
+  .kart-acildi-icerik .modal-ad { font-size: 22px; font-weight: 800; color: #ffe27a; margin: 4px 0; }
+  .kart-acildi-icerik .modal-guc { font-size: 16px; color: #6facff; margin: 6px 0; }
+  .kart-acildi-icerik .modal-rutbe { display:inline-block; margin: 6px 0; }
+  .kart-acildi-icerik .modal-sandik { color: #cfc9ec; font-size: 13px; margin-top: 6px; }
+  .kart-acildi-icerik .modal-not { color: #cfc9ec; font-size: 12px; margin: 10px 0; }
+  .kart-acildi-icerik button { margin-top: 8px; }
+
   /* Level up bildirimi */
   .level-up-bildirim {
     position: fixed; top: 20%; left: 50%; transform: translateX(-50%);
@@ -680,7 +738,7 @@
       <div class="elmas-rozet">💎 <span id="magaza-elmas-yazi">0</span></div>
       <div class="level-rozet">Lv <span id="magaza-level-yazi">1</span></div>
     </div>
-    <p class="merkez" style="color:#cfc9ec;margin-top:4px;">Her sandıkta <b>20 farklı ödül</b> var — toplam 60. Elması bot maçlarından ve level atlayınca kazanırsın.</p>
+    <p class="merkez" style="color:#cfc9ec;margin-top:4px;">Her sandıkta <b>20 farklı kart</b> var — toplam 60. Kazandığın kartlar Destem'de görünür. Elması bot maçlarından ve level atlayınca kazanırsın.</p>
     <div id="sandiklar" class="sandiklar"></div>
     <div id="magaza-sonuc" style="display:none;"></div>
     <div class="merkez" style="margin-top:14px;">
@@ -1030,55 +1088,99 @@
     { id:"buyuk", ad:"Altın Sandık", emoji:"🏆", fiyat:100, not:"20 destansı ödül" },
   ];
 
-  // 60 BENZERSİZ ÖDÜL — her sandıkta 20 farklı isim (tekrar yok)
-  const AHSAP_ODULLER = [
-    {ad:"Meşe Yaprağı",  emoji:"🍂"}, {ad:"Ceviz",         emoji:"🌰"},
-    {ad:"Ağaç Dalı",     emoji:"🪵"}, {ad:"Mantar",        emoji:"🍄"},
-    {ad:"Sincap",        emoji:"🐿️"}, {ad:"Uğur Böceği",   emoji:"🐞"},
-    {ad:"Papatya",       emoji:"🌼"}, {ad:"Kuş Tüyü",      emoji:"🪶"},
-    {ad:"Kelebek",       emoji:"🦋"}, {ad:"Böcek",         emoji:"🐛"},
-    {ad:"Balık",         emoji:"🐟"}, {ad:"Kar Tanesi",    emoji:"❄️"},
-    {ad:"Elma",          emoji:"🍎"}, {ad:"Bal Kavanozu",  emoji:"🍯"},
-    {ad:"Küçük Kese",    emoji:"👝"}, {ad:"Deniz Kabuğu",  emoji:"🐚"},
-    {ad:"Balmumu",       emoji:"🕯️"}, {ad:"Küçük Taş",     emoji:"🪨"},
-    {ad:"Yulaf",         emoji:"🌾"}, {ad:"Odun Kömürü",   emoji:"⚫"},
+  // 60 SANDIK KARTI — her sandıkta 20, hepsi savaşta oynanabilir
+  // (id benzersiz, güç + rütbe ile)
+  const AHSAP_KARTLAR = [
+    {id:"a1",  ad:"Meşe Yaprağı",  emoji:"🍂", guc:3, rutbe:"siradan"},
+    {id:"a2",  ad:"Ceviz",         emoji:"🌰", guc:4, rutbe:"siradan"},
+    {id:"a3",  ad:"Ağaç Dalı",     emoji:"🪵", guc:3, rutbe:"siradan"},
+    {id:"a4",  ad:"Mantar",        emoji:"🍄", guc:4, rutbe:"siradan"},
+    {id:"a5",  ad:"Sincap",        emoji:"🐿️", guc:5, rutbe:"siradan"},
+    {id:"a6",  ad:"Uğur Böceği",   emoji:"🐞", guc:4, rutbe:"siradan"},
+    {id:"a7",  ad:"Papatya",       emoji:"🌼", guc:3, rutbe:"siradan"},
+    {id:"a8",  ad:"Kuş Tüyü",      emoji:"🪶", guc:4, rutbe:"siradan"},
+    {id:"a9",  ad:"Kelebek",       emoji:"🦋", guc:5, rutbe:"siradan"},
+    {id:"a10", ad:"Böcek",         emoji:"🐛", guc:3, rutbe:"siradan"},
+    {id:"a11", ad:"Balık",         emoji:"🐟", guc:5, rutbe:"siradan"},
+    {id:"a12", ad:"Kar Tanesi",    emoji:"❄️", guc:4, rutbe:"siradan"},
+    {id:"a13", ad:"Elma",          emoji:"🍎", guc:5, rutbe:"siradan"},
+    {id:"a14", ad:"Bal Kavanozu",  emoji:"🍯", guc:6, rutbe:"siradan"},
+    {id:"a15", ad:"Küçük Kese",    emoji:"👝", guc:4, rutbe:"siradan"},
+    {id:"a16", ad:"Deniz Kabuğu",  emoji:"🐚", guc:5, rutbe:"siradan"},
+    {id:"a17", ad:"Balmumu",       emoji:"🕯️", guc:3, rutbe:"siradan"},
+    {id:"a18", ad:"Küçük Taş",     emoji:"🪨", guc:5, rutbe:"siradan"},
+    {id:"a19", ad:"Yulaf",         emoji:"🌾", guc:4, rutbe:"siradan"},
+    {id:"a20", ad:"Odun Kömürü",   emoji:"⚫", guc:6, rutbe:"siradan"},
   ];
-  const GUMUS_ODULLER = [
-    {ad:"Ay Taşı",       emoji:"🌙"}, {ad:"Gümüş Halka",   emoji:"💍"},
-    {ad:"Kristal Küre",  emoji:"🔮"}, {ad:"Sihirli Değnek",emoji:"🪄"},
-    {ad:"Anahtar",       emoji:"🗝️"}, {ad:"Kadeh",         emoji:"🏆"},
-    {ad:"Peri Tozu",     emoji:"✨"}, {ad:"Gümüş Ok",      emoji:"🏹"},
-    {ad:"Zümrüt",        emoji:"💚"}, {ad:"Safir",         emoji:"💙"},
-    {ad:"Miğfer",        emoji:"⛑️"}, {ad:"Kalkan",        emoji:"🛡️"},
-    {ad:"Fener",         emoji:"🏮"}, {ad:"Büyü Kitabı",   emoji:"📖"},
-    {ad:"Kum Saati",     emoji:"⏳"}, {ad:"İksir",         emoji:"⚗️"},
-    {ad:"Yıldız Taşı",   emoji:"🌟"}, {ad:"Baltacı",       emoji:"🪓"},
-    {ad:"Gümüş Kılıç",   emoji:"⚔️"}, {ad:"Kanatlı At",    emoji:"🦄"},
+  const GUMUS_KARTLAR = [
+    {id:"g1",  ad:"Ay Taşı",       emoji:"🌙", guc:7, rutbe:"ender"},
+    {id:"g2",  ad:"Gümüş Halka",   emoji:"💍", guc:6, rutbe:"ender"},
+    {id:"g3",  ad:"Kristal Küre",  emoji:"🔮", guc:8, rutbe:"ender"},
+    {id:"g4",  ad:"Sihirli Değnek",emoji:"🪄", guc:7, rutbe:"ender"},
+    {id:"g5",  ad:"Anahtar",       emoji:"🗝️", guc:6, rutbe:"ender"},
+    {id:"g6",  ad:"Kadeh",         emoji:"🏆", iyilesme:6, rutbe:"ender"},
+    {id:"g7",  ad:"Peri Tozu",     emoji:"✨", iyilesme:8, rutbe:"ender"},
+    {id:"g8",  ad:"Gümüş Ok",      emoji:"🏹", guc:8, rutbe:"ender"},
+    {id:"g9",  ad:"Zümrüt",        emoji:"💚", guc:9, rutbe:"ender"},
+    {id:"g10", ad:"Safir",         emoji:"💙", guc:9, rutbe:"ender"},
+    {id:"g11", ad:"Miğfer",        emoji:"⛑️", guc:7, rutbe:"ender"},
+    {id:"g12", ad:"Kalkan",        emoji:"🛡️", guc:8, rutbe:"ender"},
+    {id:"g13", ad:"Fener",         emoji:"🏮", guc:6, rutbe:"ender"},
+    {id:"g14", ad:"Büyü Kitabı",   emoji:"📖", iyilesme:10, rutbe:"ender"},
+    {id:"g15", ad:"Kum Saati",     emoji:"⏳", guc:7, rutbe:"ender"},
+    {id:"g16", ad:"İksir",         emoji:"⚗️", iyilesme:7, rutbe:"ender"},
+    {id:"g17", ad:"Yıldız Taşı",   emoji:"🌟", guc:10, rutbe:"ender"},
+    {id:"g18", ad:"Baltacı",       emoji:"🪓", guc:9, rutbe:"ender"},
+    {id:"g19", ad:"Gümüş Kılıç",   emoji:"⚔️", guc:10, rutbe:"ender"},
+    {id:"g20", ad:"Kanatlı At",    emoji:"🦄", guc:10, rutbe:"ender"},
   ];
-  const ALTIN_ODULLER = [
-    {ad:"Ejder Dişi",    emoji:"🐉"}, {ad:"Anka Kuşu",     emoji:"🦅"},
-    {ad:"Kutsal Kılıç",  emoji:"⚔️"}, {ad:"Kral Tacı",     emoji:"👑"},
-    {ad:"Altın Kupa",    emoji:"🏆"}, {ad:"Elmas Küpe",    emoji:"💎"},
-    {ad:"Işık Topu",     emoji:"⚡"}, {ad:"Ateş Kalbi",    emoji:"🔥"},
-    {ad:"Aslan Yelesi",  emoji:"🦁"}, {ad:"Kaplan Pençesi",emoji:"🐯"},
-    {ad:"Kartal Gözü",   emoji:"🦅"}, {ad:"Kutsal Zırh",   emoji:"🛡️"},
-    {ad:"Zaman Taşı",    emoji:"⏱️"}, {ad:"Yıldız Kılıcı", emoji:"🌟"},
-    {ad:"Kader Rünü",    emoji:"🔯"}, {ad:"Efsane Yayı",   emoji:"🏹"},
-    {ad:"Volkan Kalbi",  emoji:"🌋"}, {ad:"Gökkuşağı Kanadı",emoji:"🌈"},
-    {ad:"Kutsal Kase",   emoji:"🍷"}, {ad:"Güneş Madalyası",emoji:"🥇"},
+  const ALTIN_KARTLAR = [
+    {id:"y1",  ad:"Ejder Dişi",    emoji:"🐲", guc:12, rutbe:"destansi"},
+    {id:"y2",  ad:"Anka Kuşu",     emoji:"🦅", guc:13, rutbe:"destansi"},
+    {id:"y3",  ad:"Kutsal Kılıç",  emoji:"⚔️", guc:14, rutbe:"destansi"},
+    {id:"y4",  ad:"Kral Tacı",     emoji:"👑", guc:12, rutbe:"destansi"},
+    {id:"y5",  ad:"Altın Kupa",    emoji:"🏆", guc:11, rutbe:"destansi"},
+    {id:"y6",  ad:"Elmas Küpe",    emoji:"💎", guc:13, rutbe:"destansi"},
+    {id:"y7",  ad:"Işık Topu",     emoji:"⚡", guc:14, rutbe:"destansi"},
+    {id:"y8",  ad:"Ateş Kalbi",    emoji:"🔥", guc:13, rutbe:"destansi"},
+    {id:"y9",  ad:"Aslan Yelesi",  emoji:"🦁", guc:14, rutbe:"destansi"},
+    {id:"y10", ad:"Kaplan Pençesi",emoji:"🐯", guc:13, rutbe:"destansi"},
+    {id:"y11", ad:"Kartal Gözü",   emoji:"🦉", guc:12, rutbe:"destansi"},
+    {id:"y12", ad:"Kutsal Zırh",   emoji:"🛡️", guc:11, rutbe:"destansi"},
+    {id:"y13", ad:"Zaman Taşı",    emoji:"⏱️", iyilesme:15, rutbe:"destansi"},
+    {id:"y14", ad:"Yıldız Kılıcı", emoji:"🌟", guc:14, rutbe:"destansi"},
+    {id:"y15", ad:"Kader Rünü",    emoji:"🔯", guc:12, rutbe:"destansi"},
+    {id:"y16", ad:"Efsane Yayı",   emoji:"🏹", guc:13, rutbe:"destansi"},
+    {id:"y17", ad:"Volkan Kalbi",  emoji:"🌋", guc:15, rutbe:"destansi"},
+    {id:"y18", ad:"Gökkuşağı Kanadı",emoji:"🌈", guc:12, rutbe:"destansi"},
+    {id:"y19", ad:"Kutsal Kase",   emoji:"🍷", iyilesme:20, rutbe:"destansi"},
+    {id:"y20", ad:"Güneş Madalyası",emoji:"🥇", guc:15, rutbe:"destansi"},
   ];
 
-  function sandikOdulleri(tier) {
-    let havuz, altinTaban, altinCarpan, elmasTaban, elmasBonus;
-    if (tier === "kucuk")      { havuz = AHSAP_ODULLER; altinTaban = 20;  altinCarpan = 8;  elmasTaban = 0;  elmasBonus = 3; }
-    else if (tier === "orta")  { havuz = GUMUS_ODULLER; altinTaban = 150; altinCarpan = 25; elmasTaban = 5;  elmasBonus = 2; }
-    else                       { havuz = ALTIN_ODULLER; altinTaban = 600; altinCarpan = 60; elmasTaban = 20; elmasBonus = 2; }
-    return havuz.map((o, i) => ({
-      ad: o.ad,
-      emoji: o.emoji,
-      altin: altinTaban + (i + 1) * altinCarpan,
-      elmas: (tier === "kucuk") ? ((i % 5 === 4) ? 3 : 0) : (elmasTaban + Math.floor(i * elmasBonus / 3)),
-    }));
+  function sandikKartlari(tier) {
+    if (tier === "kucuk") return AHSAP_KARTLAR;
+    if (tier === "orta")  return GUMUS_KARTLAR;
+    return ALTIN_KARTLAR;
+  }
+  // Tüm sandık kartlarını id ile bulmak için
+  const SANDIK_KART_INDEKS = {};
+  [...AHSAP_KARTLAR, ...GUMUS_KARTLAR, ...ALTIN_KARTLAR].forEach(k => SANDIK_KART_INDEKS[k.id] = k);
+  function sandikKartBul(id) { return SANDIK_KART_INDEKS[id]; }
+
+  // Sahip olduğun sandık kartları (id listesi)
+  const SAHIP_KART_ANAHTARI = "klanlarSavasiSahipSandikKartlar";
+  function sahipSandikKartIdleri() {
+    try { return JSON.parse(guvenliOku(SAHIP_KART_ANAHTARI) || "[]"); }
+    catch (e) { return []; }
+  }
+  function sahipKartYaz(a) { guvenliYaz(SAHIP_KART_ANAHTARI, JSON.stringify(a)); }
+  function sahipMi(id) { return sahipSandikKartIdleri().indexOf(id) >= 0; }
+  function sandikKartKazan(id) {
+    const liste = sahipSandikKartIdleri();
+    if (liste.indexOf(id) >= 0) return false; // zaten var
+    liste.push(id);
+    sahipKartYaz(liste);
+    return true;
   }
 
   function magazaAc() {
@@ -1103,53 +1205,79 @@
     ekranGoster("ekran-magaza");
   }
 
+  // Duplicate kart telafi altını (rütbeye göre)
+  const KART_TELAFI = { siradan: 50, ender: 200, destansi: 600 };
+
   function sandikAc(sandik) {
     if (toplamElmas() < sandik.fiyat) return;
-    // Tıklanan sandık div'ini bul (o an sallanacak)
     const sandikDiv = [...document.querySelectorAll("#sandiklar .sandik")]
       .find(d => d.querySelector("h3")?.textContent === sandik.ad);
     if (!sandikDiv) return;
-    if (sandikDiv.classList.contains("sallaniyor")) return; // zaten sallanıyor
+    if (sandikDiv.classList.contains("sallaniyor")) return;
 
-    // Sonuç kutusunu gizle (eski ödül varsa)
-    const kutu = document.getElementById("magaza-sonuc");
-    kutu.style.display = "none";
-
-    // Elmas hemen azalt
+    document.getElementById("magaza-sonuc").style.display = "none";
     elmasCikar(sandik.fiyat);
-
-    // Sallanmayı başlat
     sandikDiv.classList.add("sallaniyor");
 
-    // ~1.4s salladıktan sonra patla ve ödülü göster
+    // ~1.4s salladıktan sonra kart çık
     setTimeout(() => {
-      // Patlama efekti
       const patlama = document.createElement("div");
       patlama.className = "sandik-patlama";
       patlama.textContent = "✨";
       sandikDiv.appendChild(patlama);
       setTimeout(() => patlama.remove(), 500);
 
-      // Ödülü belirle ve ver
-      const havuz = sandikOdulleri(sandik.id);
-      const odul = havuz[Math.floor(Math.random() * havuz.length)];
-      if (odul.altin) altinEkle(odul.altin);
-      if (odul.elmas) elmasEkle(odul.elmas);
+      // Rastgele kart seç
+      const havuz = sandikKartlari(sandik.id);
+      const kart = havuz[Math.floor(Math.random() * havuz.length)];
+      const yeniMi = sandikKartKazan(kart.id);
+      let telafi = 0;
+      if (!yeniMi) {
+        telafi = KART_TELAFI[kart.rutbe] || 50;
+        altinEkle(telafi);
+      } else {
+        // Yeni kazanılan kartı otomatik olarak aktif deste'ye ekle
+        const d = tumDestelerObj();
+        if (!Array.isArray(d["sandik"])) d["sandik"] = [];
+        if (d["sandik"].indexOf(kart.id) < 0) d["sandik"].push(kart.id);
+        desteYaz(d);
+      }
 
-      // Ödül kartını göster (biraz gecikmeyle patlamayla senkron)
       setTimeout(() => {
-        kutu.style.display = "block";
-        kutu.innerHTML =
-          '<div class="odul-emoji">' + odul.emoji + '</div>' +
-          '<div class="odul-ad">' + sandik.ad + " açıldı!</div>" +
-          '<div class="odul-ad">🎊 ' + odul.ad + ' 🎊</div>' +
-          '<div class="odul-icerik">🪙 +' + odul.altin +
-          (odul.elmas ? '  ·  💎 +' + odul.elmas : '') + '</div>';
-        // Sandık listesini yenile
         sandikDiv.classList.remove("sallaniyor");
         magazaCiz();
-      }, 250);
+        kartAcildiModal(kart, sandik.ad, yeniMi, telafi);
+      }, 300);
     }, 1400);
+  }
+
+  // ---- YENİ KART AÇILDI MODAL (fotoğraf + yazı) ----
+  function kartAcildiModal(kart, sandikAd, yeniMi, telafi) {
+    const eskiMod = document.getElementById("kart-acildi-modal");
+    if (eskiMod) eskiMod.remove();
+    const rutbeYazi = { siradan:"Sıradan", ender:"Ender", destansi:"Destansı" }[kart.rutbe];
+    const guclu = kart.iyilesme ? "💚 İyileştir +" + kart.iyilesme : "⚡ Güç " + kart.guc;
+    const yeniEtiket = yeniMi
+      ? '<div class="yeni-etiket">🎉 YENİ KART!</div>'
+      : '<div class="tekrar-etiket">🔁 Zaten var — 🪙 +' + telafi + ' altın telafi</div>';
+    const kutuAlt = yeniMi
+      ? '<div class="modal-not">Otomatik olarak Destene eklendi. Destem\'den yönetebilirsin.</div>'
+      : '<div class="modal-not">Aynı karttan tekrar çıktı. Altın telafisi verildi.</div>';
+    const mod = document.createElement("div");
+    mod.id = "kart-acildi-modal";
+    mod.className = "kart-acildi-arka";
+    mod.innerHTML =
+      '<div class="kart-acildi-icerik ' + kart.rutbe + '">' +
+        yeniEtiket +
+        '<div class="modal-emoji">' + kart.emoji + '</div>' +
+        '<div class="modal-ad">' + kart.ad + '</div>' +
+        '<div class="modal-guc">' + guclu + '</div>' +
+        '<div class="modal-rutbe rutbe ' + kart.rutbe + '">' + rutbeYazi + '</div>' +
+        '<div class="modal-sandik">📦 ' + sandikAd + '</div>' +
+        kutuAlt +
+        '<button class="buyuk" onclick="document.getElementById(\'kart-acildi-modal\').remove()">✅ Harika!</button>' +
+      '</div>';
+    document.body.appendChild(mod);
   }
 
   // magazaAc'ın sadece kutu çizim kısmı (sonuç kutusunu silmez)
@@ -1193,6 +1321,12 @@
       side === "kirmizi" ? "🔴 Kırmızı Taraf" : "🔵 Mavi Taraf";
     const liste = document.getElementById("destem-liste");
     liste.innerHTML = "";
+
+    // BÖLÜM 1: Taraf kartları
+    const b1 = document.createElement("h3");
+    b1.style.cssText = "grid-column:1/-1;margin:4px 0;color:#ffe27a;";
+    b1.textContent = (side === "kirmizi" ? "🔴" : "🔵") + " Taraf Kartlarım";
+    liste.appendChild(b1);
     kartlar.forEach((kart, i) => {
       const aktif = aktifSet.has(i);
       const lv = kartLevel(side, i);
@@ -1220,11 +1354,64 @@
         '</div>';
       liste.appendChild(div);
     });
+
+    // BÖLÜM 2: Sandıktan kazanılan kartlar
+    const sahip = sahipSandikKartIdleri();
+    const b2 = document.createElement("h3");
+    b2.style.cssText = "grid-column:1/-1;margin:14px 0 4px;color:#ffe27a;";
+    b2.textContent = "📦 Sandıktan Kazandıklarım (" + sahip.length + "/60)";
+    liste.appendChild(b2);
+    if (sahip.length === 0) {
+      const bos = document.createElement("p");
+      bos.style.cssText = "grid-column:1/-1;color:#cfc9ec;text-align:center;font-size:13px;";
+      bos.textContent = "Henüz kartın yok. 🛒 Mağazadan sandık aç!";
+      liste.appendChild(bos);
+    }
+    const sAktifSet = new Set(aktifDesteIdx("sandik"));
+    sahip.forEach(sid => {
+      const kart = sandikKartBul(sid);
+      if (!kart) return;
+      const aktif = sAktifSet.has(sid);
+      const lv = kartLevel("sandik", sid);
+      const gucYazi = kart.iyilesme
+        ? "💚 +" + kartIyilesme("sandik", sid, kart)
+        : "⚡ " + kartGuc("sandik", sid, kart);
+      const ucret = KART_YUKSELT_UCRET[lv] || 0;
+      const enUst = lv >= KART_MAX_LV;
+      const yeterAltin = toplamAltin() >= ucret;
+      const div = document.createElement("div");
+      div.className = "destem-kart " + (aktif ? "aktif" : "pasif");
+      div.innerHTML =
+        '<div class="lv-yazi">Lv ' + lv + '/' + KART_MAX_LV + '</div>' +
+        '<div class="em">' + kart.emoji + '</div>' +
+        '<div class="ad">' + kart.ad + '</div>' +
+        '<div class="guc-yazi">' + gucYazi + '</div>' +
+        '<div class="btn-satir">' +
+          '<button class="aktif-btn ' + (aktif ? "aktif" : "") + '" onclick="destemToggleSandik(\'' + sid + '\')">' +
+            (aktif ? '✅ Destede' : '➕ Ekle') +
+          '</button>' +
+          (enUst
+            ? '<button disabled>🌟 MAX</button>'
+            : '<button ' + (yeterAltin ? '' : 'disabled ') + 'onclick="kartYukseltSandik(\'' + sid + '\')">🔥 Yükselt (🪙' + ucret + ')</button>'
+          ) +
+        '</div>';
+      liste.appendChild(div);
+    });
   }
 
   function destemToggle(i) {
     const hata = desteToggle(oyun.takim, i);
     if (hata) alert(hata);
+    destemCiz();
+  }
+
+  function destemToggleSandik(sid) {
+    const d = tumDestelerObj();
+    if (!Array.isArray(d["sandik"])) d["sandik"] = [];
+    const yer = d["sandik"].indexOf(sid);
+    if (yer >= 0) d["sandik"].splice(yer, 1);
+    else d["sandik"].push(sid);
+    desteYaz(d);
     destemCiz();
   }
 
@@ -1235,6 +1422,16 @@
     if (toplamAltin() < ucret) { alert("Yeterli altının yok!"); return; }
     altinHarca(ucret);
     kartLevelArttir(oyun.takim, i);
+    destemCiz();
+  }
+
+  function kartYukseltSandik(sid) {
+    const lv = kartLevel("sandik", sid);
+    if (lv >= KART_MAX_LV) return;
+    const ucret = KART_YUKSELT_UCRET[lv];
+    if (toplamAltin() < ucret) { alert("Yeterli altının yok!"); return; }
+    altinHarca(ucret);
+    kartLevelArttir("sandik", sid);
     destemCiz();
   }
 
@@ -1406,18 +1603,32 @@
 
   // ---- KARTLARI DİZ ----
   function kartlariDiz() {
+    // Elimdeki kartları çalışma anında topla: hem taraf kartları hem aktif sandık kartları
+    oyun.elKartlari = [];
     const kartlar = oyun.takim === "kirmizi" ? kirmiziKartlar : maviKartlar;
-    const aktifIdx = aktifDesteIdx(oyun.takim); // sadece destede olan kartlar
+    const aktifIdx = aktifDesteIdx(oyun.takim);
+    kartlar.forEach((kart, i) => {
+      if (aktifIdx.indexOf(i) < 0) return;
+      oyun.elKartlari.push({ kart, side: oyun.takim, ref: i });
+    });
+    aktifDesteIdx("sandik").forEach(sid => {
+      if (!sahipMi(sid)) return; // sadece sahibi olduklar
+      const kart = sandikKartBul(sid);
+      if (!kart) return;
+      // Sandık kartlarında 'isim' yok, 'ad' var — kartlariDiz ve savaş için 'isim'e eşle
+      oyun.elKartlari.push({ kart: Object.assign({ isim: kart.ad }, kart), side: "sandik", ref: sid });
+    });
+
     const el = document.getElementById("el");
     el.innerHTML = "";
     const altinim = toplamAltin();
-    kartlar.forEach((kart, sira) => {
-      if (aktifIdx.indexOf(sira) < 0) return; // pasif kartları atla
-      const lv = kartLevel(oyun.takim, sira);
+    oyun.elKartlari.forEach((bilgi, sira) => {
+      const kart = bilgi.kart;
+      const lv = kartLevel(bilgi.side, bilgi.ref);
       const rutbeYazi = { siradan:"Sıradan", ender:"Ender", destansi:"Destansı" }[kart.rutbe];
       const guclu = kart.iyilesme
-        ? "İyileştir +" + kartIyilesme(oyun.takim, sira, kart)
-        : "Güç " + (kartGuc(oyun.takim, sira, kart) + oyun.gucBonus);
+        ? "İyileştir +" + kartIyilesme(bilgi.side, bilgi.ref, kart)
+        : "Güç " + (kartGuc(bilgi.side, bilgi.ref, kart) + oyun.gucBonus);
       const maliyet = kartMaliyet(kart);
       const yetersiz = altinim < maliyet;
       const div = document.createElement("div");
@@ -1425,7 +1636,7 @@
       div.innerHTML =
         '<div class="kart-lv">Lv' + lv + '</div>' +
         '<div class="emoji">' + kart.emoji + '</div>' +
-        '<div class="isim">' + kart.isim + '</div>' +
+        '<div class="isim">' + (kart.isim || kart.ad) + '</div>' +
         '<div class="guc">' + guclu + '</div>' +
         '<div class="rutbe ' + kart.rutbe + '">' + rutbeYazi + '</div>' +
         '<div class="kart-maliyet">🪙 ' + maliyet + '</div>';
@@ -1446,29 +1657,30 @@
   // İki asker ortada karşılaşır, dövüşür, kazanan krala ulaşır.
   function kartOyna(sira) {
     if (oyun.kilitli) return;
-    const kartlar = oyun.takim === "kirmizi" ? kirmiziKartlar : maviKartlar;
-    const benimKart = kartlar[sira];
+    const bilgi = (oyun.elKartlari || [])[sira];
+    if (!bilgi) return;
+    const benimKart = bilgi.kart;
+    const benimIsim = benimKart.isim || benimKart.ad;
 
     // Altın maliyeti kontrol et
     const maliyet = kartMaliyet(benimKart);
     if (toplamAltin() < maliyet) {
-      gunlugeYaz("⚠️ " + benimKart.isim + " için altının yetmiyor! (gereken: " + maliyet + " 🪙)");
+      gunlugeYaz("⚠️ " + benimIsim + " için altının yetmiyor! (gereken: " + maliyet + " 🪙)");
       return;
     }
 
     oyun.kilitli = true;
-    altinHarca(maliyet); // KART OYNAMAK PARA GERİKTİRİR
-    kartlariDiz(); // altın azaldı → yetersiz kartları soluklaştır
-
-    // Oynanan kart zıplasın
+    altinHarca(maliyet);
+    // Bu satırın sonunda kartlariDiz çağrılacak, sira geçersiz olur — animasyonu şimdi başlat
     const kartEl = document.querySelectorAll("#el .kart")[sira];
     if (kartEl) { kartEl.classList.remove("oynandi"); void kartEl.offsetWidth; kartEl.classList.add("oynandi"); }
+    kartlariDiz();
 
     // İyileşme kartı = koşmaz, direkt iyileştirir, düşman ayrıca saldırır
     if (benimKart.iyilesme) {
-      const iyi = kartIyilesme(oyun.takim, sira, benimKart);
+      const iyi = kartIyilesme(bilgi.side, bilgi.ref, benimKart);
       oyun.benimCan = Math.min(oyun.benimMax, oyun.benimCan + iyi);
-      gunlugeYaz("💚 " + benimKart.isim + " tarafını " + iyi + " iyileştirdi! (Lv" + kartLevel(oyun.takim, sira) + ")");
+      gunlugeYaz("💚 " + benimIsim + " tarafını " + iyi + " iyileştirdi! (Lv" + kartLevel(bilgi.side, bilgi.ref) + ")");
       iyilesmeEfekti("benim-satiri", iyi);
       canlariGuncelle();
       kaydet();
@@ -1487,7 +1699,7 @@
     // Güçleri kritiklerle hesapla (senin kartın level bonusu alır)
     const benimKritik  = Math.random() < 0.25;
     const dusmanKritik = Math.random() < 0.25;
-    const benimEsasGuc = kartGuc(oyun.takim, sira, benimKart) + oyun.gucBonus;
+    const benimEsasGuc = kartGuc(bilgi.side, bilgi.ref, benimKart) + oyun.gucBonus;
     const benimGuc  = benimEsasGuc * (benimKritik ? 2 : 1);
     const dusmanGuc = dusmanKart.guc * (dusmanKritik ? 2 : 1);
 
@@ -1495,7 +1707,7 @@
     const benimAsker  = askerOlustur("kos-yukari", benimKart.emoji);
     const dusmanAsker = askerOlustur("kos-asagi",  dusmanKart.emoji);
 
-    gunlugeYaz("⚔️ " + benimKart.isim + " (⚡" + benimGuc + (benimKritik ? " KRİTİK" : "") +
+    gunlugeYaz("⚔️ " + benimIsim + " (⚡" + benimGuc + (benimKritik ? " KRİTİK" : "") +
                ") vs " + dusmanKart.isim + " (⚡" + dusmanGuc + (dusmanKritik ? " KRİTİK" : "") + ")");
 
     // Adım 1 (600ms sonra): Ortada karşılaşma başlar, kavga animasyonu (infinite döngü)
@@ -1521,7 +1733,7 @@
         setTimeout(() => dusmanAsker.remove(), 500);
         benimAsker.classList.remove("dovus"); benimAsker.classList.add("zafer-yukari");
         oyun.dusmanCan = Math.max(0, oyun.dusmanCan - tarafHasari);
-        gunlugeYaz("🎉 " + benimKart.isim + " kazandı! Düşman tarafa" + tarafHasari + " hasar.");
+        gunlugeYaz("🎉 " + benimIsim + " kazandı! Düşman tarafa " + tarafHasari + " hasar.");
         altinEkle(benimKritik ? 5 : 1);
         setTimeout(() => {
           vurusEfekti("dusman-satiri", tarafHasari, benimKritik);
