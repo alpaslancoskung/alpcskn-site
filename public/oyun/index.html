@@ -713,7 +713,7 @@
       <button class="buyuk" onclick="destemAc()">📋 Destem</button>
       <button class="buyuk" onclick="magazaAc()">🛒 Mağaza</button>
       <button class="buyuk" onclick="profilAc()">👤 Profilim</button>
-      <button id="takim-degistir-btn" onclick="takimDegistir()" style="display:none;font-size:14px;padding:8px 16px;">🔄 Tarafı Değiştir</button>
+      <div id="taraf-goster" style="display:none;margin-top:10px;color:#eaf7d5;font-size:13px;text-shadow:0 1px 3px #000;"></div>
     </div>
   </section>
 
@@ -724,7 +724,7 @@
       <div class="altin-rozet">🪙 <span id="destem-altin-yazi">0</span></div>
       <div id="destem-taraf-etiketi" style="color:#ffe27a;font-weight:700;padding:6px 12px;">🔴 Kırmızı</div>
     </div>
-    <p class="merkez" style="color:#cfc9ec;font-size:13px;">Kartlara tıklayıp destene ekle/çıkar (min <b>4</b>). "Yükselt" ile güç arttır (max Lv <b>5</b>).</p>
+    <p class="merkez" style="color:#cfc9ec;font-size:13px;">Destende <b>tam 10 kart</b> olmalı — <b id="destem-sayac">0/10</b>. Az kartla oyuna giremezsin. "Yükselt" ile güç arttır (max Lv <b>5</b>).</p>
     <div id="destem-liste"></div>
     <div class="merkez" style="margin-top:14px;">
       <button onclick="anaMenu()">← Menüye Dön</button>
@@ -895,7 +895,7 @@
   const LEVEL_XP        = 300;                  // her level için gereken XP
   const KART_MAX_LV     = 5;                    // kart max level
   const KART_YUKSELT_UCRET = [0, 300, 800, 1800, 4000]; // Lv1→2, 2→3, 3→4, 4→5
-  const DESTE_MIN       = 4;                    // destede minimum kart sayısı
+  const DESTE_TAM       = 10;                   // deste tam olarak 10 kart (max ve giriş için gerekli)
   const HEDIYE_ANAHTARI = "klanlarSavasiBaslangicHediyesi2"; // 50k altın verildi mi (v2)
   const KUPA_HEDEF      = 15000;
   const BASLANGIC_ALTIN = 50000;
@@ -1062,19 +1062,24 @@
   function aktifDesteIdx(side) {
     const d = tumDestelerObj();
     if (!Array.isArray(d[side])) {
+      if (side === "sandik") return [];
       const kartlar = side === "kirmizi" ? kirmiziKartlar : maviKartlar;
-      return kartlar.map((_, i) => i); // default: hepsi aktif
+      return kartlar.slice(0, DESTE_TAM).map((_, i) => i); // default: ilk 10 kart
     }
     return d[side];
+  }
+  // Aktif destedeki TOPLAM kart sayısı (taraf + sandık)
+  function toplamAktifKart() {
+    return aktifDesteIdx(oyun.takim).length + aktifDesteIdx("sandik").length;
   }
   function desteToggle(side, idx) {
     const d = tumDestelerObj();
     if (!Array.isArray(d[side])) d[side] = aktifDesteIdx(side);
     const yer = d[side].indexOf(idx);
     if (yer >= 0) {
-      if (d[side].length <= DESTE_MIN) return "❌ Deste " + DESTE_MIN + " karttan az olamaz!";
-      d[side].splice(yer, 1);
+      d[side].splice(yer, 1); // çıkarma her zaman serbest
     } else {
+      if (toplamAktifKart() >= DESTE_TAM) return "❌ Deste dolu! Max " + DESTE_TAM + " kart olabilir. Önce bir kart çıkar.";
       d[side].push(idx);
     }
     desteYaz(d);
@@ -1236,11 +1241,17 @@
         telafi = KART_TELAFI[kart.rutbe] || 50;
         altinEkle(telafi);
       } else {
-        // Yeni kazanılan kartı otomatik olarak aktif deste'ye ekle
-        const d = tumDestelerObj();
-        if (!Array.isArray(d["sandik"])) d["sandik"] = [];
-        if (d["sandik"].indexOf(kart.id) < 0) d["sandik"].push(kart.id);
-        desteYaz(d);
+        // Yeni kazanılan kartı otomatik ekle — YALNIZCA destede yer varsa (<10)
+        // Aktif takım henüz seçilmemiş olabilir (mağaza direkt açıldıysa), o durumda taraf yok say
+        const takim = oyun.takim || guvenliOku(TAKIM_ANAHTARI);
+        const tarafSayisi = takim ? aktifDesteIdx(takim).length : 0;
+        const sandikSayisi = aktifDesteIdx("sandik").length;
+        if (tarafSayisi + sandikSayisi < DESTE_TAM) {
+          const d = tumDestelerObj();
+          if (!Array.isArray(d["sandik"])) d["sandik"] = [];
+          if (d["sandik"].indexOf(kart.id) < 0) d["sandik"].push(kart.id);
+          desteYaz(d);
+        }
       }
 
       setTimeout(() => {
@@ -1319,6 +1330,12 @@
     document.getElementById("destem-altin-yazi").textContent = toplamAltin();
     document.getElementById("destem-taraf-etiketi").textContent =
       side === "kirmizi" ? "🔴 Kırmızı Taraf" : "🔵 Mavi Taraf";
+    const sayac = document.getElementById("destem-sayac");
+    if (sayac) {
+      const t = toplamAktifKart();
+      sayac.textContent = t + "/" + DESTE_TAM;
+      sayac.style.color = (t === DESTE_TAM) ? "#4dd070" : "#ff8a7a";
+    }
     const liste = document.getElementById("destem-liste");
     liste.innerHTML = "";
 
@@ -1409,8 +1426,15 @@
     const d = tumDestelerObj();
     if (!Array.isArray(d["sandik"])) d["sandik"] = [];
     const yer = d["sandik"].indexOf(sid);
-    if (yer >= 0) d["sandik"].splice(yer, 1);
-    else d["sandik"].push(sid);
+    if (yer >= 0) {
+      d["sandik"].splice(yer, 1); // çıkarma serbest
+    } else {
+      if (toplamAktifKart() >= DESTE_TAM) {
+        alert("❌ Deste dolu! Max " + DESTE_TAM + " kart olabilir. Önce bir kart çıkar.");
+        return;
+      }
+      d["sandik"].push(sid);
+    }
     desteYaz(d);
     destemCiz();
   }
@@ -2139,6 +2163,13 @@
 
   function botIleMac() {
     if (!oyun.aktifBot) oyun.aktifBot = botBul();
+    // Deste kontrolü: tam 10 kart olmalı
+    const say = toplamAktifKart();
+    if (say < DESTE_TAM) {
+      alert("❌ Oyuna giremezsin!\nDestende " + say + " kart var — " + DESTE_TAM + " karta ihtiyacın var.\nDestem'den kart ekle.");
+      destemAc();
+      return;
+    }
     oyun.mod = "bot";
     oyun.arenaSira = 0; // arka plan için ilk arenayı kullan
     oyun.benimMax = 70; oyun.benimCan = 70;
@@ -2168,13 +2199,7 @@
     }
   }
 
-  // "Tarafı değiştir" — sadece takım seçilmişse görünür buton çağırır
-  function takimDegistir() {
-    guvenliSil(TAKIM_ANAHTARI);
-    kayitSil();
-    oyun.kilitli = false;
-    ekranGoster("ekran-takim");
-  }
+  // takimDegistir kaldırıldı — taraf seçildikten sonra değişmez
 
   function devamEt() {
     const veri = kayitOku();
@@ -2242,15 +2267,15 @@
       guvenliYaz(ALP_HEDIYE3, "1");
     }
 
-    // Takım seçilmişse "Tarafı değiştir" butonu görünsün
-    const takimBtn = document.getElementById("takim-degistir-btn");
+    // Taraf seçilmişse göster (değiştirme yok — kalıcı)
+    const tarafGoster = document.getElementById("taraf-goster");
     const kayitliTakim = guvenliOku(TAKIM_ANAHTARI);
     if (kayitliTakim === "kirmizi" || kayitliTakim === "mavi") {
-      takimBtn.style.display = "inline-block";
       const isim = kayitliTakim === "kirmizi" ? "🔴 Kırmızı" : "🔵 Mavi";
-      takimBtn.textContent = "🔄 Tarafı Değiştir (şu an: " + isim + ")";
+      tarafGoster.style.display = "block";
+      tarafGoster.textContent = "Tarafın: " + isim + " (değiştirilemez)";
     } else {
-      takimBtn.style.display = "none";
+      tarafGoster.style.display = "none";
     }
 
     altinGoster();
