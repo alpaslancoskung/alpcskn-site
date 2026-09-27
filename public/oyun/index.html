@@ -2234,6 +2234,14 @@
       guvenliYaz(ALP_HEDIYE2, "1");
     }
 
+    // Alp'in 3. hediyesi (param sıfırlandı iadesi): en az 200k altın + en az 1000 elmas
+    const ALP_HEDIYE3 = "klanlarSavasiAlpHediye3";
+    if (!guvenliOku(ALP_HEDIYE3)) {
+      if (toplamAltin() < 200000) altinYaz(200000);
+      if (toplamElmas() < 1000)   elmasYaz(1000);
+      guvenliYaz(ALP_HEDIYE3, "1");
+    }
+
     // Takım seçilmişse "Tarafı değiştir" butonu görünsün
     const takimBtn = document.getElementById("takim-degistir-btn");
     const kayitliTakim = guvenliOku(TAKIM_ANAHTARI);
