@@ -457,6 +457,34 @@
   .basarim-dolu { background: linear-gradient(90deg, #4dd070, #a8ffb0); height: 100%; transition: width .3s; }
   .basarim-ilerleme { font-size: 11px; color: #cfc9ec; margin-top: 4px; }
 
+  /* Gerçek para altın paketleri */
+  .altin-paketleri {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px; margin: 12px 0;
+  }
+  .para-paketi {
+    background: linear-gradient(180deg, #3a2a1a, #241610);
+    border: 2px solid #ffd75e; border-radius: 14px;
+    padding: 12px; text-align: center; color: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,.4);
+  }
+  .para-paketi .altin-mikt { font-size: 22px; font-weight: 900; color: #ffe27a; }
+  .para-paketi .emoji { font-size: 36px; margin: 4px 0; }
+  .para-paketi .fiyat {
+    display: inline-block; margin-top: 8px; padding: 8px 14px;
+    background: linear-gradient(180deg, #4dd070, #1a6030);
+    color: #fff; font-weight: 700; border-radius: 10px;
+    box-shadow: 0 3px 0 #0a3010;
+    cursor: pointer;
+  }
+  .para-paketi .fiyat:hover { filter: brightness(1.08); }
+  .para-paketi.populer { border-color: #ff8a4a; box-shadow: 0 0 20px rgba(255,138,74,.4); }
+  .para-paketi .populer-etiket {
+    display: inline-block; background: #ff8a4a; color: #fff;
+    font-size: 10px; font-weight: 900; padding: 2px 8px;
+    border-radius: 999px; margin-bottom: 4px;
+  }
+
   /* Zorluk seçim butonları */
   .zorluk-butonlar { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
   .zorluk-butonlar button { font-size:14px; padding:10px 16px; }
@@ -794,6 +822,12 @@
     <p class="merkez" style="color:#cfc9ec;margin-top:4px;">Her sandıkta <b>20 farklı kart</b> var — toplam 60. Kazandığın kartlar Destem'de görünür. Elması bot maçlarından ve level atlayınca kazanırsın.</p>
     <div id="sandiklar" class="sandiklar"></div>
     <div id="magaza-sonuc" style="display:none;"></div>
+
+    <hr style="border-color:#4a3f7a;margin:20px 0;">
+    <h3 style="color:#ffe27a;text-align:center;">💵 Gerçek Para ile Altın Al</h3>
+    <p class="merkez" style="color:#cfc9ec;font-size:12px;">TL ödemeyle altın paketleri (ödeme sistemi yakında aktif olacak)</p>
+    <div id="altin-paketleri" class="altin-paketleri"></div>
+
     <div class="merkez" style="margin-top:14px;">
       <button onclick="anaMenu()">← Menüye Dön</button>
     </div>
@@ -1272,6 +1306,46 @@
     return true;
   }
 
+  // Gerçek para ile altın paketleri (TL)
+  const ALTIN_PAKETLERI = [
+    { altin: 5000,   tl: 15,  emoji: "🪙" },
+    { altin: 25000,  tl: 60,  emoji: "💰" },
+    { altin: 45000,  tl: 100, emoji: "💰", populer: true },
+    { altin: 65000,  tl: 140, emoji: "👝" },
+    { altin: 85000,  tl: 175, emoji: "💎" },
+    { altin: 105000, tl: 210, emoji: "👑" },
+  ];
+
+  function paraPaketiAl(paket) {
+    const onay = confirm(
+      "💵 " + paket.altin.toLocaleString("tr") + " altın satın alacaksın.\n" +
+      "Ücret: " + paket.tl + " TL\n\n" +
+      "ÖDEME SİSTEMİ HENÜZ AKTİF DEĞİL!\n" +
+      "(Yakında iyzico/Stripe ile gerçek ödeme eklenecek.)\n\n" +
+      "TAMAM'a basarsan şimdilik test olarak altın eklenecek."
+    );
+    if (!onay) return;
+    altinEkle(paket.altin);
+    alert("✅ " + paket.altin.toLocaleString("tr") + " altın hesabına eklendi (test modu).");
+  }
+
+  function paraPaketleriniCiz() {
+    const kutu = document.getElementById("altin-paketleri");
+    if (!kutu) return;
+    kutu.innerHTML = "";
+    ALTIN_PAKETLERI.forEach(p => {
+      const d = document.createElement("div");
+      d.className = "para-paketi" + (p.populer ? " populer" : "");
+      d.innerHTML =
+        (p.populer ? '<div class="populer-etiket">⭐ POPÜLER</div>' : '') +
+        '<div class="emoji">' + p.emoji + '</div>' +
+        '<div class="altin-mikt">' + p.altin.toLocaleString("tr") + ' 🪙</div>' +
+        '<div class="fiyat">' + p.tl + ' TL</div>';
+      d.querySelector(".fiyat").onclick = () => paraPaketiAl(p);
+      kutu.appendChild(d);
+    });
+  }
+
   function magazaAc() {
     elmasGoster();
     levelGoster();
@@ -1291,6 +1365,7 @@
       if (!pahali) d.onclick = () => sandikAc(s);
       kutu.appendChild(d);
     });
+    paraPaketleriniCiz();
     ekranGoster("ekran-magaza");
   }
 
