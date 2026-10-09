@@ -441,6 +441,47 @@
 
   .buyuk-emoji-orta { font-size: 64px; }
 
+  /* Başarım listesi */
+  .basarim-satir {
+    display: flex; gap: 10px; align-items: center;
+    background: linear-gradient(180deg, #2a2450, #1a1638);
+    border: 2px solid #4a3f7a; border-radius: 12px;
+    padding: 10px; margin: 8px 0; color: #fff;
+  }
+  .basarim-satir.tamam { border-color: #4dd070; box-shadow: 0 0 10px rgba(77,208,112,.3); }
+  .basarim-em { font-size: 36px; flex-shrink: 0; }
+  .basarim-ic { flex: 1; min-width: 0; }
+  .basarim-ad { font-weight: 700; color: #ffe27a; margin-bottom: 2px; }
+  .basarim-not { font-size: 12px; color: #cfc9ec; margin-bottom: 6px; }
+  .basarim-cubuk { background: #1a1638; border-radius: 8px; height: 10px; overflow: hidden; }
+  .basarim-dolu { background: linear-gradient(90deg, #4dd070, #a8ffb0); height: 100%; transition: width .3s; }
+  .basarim-ilerleme { font-size: 11px; color: #cfc9ec; margin-top: 4px; }
+
+  /* Zorluk seçim butonları */
+  .zorluk-butonlar { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+  .zorluk-butonlar button { font-size:14px; padding:10px 16px; }
+  .zorluk-butonlar button.secili {
+    background: linear-gradient(180deg,#a8ffb0,#4dd070); color:#0a3010;
+    box-shadow: 0 4px 0 #1a6030, 0 6px 10px rgba(0,0,0,.35);
+  }
+
+  /* Kombo balon efekti (savaş sahnesinde) */
+  .kombo-balon {
+    position: absolute; top: 20%; left: 50%; transform: translateX(-50%);
+    background: linear-gradient(180deg, #ff8a4a, #c0392b);
+    color: #fff; padding: 10px 18px; border-radius: 16px;
+    font-weight: 900; font-size: 18px; text-align: center;
+    box-shadow: 0 6px 20px rgba(0,0,0,.5), 0 0 25px rgba(255,138,74,.7);
+    z-index: 50; pointer-events: none;
+    animation: komboAnim 1.2s ease-out forwards;
+  }
+  @keyframes komboAnim {
+    0%   { transform: translateX(-50%) scale(.3); opacity: 0; }
+    30%  { transform: translateX(-50%) scale(1.3); opacity: 1; }
+    70%  { transform: translateX(-50%) scale(1); opacity: 1; }
+    100% { transform: translateX(-50%) scale(.9) translateY(-30px); opacity: 0; }
+  }
+
   /* ---- Destem ekranı: kart listesi ---- */
   #destem-liste {
     display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -713,6 +754,7 @@
       <button class="buyuk" onclick="botEkraniAc()">🤖 Bot ile Maç</button>
       <button class="buyuk" onclick="destemAc()">📋 Destem</button>
       <button class="buyuk" onclick="magazaAc()">🛒 Mağaza</button>
+      <button class="buyuk" onclick="basarimAc()">🏅 Başarımlar</button>
       <button class="buyuk" onclick="profilAc()">👤 Profilim</button>
       <div id="taraf-goster" style="display:none;margin-top:10px;color:#eaf7d5;font-size:13px;text-shadow:0 1px 3px #000;"></div>
     </div>
@@ -727,6 +769,16 @@
     </div>
     <p class="merkez" style="color:#cfc9ec;font-size:13px;">Destende <b>tam 10 kart</b> olmalı — <b id="destem-sayac">0/10</b>. Az kartla oyuna giremezsin. "Yükselt" ile güç arttır (max Lv <b>5</b>).</p>
     <div id="destem-liste"></div>
+    <div class="merkez" style="margin-top:14px;">
+      <button onclick="anaMenu()">← Menüye Dön</button>
+    </div>
+  </section>
+
+  <!-- EKRAN: Başarımlar -->
+  <section id="ekran-basarim" class="ekran">
+    <h2>🏅 Başarımlar</h2>
+    <p class="merkez" style="color:#cfc9ec;font-size:13px;">Hedefleri tamamla, elmas kazan!</p>
+    <div id="basarim-liste"></div>
     <div class="merkez" style="margin-top:14px;">
       <button onclick="anaMenu()">← Menüye Dön</button>
     </div>
@@ -777,11 +829,15 @@
   <!-- EKRAN: Bot eşleşme -->
   <section id="ekran-bot" class="ekran">
     <h2>🤖 Bot ile Maç</h2>
-    <p class="merkez">Kupa seviyene göre bir rakip seçildi. Kazanırsan <b>+50 kupa</b> + <b>+100 altın</b>, kaybedersen <b>-20 kupa</b>.</p>
+    <p class="merkez">Kupa seviyene göre bir rakip seçildi. Kazanırsan <b>+50 kupa</b> + <b>+100 altın</b> + 🎁 Zafer Sandığı, kaybedersen <b>-20 kupa</b>.</p>
     <div id="bot-karti" class="secim" style="max-width:340px;margin:10px auto;cursor:default;">
       <div class="buyuk-emoji" id="bot-emoji">🐣</div>
       <h3 id="bot-ad" style="color:#ffe27a">—</h3>
       <p id="bot-bilgi">—</p>
+    </div>
+    <div class="merkez" style="margin-top:8px;">
+      <h3 style="color:#ffe27a;margin:8px 0 4px;">Zorluk</h3>
+      <div id="zorluk-secim" class="zorluk-butonlar"></div>
     </div>
     <div class="merkez" style="margin-top:14px;">
       <button class="buyuk" onclick="botIleMac()">⚔️ Savaşa Başla</button>
@@ -880,6 +936,9 @@
     altin: 0,          // bu seferde toplanmış altın
     mod: "sefer",      // "sefer" (kampanya) veya "bot" (tek maç)
     aktifBot: null,    // bot modunda karşındaki bot
+    sonRutbe: null,    // son oynanan kartın rütbesi (kombo için)
+    komboSayac: 0,     // ardışık aynı rütbe sayısı
+    zorluk: "normal",  // bot zorluk: "kolay" / "normal" / "zor"
   };
 
   const KAYIT_ANAHTARI  = "klanlarSavasi";
@@ -1226,6 +1285,7 @@
     document.getElementById("magaza-sonuc").style.display = "none";
     elmasCikar(sandik.fiyat);
     sandikDiv.classList.add("sallaniyor");
+    basarimSayacArttir("acilanSandik", 1);
 
     // ~1.4s salladıktan sonra kart çık
     setTimeout(() => {
@@ -1326,6 +1386,113 @@
         '<button class="buyuk" onclick="document.getElementById(\'gunluk-modal\').remove()">✅ Teşekkürler!</button>' +
       '</div>';
     document.body.appendChild(mod);
+  }
+
+  // ---- BAŞARIMLAR (hedef + ödül + ilerleme) ----
+  const BASARIM_SAYACLAR = "klanlarSavasiBasarimSayac"; // {macZafer, macToplam, acilanSandik, komboMax, bos...}
+  const BASARIM_ALINAN   = "klanlarSavasiBasarimAlinan"; // array of basarim id
+
+  const BASARIMLAR = [
+    { id:"ilk-zafer",   ad:"İlk Zafer",            emoji:"🎉", hedef:1,   sayac:"macZafer",     odul:10,  not:"İlk bot maçını kazan" },
+    { id:"10-zafer",    ad:"10 Maç Kazan",         emoji:"⚔️", hedef:10,  sayac:"macZafer",     odul:30,  not:"10 bot maçını kazan" },
+    { id:"50-zafer",    ad:"50 Maç Kazan",         emoji:"🥇", hedef:50,  sayac:"macZafer",     odul:100, not:"50 bot maçını kazan" },
+    { id:"100-zafer",   ad:"100 Maç Kazan",        emoji:"🏆", hedef:100, sayac:"macZafer",     odul:250, not:"100 bot maçını kazan" },
+    { id:"10-mac",      ad:"10 Maç Oyna",          emoji:"🎮", hedef:10,  sayac:"macToplam",    odul:20,  not:"10 maç oyna (galibiyet-mağlubiyet)" },
+    { id:"50-mac",      ad:"50 Maç Oyna",          emoji:"🎲", hedef:50,  sayac:"macToplam",    odul:60,  not:"50 maç oyna" },
+    { id:"ilk-sandik",  ad:"İlk Sandık",           emoji:"📦", hedef:1,   sayac:"acilanSandik", odul:15,  not:"Mağazadan ilk sandığını aç" },
+    { id:"10-sandik",   ad:"10 Sandık Aç",         emoji:"🎁", hedef:10,  sayac:"acilanSandik", odul:50,  not:"Toplam 10 sandık aç" },
+    { id:"50-sandik",   ad:"50 Sandık Aç",         emoji:"🏰", hedef:50,  sayac:"acilanSandik", odul:200, not:"Toplam 50 sandık aç" },
+    { id:"kombo-3",     ad:"Kombo x3",             emoji:"🔥", hedef:3,   sayac:"komboMax",     odul:25,  not:"3'lü kombo yap (aynı rütbe 3 kart)" },
+    { id:"kombo-5",     ad:"Kombo x5",             emoji:"💥", hedef:5,   sayac:"komboMax",     odul:75,  not:"5'li kombo yap" },
+    { id:"10-kart",     ad:"10 Kart Topla",        emoji:"🃏", hedef:10,  sayac:"sahipKart",    odul:40,  not:"10 farklı sandık kartı topla" },
+    { id:"30-kart",     ad:"30 Kart Topla",        emoji:"🎴", hedef:30,  sayac:"sahipKart",    odul:150, not:"30 farklı sandık kartı topla" },
+    { id:"60-kart",     ad:"Koleksiyon Tam!",      emoji:"👑", hedef:60,  sayac:"sahipKart",    odul:500, not:"60 kartın hepsini topla" },
+    { id:"sampiyon",    ad:"Şampiyonu Yen",        emoji:"👑", hedef:1,   sayac:"sampiyonZafer",odul:200, not:"Şampiyon Emre'yi yen" },
+    { id:"lv-5",        ad:"Level 5",              emoji:"⭐", hedef:5,   sayac:"oyuncuLevel",  odul:30,  not:"Oyuncu level 5'e ulaş" },
+    { id:"lv-10",       ad:"Level 10",             emoji:"🌟", hedef:10,  sayac:"oyuncuLevel",  odul:80,  not:"Oyuncu level 10'a ulaş" },
+    { id:"lv-20",       ad:"Max Level",            emoji:"💫", hedef:20,  sayac:"oyuncuLevel",  odul:300, not:"Oyuncu level 20'ye ulaş" },
+  ];
+
+  function basarimSayaclari() {
+    try { return JSON.parse(guvenliOku(BASARIM_SAYACLAR) || "{}"); }
+    catch (e) { return {}; }
+  }
+  function basarimSayacYaz(o) { guvenliYaz(BASARIM_SAYACLAR, JSON.stringify(o)); }
+  function basarimAlinanIdler() {
+    try { return JSON.parse(guvenliOku(BASARIM_ALINAN) || "[]"); }
+    catch (e) { return []; }
+  }
+  function basarimAlinanYaz(a) { guvenliYaz(BASARIM_ALINAN, JSON.stringify(a)); }
+  function basarimSayacGuncelle(ad, deger) {
+    const s = basarimSayaclari();
+    if (deger > (s[ad] || 0)) s[ad] = deger;
+    basarimSayacYaz(s);
+    basarimKontrol();
+  }
+  function basarimSayacArttir(ad, miktar) {
+    const s = basarimSayaclari();
+    s[ad] = (s[ad] || 0) + (miktar || 1);
+    basarimSayacYaz(s);
+    basarimKontrol();
+  }
+  function basarimKontrol() {
+    const s = basarimSayaclari();
+    s.sahipKart = sahipSandikKartIdleri().length;
+    s.oyuncuLevel = seviye();
+    const alinan = basarimAlinanIdler();
+    let yeni = false;
+    BASARIMLAR.forEach(b => {
+      if (alinan.indexOf(b.id) >= 0) return;
+      const mevcut = s[b.sayac] || 0;
+      if (mevcut >= b.hedef) {
+        alinan.push(b.id);
+        elmasEkle(b.odul);
+        yeni = true;
+        setTimeout(() => basarimAcildiModal(b), 300);
+      }
+    });
+    if (yeni) basarimAlinanYaz(alinan);
+  }
+  function basarimAcildiModal(b) {
+    const eski = document.getElementById("basarim-modal");
+    if (eski) eski.remove();
+    const mod = document.createElement("div");
+    mod.id = "basarim-modal";
+    mod.className = "kart-acildi-arka";
+    mod.innerHTML =
+      '<div class="kart-acildi-icerik destansi" style="text-align:center;">' +
+        '<div class="yeni-etiket">🏅 BAŞARIM AÇILDI!</div>' +
+        '<div class="modal-emoji">' + b.emoji + '</div>' +
+        '<div class="modal-ad">' + b.ad + '</div>' +
+        '<div class="modal-not" style="font-size:14px;color:#eaf7d5;">' + b.not + '</div>' +
+        '<div class="modal-guc" style="font-size:20px;color:#6ecff5;margin:12px 0;">+' + b.odul + ' 💎</div>' +
+        '<button class="buyuk" onclick="document.getElementById(\'basarim-modal\').remove()">✅ Harika!</button>' +
+      '</div>';
+    document.body.appendChild(mod);
+  }
+  function basarimAc() {
+    basarimKontrol();
+    const s = basarimSayaclari();
+    const alinan = new Set(basarimAlinanIdler());
+    const liste = document.getElementById("basarim-liste");
+    liste.innerHTML = "";
+    BASARIMLAR.forEach(b => {
+      const mevcut = s[b.sayac] || 0;
+      const ilerleme = Math.min(100, (mevcut / b.hedef) * 100);
+      const tamam = alinan.has(b.id);
+      const div = document.createElement("div");
+      div.className = "basarim-satir" + (tamam ? " tamam" : "");
+      div.innerHTML =
+        '<div class="basarim-em">' + b.emoji + '</div>' +
+        '<div class="basarim-ic">' +
+          '<div class="basarim-ad">' + b.ad + (tamam ? ' ✅' : '') + '</div>' +
+          '<div class="basarim-not">' + b.not + '</div>' +
+          '<div class="basarim-cubuk"><div class="basarim-dolu" style="width:' + ilerleme + '%"></div></div>' +
+          '<div class="basarim-ilerleme">' + Math.min(mevcut, b.hedef) + ' / ' + b.hedef + ' · 💎 ' + b.odul + '</div>' +
+        '</div>';
+      liste.appendChild(div);
+    });
+    ekranGoster("ekran-basarim");
   }
 
   // ---- KART İSTATİSTİKLERİ (kullanım + galibiyet) ----
@@ -1841,10 +2008,19 @@
     const enGuclu = dusmanSaldiriKartlari.reduce((a, b) => (b.guc > a.guc ? b : a));
     const dusmanKart = Math.random() < 0.5 ? enGuclu : rastgele(dusmanSaldiriKartlari);
 
+    // KOMBO: aynı rütbe arka arkaya → 2.si +1, 3.sü +2, 4+ +3 güç bonus
+    if (oyun.sonRutbe === benimKart.rutbe) oyun.komboSayac += 1;
+    else { oyun.komboSayac = 1; oyun.sonRutbe = benimKart.rutbe; }
+    const komboBonus = Math.max(0, Math.min(3, oyun.komboSayac - 1));
+    if (komboBonus > 0) {
+      gunlugeYaz("🔥 KOMBO x" + oyun.komboSayac + "! +" + komboBonus + " güç bonusu");
+      komboEfekti(oyun.komboSayac, komboBonus);
+      basarimSayacGuncelle("komboMax", oyun.komboSayac);
+    }
     // Güçleri kritiklerle hesapla (senin kartın level bonusu alır)
     const benimKritik  = Math.random() < 0.25;
     const dusmanKritik = Math.random() < 0.25;
-    const benimEsasGuc = kartGuc(bilgi.side, bilgi.ref, benimKart) + oyun.gucBonus;
+    const benimEsasGuc = kartGuc(bilgi.side, bilgi.ref, benimKart) + oyun.gucBonus + komboBonus;
     const benimGuc  = benimEsasGuc * (benimKritik ? 2 : 1);
     const dusmanGuc = dusmanKart.guc * (dusmanKritik ? 2 : 1);
 
@@ -1980,18 +2156,26 @@
     // Bot modunda: kupa+altın+elmas+XP ver, menüye dön
     if (oyun.mod === "bot" && oyun.aktifBot) {
       const bot = oyun.aktifBot;
-      const kazaniElmas = 5 + Math.floor(bot.kupaMin / 500) * 2;
-      const kazaniXP = 100;
-      kupaEkle(50);
-      altinEkle(100);
+      const zorlukObj = ZORLUKLAR.find(z => z.id === oyun.zorluk) || ZORLUKLAR[1];
+      const cz = zorlukObj.oduldCarpan;
+      const kazaniElmas = Math.round((5 + Math.floor(bot.kupaMin / 500) * 2) * cz);
+      const kazaniXP = Math.round(100 * cz);
+      const kazaniAltin = Math.round(100 * cz);
+      const kazaniKupa = Math.round(50 * cz);
+      kupaEkle(kazaniKupa);
+      altinEkle(kazaniAltin);
       elmasEkle(kazaniElmas);
       xpEkle(kazaniXP);
-      gunlugeYaz("🏆 " + bot.ad + "'ı yendin! +50 kupa, +100 altın, +" + kazaniElmas + " 💎, +" + kazaniXP + " XP.");
+      // Başarım sayaçları
+      basarimSayacArttir("macZafer", 1);
+      basarimSayacArttir("macToplam", 1);
+      if (bot.ad === "Şampiyon Emre") basarimSayacArttir("sampiyonZafer", 1);
+      gunlugeYaz("🏆 " + bot.ad + "'ı yendin! +" + kazaniKupa + " kupa, +" + kazaniAltin + " altın, +" + kazaniElmas + " 💎, +" + kazaniXP + " XP.");
       document.getElementById("sonuc-emoji").textContent = "🏆";
       document.getElementById("sonuc-baslik").textContent = "BOT MAÇI KAZANILDI!";
       document.getElementById("sonuc-yazi").innerHTML =
-        bot.emoji + " " + bot.ad + " yenildi!<br>" +
-        "🏆 +50 kupa · 🪙 +100 altın · 💎 +" + kazaniElmas + " elmas · +" + kazaniXP + " XP<br>" +
+        bot.emoji + " " + bot.ad + " yenildi! (" + zorlukObj.ad + ")<br>" +
+        "🏆 +" + kazaniKupa + " kupa · 🪙 +" + kazaniAltin + " altın · 💎 +" + kazaniElmas + " elmas · +" + kazaniXP + " XP<br>" +
         "Level: <b>" + seviye() + "</b> / " + MAX_LEVEL +
         "<br><br>🎁 Zafer Sandığın açılıyor...";
       oyun.mod = "sefer"; oyun.aktifBot = null;
@@ -2138,7 +2322,8 @@
     if (oyun.mod === "bot" && oyun.aktifBot) {
       const bot = oyun.aktifBot;
       kupaCikar(20);
-      xpEkle(25); // Kaybetsen bile biraz deneyim
+      xpEkle(25);
+      basarimSayacArttir("macToplam", 1);
       const kupa = toplamKupa();
       document.getElementById("sonuc-emoji").textContent = "💀";
       document.getElementById("sonuc-baslik").textContent = "Kaybettin";
@@ -2269,10 +2454,32 @@
     }
   }
 
+  const ZORLUKLAR = [
+    { id:"kolay",  ad:"🐣 Kolay",  canCarpan:0.7, oduldCarpan:0.5 },
+    { id:"normal", ad:"⚖️ Normal", canCarpan:1.0, oduldCarpan:1.0 },
+    { id:"zor",    ad:"🔥 Zor",    canCarpan:1.5, oduldCarpan:2.0 },
+  ];
+
+  function zorlukSec(id) {
+    oyun.zorluk = id;
+    zorlukCiz();
+  }
+  function zorlukCiz() {
+    const kutu = document.getElementById("zorluk-secim");
+    if (!kutu) return;
+    kutu.innerHTML = "";
+    ZORLUKLAR.forEach(z => {
+      const b = document.createElement("button");
+      b.textContent = z.ad + " (×" + z.oduldCarpan + " ödül)";
+      if (oyun.zorluk === z.id) b.className = "secili";
+      b.onclick = () => zorlukSec(z.id);
+      kutu.appendChild(b);
+    });
+  }
+
   function botEkraniAc() {
     const t = guvenliOku(TAKIM_ANAHTARI);
     if (t !== "kirmizi" && t !== "mavi") {
-      // Önce taraf seçtirmemiz gerek — direkt taraf ekranına git
       ekranGoster("ekran-takim");
       return;
     }
@@ -2282,6 +2489,8 @@
     document.getElementById("bot-emoji").textContent = b.emoji;
     document.getElementById("bot-ad").textContent = b.ad + " (🏆 " + b.kupaMin + "+)";
     document.getElementById("bot-bilgi").textContent = b.not;
+    if (!oyun.zorluk) oyun.zorluk = "normal";
+    zorlukCiz();
     ekranGoster("ekran-bot");
   }
 
@@ -2295,17 +2504,29 @@
       return;
     }
     oyun.mod = "bot";
-    oyun.arenaSira = 0; // arka plan için ilk arenayı kullan
+    oyun.arenaSira = 0;
     oyun.benimMax = 70; oyun.benimCan = 70;
-    oyun.dusmanMax = oyun.aktifBot.dusmanCan;
-    oyun.dusmanCan = oyun.aktifBot.dusmanCan;
+    const zorlukObj = ZORLUKLAR.find(z => z.id === oyun.zorluk) || ZORLUKLAR[1];
+    const botCan = Math.round(oyun.aktifBot.dusmanCan * zorlukObj.canCarpan);
+    oyun.dusmanMax = botCan;
+    oyun.dusmanCan = botCan;
     oyun.gucBonus = 0;
     oyun.durum = "savas";
     oyun.kilitli = false;
+    oyun.sonRutbe = null; oyun.komboSayac = 0; // kombo reset
     document.getElementById("gunluk").innerHTML = "";
     gunlugeYaz("🤖 " + oyun.aktifBot.emoji + " " + oyun.aktifBot.ad + " ile eşleştin! Bol şans.");
     savasiCiz();
     ekranGoster("ekran-savas");
+  }
+
+  function komboEfekti(sayi, bonus) {
+    const sahne = document.getElementById("sahne");
+    const d = document.createElement("div");
+    d.className = "kombo-balon";
+    d.innerHTML = '🔥 KOMBO x' + sayi + '<br>+' + bonus + ' Güç';
+    sahne.appendChild(d);
+    setTimeout(() => d.remove(), 1200);
   }
 
   function yeniOyun() {
