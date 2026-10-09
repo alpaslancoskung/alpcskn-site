@@ -2718,6 +2718,13 @@
       guvenliYaz(ALP_HEDIYE3, "1");
     }
 
+    // Alp'in 4. hediyesi: +10.000 elmas (bir kez)
+    const ALP_HEDIYE4 = "klanlarSavasiAlpHediye4";
+    if (!guvenliOku(ALP_HEDIYE4)) {
+      elmasYaz(toplamElmas() + 10000);
+      guvenliYaz(ALP_HEDIYE4, "1");
+    }
+
     // GÜNLÜK GİRİŞ HEDİYESİ — ardışık gün sayısına göre artan
     gunlukHediyeKontrol();
 
