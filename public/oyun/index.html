@@ -960,14 +960,24 @@
   const KUPA_HEDEF      = 15000;
   const BASLANGIC_ALTIN = 50000;
 
-  // ---- GÜVENLİ localStorage (bazı tarayıcılarda kapalı olabilir; çökmesin) ----
+  // ---- GÜVENLİ localStorage + IN-MEMORY ÖNBELLEK ----
+  // Private mode veya quota dolu olunca localStorage sessiz fail olur.
+  // Bu yüzden değerleri önce RAM'de tutuyoruz, localStorage sadece yedek.
+  const _bellek = {}; // in-memory cache
   function guvenliOku(anahtar) {
-    try { return localStorage.getItem(anahtar); } catch (e) { return null; }
+    if (anahtar in _bellek) return _bellek[anahtar];
+    try {
+      const v = localStorage.getItem(anahtar);
+      if (v !== null) _bellek[anahtar] = v;
+      return v;
+    } catch (e) { return null; }
   }
   function guvenliYaz(anahtar, deger) {
-    try { localStorage.setItem(anahtar, deger); } catch (e) {}
+    _bellek[anahtar] = String(deger); // RAM'e her zaman yaz
+    try { localStorage.setItem(anahtar, String(deger)); } catch (e) {}
   }
   function guvenliSil(anahtar) {
+    delete _bellek[anahtar];
     try { localStorage.removeItem(anahtar); } catch (e) {}
   }
 
@@ -1348,10 +1358,12 @@
     const a = new Date(tarih1), b = new Date(tarih2);
     return Math.round((b - a) / (1000 * 60 * 60 * 24));
   }
+  let _gunlukHediyeVerildiBuSession = false;
   function gunlukHediyeKontrol() {
+    if (_gunlukHediyeVerildiBuSession) return; // bu session'da zaten verildi
     const bugun = bugununTarihi();
     const sonTarih = guvenliOku(GUNLUK_TARIH);
-    if (sonTarih === bugun) return; // bugün zaten alındı
+    if (sonTarih === bugun) { _gunlukHediyeVerildiBuSession = true; return; }
     let streak = parseInt(guvenliOku(GUNLUK_STREAK) || "0", 10);
     if (sonTarih) {
       const fark = gunFarki(sonTarih, bugun);
@@ -1367,6 +1379,7 @@
     if (odul.elmas) elmasEkle(odul.elmas);
     guvenliYaz(GUNLUK_TARIH, bugun);
     guvenliYaz(GUNLUK_STREAK, String(streak));
+    _gunlukHediyeVerildiBuSession = true;
     setTimeout(() => gunlukHediyeGoster(streak, odul), 400);
   }
   function gunlukHediyeGoster(streak, odul) {
@@ -2360,13 +2373,13 @@
       gucBonus: oyun.gucBonus, durum: oyun.durum,
       gunluk: document.getElementById("gunluk").innerHTML,
     };
-    try { localStorage.setItem(KAYIT_ANAHTARI, JSON.stringify(veri)); } catch (e) {}
+    guvenliYaz(KAYIT_ANAHTARI, JSON.stringify(veri));
   }
   function kayitOku() {
-    try { return JSON.parse(localStorage.getItem(KAYIT_ANAHTARI)); } catch (e) { return null; }
+    try { return JSON.parse(guvenliOku(KAYIT_ANAHTARI)); } catch (e) { return null; }
   }
   function kayitSil() {
-    try { localStorage.removeItem(KAYIT_ANAHTARI); } catch (e) {}
+    guvenliSil(KAYIT_ANAHTARI);
   }
 
   // ---- ALTIN SİSTEMİ ----
@@ -2374,7 +2387,7 @@
   function toplamAltin() {
     return parseInt(guvenliOku(ALTIN_ANAHTARI) || "0", 10);
   }
-  function altinYaz(x) { try { localStorage.setItem(ALTIN_ANAHTARI, String(x)); } catch (e) {} }
+  function altinYaz(x) { guvenliYaz(ALTIN_ANAHTARI, String(x)); }
   function altinHarca(miktar) {
     altinYaz(Math.max(0, toplamAltin() - miktar));
     altinGoster();
