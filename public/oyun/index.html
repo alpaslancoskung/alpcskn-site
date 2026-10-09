@@ -458,6 +458,7 @@
   .destem-kart .ad { font-weight: 700; font-size: 13px; margin-bottom: 3px; }
   .destem-kart .lv-yazi { color: #ffe27a; font-weight: 700; font-size: 12px; }
   .destem-kart .guc-yazi { color: #6facff; font-size: 12px; margin: 3px 0; }
+  .destem-kart .ist-yazi { color: #cfc9ec; font-size: 11px; margin: 2px 0; }
   .destem-kart .btn-satir { display: flex; gap: 4px; margin-top: 6px; }
   .destem-kart button { font-size: 11px; padding: 6px 8px; flex: 1; box-shadow: 0 2px 0 #b9791a; }
   .destem-kart button.aktif-btn.aktif { background: linear-gradient(180deg,#a8ffb0,#4dd070); color:#0a3010; box-shadow:0 2px 0 #1a6030; }
@@ -1088,9 +1089,10 @@
 
   // ---- MAĞAZA: 3 sandık × 20 ödül = 60 ödül ----
   const SANDIKLAR = [
-    { id:"kucuk", ad:"Ahşap Sandık", emoji:"📦", fiyat:20,  not:"20 ödülden birini kazan" },
-    { id:"orta",  ad:"Gümüş Sandık", emoji:"🎁", fiyat:50,  not:"20 daha büyük ödül" },
-    { id:"buyuk", ad:"Altın Sandık", emoji:"🏆", fiyat:100, not:"20 destansı ödül" },
+    { id:"kucuk",  ad:"Ahşap Sandık",  emoji:"📦", fiyat:20,  not:"20 sıradan karttan 1" },
+    { id:"orta",   ad:"Gümüş Sandık",  emoji:"🎁", fiyat:50,  not:"20 ender karttan 1" },
+    { id:"buyuk",  ad:"Altın Sandık",  emoji:"🏆", fiyat:100, not:"20 destansı karttan 1" },
+    { id:"efsane", ad:"Efsane Sandığı",emoji:"🌟", fiyat:500, not:"GARANTİ DESTANSI (altın havuzu)" },
   ];
 
   // 60 SANDIK KARTI — her sandıkta 20, hepsi savaşta oynanabilir
@@ -1165,6 +1167,7 @@
   function sandikKartlari(tier) {
     if (tier === "kucuk") return AHSAP_KARTLAR;
     if (tier === "orta")  return GUMUS_KARTLAR;
+    if (tier === "efsane") return ALTIN_KARTLAR; // Efsane de altın havuzu kullanır
     return ALTIN_KARTLAR;
   }
   // Tüm sandık kartlarını id ile bulmak için
@@ -1262,6 +1265,120 @@
     }, 1400);
   }
 
+  // ---- GÜNLÜK GİRİŞ HEDİYESİ ----
+  const GUNLUK_TARIH = "klanlarSavasiGunlukTarih";   // son hediye alınan tarih (YYYY-MM-DD)
+  const GUNLUK_STREAK = "klanlarSavasiGunlukStreak"; // ardışık gün sayısı
+  // Her ardışık gün: 1=100🪙, 2=200🪙+2💎, 3=400🪙+5💎, 4=600🪙+10💎, 5=1000🪙+15💎, 6=1500🪙+25💎, 7+=50💎+2000🪙
+  const GUNLUK_ODUL = [
+    { gun: 1, altin: 100,  elmas: 0,  not: "Hoş geldin! İlk gün bonusu." },
+    { gun: 2, altin: 200,  elmas: 2,  not: "2. gün — devam et!" },
+    { gun: 3, altin: 400,  elmas: 5,  not: "3. gün — süper!" },
+    { gun: 4, altin: 600,  elmas: 10, not: "4. gün — harikasın!" },
+    { gun: 5, altin: 1000, elmas: 15, not: "5. gün — efsane!" },
+    { gun: 6, altin: 1500, elmas: 25, not: "6. gün — süper streak!" },
+    { gun: 7, altin: 2000, elmas: 50, not: "7+ gün — ULTRA ÖDÜL!" },
+  ];
+  function bugununTarihi() {
+    const d = new Date();
+    return d.getFullYear() + "-" +
+      String(d.getMonth() + 1).padStart(2, "0") + "-" +
+      String(d.getDate()).padStart(2, "0");
+  }
+  function gunFarki(tarih1, tarih2) {
+    const a = new Date(tarih1), b = new Date(tarih2);
+    return Math.round((b - a) / (1000 * 60 * 60 * 24));
+  }
+  function gunlukHediyeKontrol() {
+    const bugun = bugununTarihi();
+    const sonTarih = guvenliOku(GUNLUK_TARIH);
+    if (sonTarih === bugun) return; // bugün zaten alındı
+    let streak = parseInt(guvenliOku(GUNLUK_STREAK) || "0", 10);
+    if (sonTarih) {
+      const fark = gunFarki(sonTarih, bugun);
+      if (fark === 1) streak += 1;
+      else if (fark > 1) streak = 1; // zincir koptu, sıfırdan başla
+      else return; // fark 0 veya negatif, hata
+    } else {
+      streak = 1;
+    }
+    const idx = Math.min(streak - 1, GUNLUK_ODUL.length - 1);
+    const odul = GUNLUK_ODUL[idx];
+    altinEkle(odul.altin);
+    if (odul.elmas) elmasEkle(odul.elmas);
+    guvenliYaz(GUNLUK_TARIH, bugun);
+    guvenliYaz(GUNLUK_STREAK, String(streak));
+    setTimeout(() => gunlukHediyeGoster(streak, odul), 400);
+  }
+  function gunlukHediyeGoster(streak, odul) {
+    const mod = document.createElement("div");
+    mod.className = "kart-acildi-arka";
+    mod.id = "gunluk-modal";
+    mod.innerHTML =
+      '<div class="kart-acildi-icerik destansi" style="text-align:center;">' +
+        '<div class="yeni-etiket">🎁 GÜNLÜK HEDİYE</div>' +
+        '<div style="font-size:60px;margin:10px 0;">📅</div>' +
+        '<div class="modal-ad">Gün ' + streak + ' Ödülü</div>' +
+        '<div class="modal-not" style="font-size:14px;color:#eaf7d5;">' + odul.not + '</div>' +
+        '<div class="modal-guc" style="font-size:20px;color:#ffe27a;margin:12px 0;">' +
+          '🪙 +' + odul.altin + (odul.elmas ? '  ·  💎 +' + odul.elmas : '') +
+        '</div>' +
+        '<div class="modal-not">Yarın da gel, zincir büyüsün! (Max 7. gün)</div>' +
+        '<button class="buyuk" onclick="document.getElementById(\'gunluk-modal\').remove()">✅ Teşekkürler!</button>' +
+      '</div>';
+    document.body.appendChild(mod);
+  }
+
+  // ---- KART İSTATİSTİKLERİ (kullanım + galibiyet) ----
+  const KART_IST_ANAHTARI = "klanlarSavasiKartIst";
+  function kartIstler() {
+    try { return JSON.parse(guvenliOku(KART_IST_ANAHTARI) || "{}"); }
+    catch (e) { return {}; }
+  }
+  function kartIstYaz(o) { guvenliYaz(KART_IST_ANAHTARI, JSON.stringify(o)); }
+  function kartIstAl(side, ref) {
+    const k = side + "_" + ref;
+    const all = kartIstler();
+    return all[k] || { kullanim: 0, galibiyet: 0 };
+  }
+  function kartKullanildi(side, ref) {
+    const all = kartIstler();
+    const k = side + "_" + ref;
+    if (!all[k]) all[k] = { kullanim: 0, galibiyet: 0 };
+    all[k].kullanim += 1;
+    kartIstYaz(all);
+  }
+  function kartGalibiyet(side, ref) {
+    const all = kartIstler();
+    const k = side + "_" + ref;
+    if (!all[k]) all[k] = { kullanim: 0, galibiyet: 0 };
+    all[k].galibiyet += 1;
+    kartIstYaz(all);
+  }
+
+  // ---- ZAFER SANDIĞI (maç kazanınca otomatik, Ahşap kart havuzundan) ----
+  function zaferSandiginiAc() {
+    const havuz = AHSAP_KARTLAR;
+    const kart = havuz[Math.floor(Math.random() * havuz.length)];
+    const yeniMi = sandikKartKazan(kart.id);
+    let telafi = 0;
+    if (!yeniMi) {
+      telafi = KART_TELAFI[kart.rutbe] || 50;
+      altinEkle(telafi);
+    } else {
+      // Yer varsa otomatik destege ekle
+      const takim = oyun.takim || guvenliOku(TAKIM_ANAHTARI);
+      const tarafSayisi = takim ? aktifDesteIdx(takim).length : 0;
+      const sandikSayisi = aktifDesteIdx("sandik").length;
+      if (tarafSayisi + sandikSayisi < DESTE_TAM) {
+        const d = tumDestelerObj();
+        if (!Array.isArray(d["sandik"])) d["sandik"] = [];
+        if (d["sandik"].indexOf(kart.id) < 0) d["sandik"].push(kart.id);
+        desteYaz(d);
+      }
+    }
+    kartAcildiModal(kart, "🎁 Zafer Sandığı", yeniMi, telafi);
+  }
+
   // ---- YENİ KART AÇILDI MODAL (fotoğraf + yazı) ----
   function kartAcildiModal(kart, sandikAd, yeniMi, telafi) {
     const eskiMod = document.getElementById("kart-acildi-modal");
@@ -1353,6 +1470,7 @@
       const ucret = KART_YUKSELT_UCRET[lv] || 0;
       const enUst = lv >= KART_MAX_LV;
       const yeterAltin = toplamAltin() >= ucret;
+      const ist = kartIstAl(side, i);
       const div = document.createElement("div");
       div.className = "destem-kart " + (aktif ? "aktif" : "pasif");
       div.innerHTML =
@@ -1360,6 +1478,7 @@
         '<div class="em">' + kart.emoji + '</div>' +
         '<div class="ad">' + kart.isim + '</div>' +
         '<div class="guc-yazi">' + gucYazi + '</div>' +
+        '<div class="ist-yazi">🎮 ' + ist.kullanim + ' · 🏆 ' + ist.galibiyet + '</div>' +
         '<div class="btn-satir">' +
           '<button class="aktif-btn ' + (aktif ? "aktif" : "") + '" onclick="destemToggle(' + i + ')">' +
             (aktif ? '✅ Destede' : '➕ Ekle') +
@@ -1398,11 +1517,13 @@
       const yeterAltin = toplamAltin() >= ucret;
       const div = document.createElement("div");
       div.className = "destem-kart " + (aktif ? "aktif" : "pasif");
+      const ist = kartIstAl("sandik", sid);
       div.innerHTML =
         '<div class="lv-yazi">Lv ' + lv + '/' + KART_MAX_LV + '</div>' +
         '<div class="em">' + kart.emoji + '</div>' +
         '<div class="ad">' + kart.ad + '</div>' +
         '<div class="guc-yazi">' + gucYazi + '</div>' +
+        '<div class="ist-yazi">🎮 ' + ist.kullanim + ' · 🏆 ' + ist.galibiyet + '</div>' +
         '<div class="btn-satir">' +
           '<button class="aktif-btn ' + (aktif ? "aktif" : "") + '" onclick="destemToggleSandik(\'' + sid + '\')">' +
             (aktif ? '✅ Destede' : '➕ Ekle') +
@@ -1695,7 +1816,7 @@
 
     oyun.kilitli = true;
     altinHarca(maliyet);
-    // Bu satırın sonunda kartlariDiz çağrılacak, sira geçersiz olur — animasyonu şimdi başlat
+    kartKullanildi(bilgi.side, bilgi.ref); // istatistik
     const kartEl = document.querySelectorAll("#el .kart")[sira];
     if (kartEl) { kartEl.classList.remove("oynandi"); void kartEl.offsetWidth; kartEl.classList.add("oynandi"); }
     kartlariDiz();
@@ -1758,6 +1879,7 @@
         benimAsker.classList.remove("dovus"); benimAsker.classList.add("zafer-yukari");
         oyun.dusmanCan = Math.max(0, oyun.dusmanCan - tarafHasari);
         gunlugeYaz("🎉 " + benimIsim + " kazandı! Düşman tarafa " + tarafHasari + " hasar.");
+        kartGalibiyet(bilgi.side, bilgi.ref); // istatistik
         altinEkle(benimKritik ? 5 : 1);
         setTimeout(() => {
           vurusEfekti("dusman-satiri", tarafHasari, benimKritik);
@@ -1858,23 +1980,25 @@
     // Bot modunda: kupa+altın+elmas+XP ver, menüye dön
     if (oyun.mod === "bot" && oyun.aktifBot) {
       const bot = oyun.aktifBot;
-      // Bot zorluğuna göre ödül: kupaMin arttıkça artar
-      const kazaniElmas = 5 + Math.floor(bot.kupaMin / 500) * 2; // 5, 7, 13, 25, 45
+      const kazaniElmas = 5 + Math.floor(bot.kupaMin / 500) * 2;
       const kazaniXP = 100;
       kupaEkle(50);
       altinEkle(100);
       elmasEkle(kazaniElmas);
-      xpEkle(kazaniXP); // level atlama burada tetiklenir
+      xpEkle(kazaniXP);
       gunlugeYaz("🏆 " + bot.ad + "'ı yendin! +50 kupa, +100 altın, +" + kazaniElmas + " 💎, +" + kazaniXP + " XP.");
       document.getElementById("sonuc-emoji").textContent = "🏆";
       document.getElementById("sonuc-baslik").textContent = "BOT MAÇI KAZANILDI!";
       document.getElementById("sonuc-yazi").innerHTML =
         bot.emoji + " " + bot.ad + " yenildi!<br>" +
         "🏆 +50 kupa · 🪙 +100 altın · 💎 +" + kazaniElmas + " elmas · +" + kazaniXP + " XP<br>" +
-        "Level: <b>" + seviye() + "</b> / " + MAX_LEVEL;
+        "Level: <b>" + seviye() + "</b> / " + MAX_LEVEL +
+        "<br><br>🎁 Zafer Sandığın açılıyor...";
       oyun.mod = "sefer"; oyun.aktifBot = null;
       oyun.durum = "menu";
       ekranGoster("ekran-sonuc");
+      // ZAFER SANDIĞI: Ahşap havuzundan rastgele 1 kart ver
+      setTimeout(() => zaferSandiginiAc(), 1200);
       return;
     }
 
@@ -2266,6 +2390,9 @@
       if (toplamElmas() < 1000)   elmasYaz(1000);
       guvenliYaz(ALP_HEDIYE3, "1");
     }
+
+    // GÜNLÜK GİRİŞ HEDİYESİ — ardışık gün sayısına göre artan
+    gunlukHediyeKontrol();
 
     // Taraf seçilmişse göster (değiştirme yok — kalıcı)
     const tarafGoster = document.getElementById("taraf-goster");
