@@ -824,6 +824,18 @@
       <button class="buyuk" onclick="profilKaydet()">✅ Kaydet ve Dön</button>
       <button onclick="anaMenu()" style="display:block;margin:14px auto 0;">← İptal</button>
     </div>
+
+    <hr style="border-color:#4a3f7a;margin:20px 0;">
+    <h3 style="color:#ffe27a;text-align:center;">💾 Oyun Yedeği</h3>
+    <div id="depolama-durum" class="merkez" style="font-size:13px;margin:10px 0;color:#cfc9ec;">Depolama test ediliyor...</div>
+    <p class="merkez" style="color:#cfc9ec;font-size:12px;">Para/kartlar kayboluyorsa yedek al. Başka cihazda açarsan yükle.</p>
+    <div class="merkez" style="margin:10px 0;">
+      <button onclick="yedekAl()" style="margin:4px;">⬇️ Yedek Al (indir)</button>
+      <label class="dosya-btn" style="margin:4px;font-size:14px;padding:10px 14px;">
+        ⬆️ Yedek Yükle
+        <input type="file" accept=".json,application/json" onchange="yedekYukle(event)" style="display:none;">
+      </label>
+    </div>
   </section>
 
   <!-- EKRAN: Bot eşleşme -->
@@ -1003,8 +1015,8 @@
   function profilAc() {
     document.getElementById("profil-isim-input").value = oyuncuAdi() === "Oyuncu" ? "" : oyuncuAdi();
     profilOnizlemeGuncelle();
+    depolamaDurumKontrol();
     ekranGoster("ekran-profil");
-    // Odaklanma iOS'ta gerekebilir
     setTimeout(() => { const i = document.getElementById("profil-isim-input"); if (i) i.focus(); }, 100);
   }
 
@@ -1758,6 +1770,87 @@
     altinHarca(ucret);
     kartLevelArttir("sandik", sid);
     destemCiz();
+  }
+
+  // ---- DEPOLAMA (localStorage) DURUMU + YEDEK AL/YÜKLE ----
+  function depolamaDurumKontrol() {
+    const el = document.getElementById("depolama-durum");
+    if (!el) return;
+    const anahtar = "_depoTesti";
+    const deger = String(Date.now());
+    let yazma = false, okuma = false, kalicilik = false;
+    try {
+      localStorage.setItem(anahtar, deger);
+      yazma = true;
+      okuma = localStorage.getItem(anahtar) === deger;
+      // Kalıcılık testi: başka bir anahtar daha önce yazılmış mı?
+      kalicilik = !!localStorage.getItem("klanlarSavasiAltin") ||
+                  !!localStorage.getItem("klanlarSavasiHeDiYE2");
+      localStorage.removeItem(anahtar);
+    } catch (e) { /* ignore */ }
+
+    if (yazma && okuma) {
+      el.innerHTML = '✅ <b style="color:#4dd070">Tarayıcı depolaması çalışıyor</b><br>' +
+        '<span style="font-size:11px">Verilerin otomatik kayıt oluyor</span>';
+    } else {
+      el.innerHTML = '⚠️ <b style="color:#ff8a7a">DEPOLAMA ÇALIŞMIYOR!</b><br>' +
+        '<span style="font-size:11px">Gizli mod ya da tarayıcı ayarı. Oyun kapanınca veriler kaybolur.<br>' +
+        'Yedek Al butonuyla JSON indirmeni öneririm.</span>';
+    }
+  }
+
+  function tumVeri() {
+    // Oyunun tüm localStorage anahtarlarını topla
+    const anahtarlar = [
+      ALTIN_ANAHTARI, KUPA_ANAHTARI, ELMAS_ANAHTARI, XP_ANAHTARI,
+      TAKIM_ANAHTARI, ISIM_ANAHTARI, FOTO_ANAHTARI,
+      SAHIP_KART_ANAHTARI, DESTE_ANAHTARI, KART_LV_ANAHTARI,
+      KART_IST_ANAHTARI, BASARIM_SAYACLAR, BASARIM_ALINAN,
+      GUNLUK_TARIH, GUNLUK_STREAK, KAYIT_ANAHTARI,
+      HEDIYE_ANAHTARI, "klanlarSavasiIade40k", "klanlarSavasiAlpHediye",
+      "klanlarSavasiAlpHediye2", "klanlarSavasiAlpHediye3",
+    ];
+    const veri = { surum: "klanlarSavasi-v1", tarih: new Date().toISOString(), data: {} };
+    anahtarlar.forEach(a => {
+      const v = guvenliOku(a);
+      if (v !== null) veri.data[a] = v;
+    });
+    return veri;
+  }
+
+  function yedekAl() {
+    const veri = tumVeri();
+    const metin = JSON.stringify(veri, null, 2);
+    const blob = new Blob([metin], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const tarih = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = "klanlar-savasi-yedek-" + tarih + ".json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    alert("✅ Yedek indirildi! İndirilenler klasörüne kaydedildi.");
+  }
+
+  function yedekYukle(ev) {
+    const dosya = ev.target.files && ev.target.files[0];
+    if (!dosya) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const veri = JSON.parse(e.target.result);
+        if (!veri.data || typeof veri.data !== "object") throw new Error("Geçersiz yedek dosyası");
+        Object.keys(veri.data).forEach(k => guvenliYaz(k, veri.data[k]));
+        alert("✅ Yedek yüklendi! Oyun yenileniyor...");
+        location.reload();
+      } catch (err) {
+        alert("❌ Yedek dosyası bozuk veya hatalı: " + err.message);
+      }
+    };
+    reader.readAsText(dosya);
+    ev.target.value = "";
   }
 
   function profilKaydet() {
