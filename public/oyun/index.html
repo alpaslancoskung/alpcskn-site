@@ -853,6 +853,12 @@
         <button id="profil-foto-sil" onclick="fotoSil()" style="display:none;background:linear-gradient(180deg,#ff8a7a,#c0392b);color:#fff;box-shadow:0 4px 0 #7a1e15,0 6px 10px rgba(0,0,0,.35);">🗑️ Kaldır</button>
       </div>
       <p style="font-size:12px;color:#cfc9ec;margin-top:6px;">JPG/PNG olabilir. Kare kırpılır ve küçültülür. Sadece senin tarayıcında saklanır.</p>
+
+      <label style="display:block;font-weight:700;margin:16px 0 6px;color:#ffe27a;">🔊 Ses:</label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button id="ses-toggle-btn" onclick="sesToggle()" style="flex:1;">🔊 Ses Açık</button>
+        <button onclick="sesCal('kart');setTimeout(()=>sesCal('zafer'),300);">🎵 Test</button>
+      </div>
     </div>
     <div class="merkez" style="margin-top:22px;">
       <button class="buyuk" onclick="profilKaydet()">✅ Kaydet ve Dön</button>
@@ -1027,6 +1033,59 @@
     try { localStorage.removeItem(anahtar); } catch (e) {}
   }
 
+  // ---- SES MOTORU (Web Audio API, dış dosya yok) ----
+  let _audioCtx = null;
+  function sesAcikMi() { return guvenliOku(SES_ANAHTARI) !== "0"; } // default açık
+  function sesAcKapa(acik) { guvenliYaz(SES_ANAHTARI, acik ? "1" : "0"); }
+  function _audio() {
+    if (!_audioCtx) {
+      try { _audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+      catch (e) { _audioCtx = null; }
+    }
+    return _audioCtx;
+  }
+  // Tek bir ton çal (frekans Hz, süre s, tip, hacim 0-1)
+  function _ton(frekans, sure, tip, hacim, sonFrekans) {
+    const ctx = _audio();
+    if (!ctx || !sesAcikMi()) return;
+    try {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = tip || "sine";
+      osc.frequency.setValueAtTime(frekans, ctx.currentTime);
+      if (sonFrekans) osc.frequency.exponentialRampToValueAtTime(sonFrekans, ctx.currentTime + sure);
+      gain.gain.setValueAtTime(hacim || 0.3, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + sure);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + sure);
+    } catch (e) { /* ignore */ }
+  }
+  function _akor(frekanslar, sure, tip, hacim) {
+    frekanslar.forEach(f => _ton(f, sure, tip, hacim));
+  }
+  // İsimli ses efektleri
+  function sesCal(ad) {
+    switch (ad) {
+      case "tik":        _ton(600, 0.05, "triangle", 0.15); break;
+      case "kart":       _ton(400, 0.08, "triangle", 0.2); setTimeout(() => _ton(800, 0.06, "sine", 0.15), 50); break;
+      case "kilic":      _ton(1200 + Math.random() * 400, 0.08, "sawtooth", 0.18, 400); break;
+      case "patlama":    _ton(100, 0.3, "sawtooth", 0.3, 50); _ton(60, 0.4, "sine", 0.2, 30); break;
+      case "zafer":      [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => _ton(f, 0.25, "triangle", 0.25), i * 120)); break;
+      case "yenilgi":    [392, 311, 262, 196].forEach((f, i) => setTimeout(() => _ton(f, 0.3, "sine", 0.25), i * 150)); break;
+      case "sandik":     _akor([392, 523, 659], 0.15, "triangle", 0.15); setTimeout(() => _akor([523, 659, 784], 0.2, "triangle", 0.18), 160); break;
+      case "sandikSalla":_ton(200 + Math.random() * 100, 0.06, "square", 0.1); break;
+      case "yeniKart":   [523, 659, 784, 1047, 1319].forEach((f, i) => setTimeout(() => _ton(f, 0.15, "triangle", 0.22), i * 70)); break;
+      case "para":       _ton(900, 0.08, "sine", 0.2); setTimeout(() => _ton(1200, 0.1, "sine", 0.18), 60); break;
+      case "elmas":      _ton(1500, 0.1, "triangle", 0.18); setTimeout(() => _ton(2000, 0.1, "triangle", 0.15), 80); break;
+      case "levelUp":    [523, 659, 784, 1047, 1319, 1568].forEach((f, i) => setTimeout(() => _ton(f, 0.2, "triangle", 0.3), i * 90)); break;
+      case "kombo":      _ton(800, 0.1, "square", 0.25); setTimeout(() => _ton(1000, 0.1, "square", 0.25), 80); setTimeout(() => _ton(1200, 0.15, "square", 0.3), 160); break;
+      case "basarim":    [659, 784, 988, 1319].forEach((f, i) => setTimeout(() => _ton(f, 0.3, "triangle", 0.28), i * 100)); break;
+      case "iyilesme":   _ton(600, 0.2, "sine", 0.2, 1200); setTimeout(() => _ton(1200, 0.15, "sine", 0.15), 180); break;
+      case "hata":       _ton(200, 0.15, "square", 0.2); break;
+    }
+  }
+
   // ---- OYUNCU İSMİ + FOTOĞRAF (PROFİL) ----
   function oyuncuAdi()  { return guvenliOku(ISIM_ANAHTARI) || "Oyuncu"; }
   function oyuncuFoto() { return guvenliOku(FOTO_ANAHTARI); } // base64 dataURL veya null
@@ -1050,8 +1109,19 @@
     document.getElementById("profil-isim-input").value = oyuncuAdi() === "Oyuncu" ? "" : oyuncuAdi();
     profilOnizlemeGuncelle();
     depolamaDurumKontrol();
+    sesButonuGuncelle();
     ekranGoster("ekran-profil");
     setTimeout(() => { const i = document.getElementById("profil-isim-input"); if (i) i.focus(); }, 100);
+  }
+  function sesButonuGuncelle() {
+    const btn = document.getElementById("ses-toggle-btn");
+    if (!btn) return;
+    btn.textContent = sesAcikMi() ? "🔊 Ses Açık" : "🔇 Ses Kapalı";
+  }
+  function sesToggle() {
+    sesAcKapa(!sesAcikMi());
+    sesButonuGuncelle();
+    if (sesAcikMi()) sesCal("tik");
   }
 
   function profilOnizlemeGuncelle() {
@@ -1140,6 +1210,7 @@
     d.className = "level-up-bildirim";
     d.innerHTML = "🎉 LEVEL " + yeniLevel + "! 🎉<br><span style='font-size:18px'>+" + bonusElmas + " 💎 kazandın</span>";
     document.body.appendChild(d);
+    sesCal("levelUp");
     setTimeout(() => d.remove(), 2500);
   }
 
@@ -1291,6 +1362,7 @@
   function sandikKartBul(id) { return SANDIK_KART_INDEKS[id]; }
 
   // Sahip olduğun sandık kartları (id listesi)
+  const SES_ANAHTARI        = "klanlarSavasiSes"; // "1" = açık, "0" = kapalı
   const SAHIP_KART_ANAHTARI = "klanlarSavasiSahipSandikKartlar";
   function sahipSandikKartIdleri() {
     try { return JSON.parse(guvenliOku(SAHIP_KART_ANAHTARI) || "[]"); }
@@ -1383,6 +1455,9 @@
     elmasCikar(sandik.fiyat);
     sandikDiv.classList.add("sallaniyor");
     basarimSayacArttir("acilanSandik", 1);
+    // Sallanırken titreşim sesi
+    for (let i = 0; i < 6; i++) setTimeout(() => sesCal("sandikSalla"), i * 200);
+    setTimeout(() => sesCal("sandik"), 1300);
 
     // ~1.4s salladıktan sonra kart çık
     setTimeout(() => {
@@ -1556,6 +1631,7 @@
   function basarimAcildiModal(b) {
     const eski = document.getElementById("basarim-modal");
     if (eski) eski.remove();
+    sesCal("basarim");
     const mod = document.createElement("div");
     mod.id = "basarim-modal";
     mod.className = "kart-acildi-arka";
@@ -1650,6 +1726,7 @@
   function kartAcildiModal(kart, sandikAd, yeniMi, telafi) {
     const eskiMod = document.getElementById("kart-acildi-modal");
     if (eskiMod) eskiMod.remove();
+    sesCal(yeniMi ? "yeniKart" : "para");
     const rutbeYazi = { siradan:"Sıradan", ender:"Ender", destansi:"Destansı" }[kart.rutbe];
     const guclu = kart.iyilesme ? "💚 İyileştir +" + kart.iyilesme : "⚡ Güç " + kart.guc;
     const yeniEtiket = yeniMi
@@ -2164,6 +2241,7 @@
 
     oyun.kilitli = true;
     altinHarca(maliyet);
+    sesCal("kart");
     kartKullanildi(bilgi.side, bilgi.ref); // istatistik
     const kartEl = document.querySelectorAll("#el .kart")[sira];
     if (kartEl) { kartEl.classList.remove("oynandi"); void kartEl.offsetWidth; kartEl.classList.add("oynandi"); }
@@ -2174,6 +2252,7 @@
       const iyi = kartIyilesme(bilgi.side, bilgi.ref, benimKart);
       oyun.benimCan = Math.min(oyun.benimMax, oyun.benimCan + iyi);
       gunlugeYaz("💚 " + benimIsim + " tarafını " + iyi + " iyileştirdi! (Lv" + kartLevel(bilgi.side, bilgi.ref) + ")");
+      sesCal("iyilesme");
       iyilesmeEfekti("benim-satiri", iyi);
       canlariGuncelle();
       kaydet();
@@ -2196,6 +2275,7 @@
     if (komboBonus > 0) {
       gunlugeYaz("🔥 KOMBO x" + oyun.komboSayac + "! +" + komboBonus + " güç bonusu");
       komboEfekti(oyun.komboSayac, komboBonus);
+      sesCal("kombo");
       basarimSayacGuncelle("komboMax", oyun.komboSayac);
     }
     // Güçleri kritiklerle hesapla (senin kartın level bonusu alır)
@@ -2288,6 +2368,7 @@
     s.style.top = (40 + Math.random() * 20) + "%";
     sahne.appendChild(s);
     setTimeout(() => s.remove(), 620);
+    sesCal("kilic");
   }
 
   // ---- AKILLI DÜŞMAN ----
@@ -2352,6 +2433,7 @@
       basarimSayacArttir("macToplam", 1);
       if (bot.ad === "Şampiyon Emre") basarimSayacArttir("sampiyonZafer", 1);
       gunlugeYaz("🏆 " + bot.ad + "'ı yendin! +" + kazaniKupa + " kupa, +" + kazaniAltin + " altın, +" + kazaniElmas + " 💎, +" + kazaniXP + " XP.");
+      sesCal("zafer");
       document.getElementById("sonuc-emoji").textContent = "🏆";
       document.getElementById("sonuc-baslik").textContent = "BOT MAÇI KAZANILDI!";
       document.getElementById("sonuc-yazi").innerHTML =
@@ -2505,6 +2587,7 @@
       kupaCikar(20);
       xpEkle(25);
       basarimSayacArttir("macToplam", 1);
+      sesCal("yenilgi");
       const kupa = toplamKupa();
       document.getElementById("sonuc-emoji").textContent = "💀";
       document.getElementById("sonuc-baslik").textContent = "Kaybettin";
