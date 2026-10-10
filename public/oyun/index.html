@@ -408,7 +408,43 @@
   }
   #gunluk div { margin-bottom: 3px; }
 
-  .el-baslik { text-align: center; color: var(--altin); font-weight: 700; margin-bottom: 10px; text-shadow: 0 1px 3px #000; }
+  .el-baslik { text-align: center; color: var(--altin); font-weight: 700; margin-bottom: 10px; text-shadow: 0 1px 3px #000; font-size:13px; }
+
+  /* Savaş iç layout: sol kartlar + sahne + sağ kartlar */
+  .savas-ic { display: flex; gap: 6px; align-items: stretch; margin: 10px 0; }
+  .el-yan {
+    display: flex; flex-direction: column; gap: 4px;
+    flex: 0 0 86px; /* dar sabit genişlik */
+  }
+  .el-yan .kart {
+    flex: 1 1 auto; min-height: 0;
+    padding: 4px; font-size: 11px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+  }
+  .el-yan .kart .emoji { font-size: 22px; line-height: 1; margin: 2px 0; }
+  .el-yan .kart .isim  { font-size: 10px; margin: 1px 0; line-height: 1.1; }
+  .el-yan .kart .guc   { font-size: 10px; }
+  .el-yan .kart .rutbe { display: none; }
+  .el-yan .kart .kart-maliyet { font-size: 10px; padding: 1px 4px; }
+  .el-yan .kart .kart-lv { font-size: 9px; padding: 1px 3px; top: 2px; right: 3px; }
+  /* Numara rozeti sol üstte */
+  .el-yan .kart .no-rozet {
+    position: absolute; top: 2px; left: 3px;
+    background: var(--altin); color: #3a2600;
+    width: 20px; height: 20px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.5);
+  }
+  #sahne { flex: 1 1 auto; min-width: 0; }
+
+  /* Dar ekran: üstte sahne, altta 2 sıra kart */
+  @media (max-width: 480px) {
+    .savas-ic { flex-direction: column; }
+    .el-yan { flex-direction: row; flex: 0 0 auto; flex-wrap: wrap; justify-content: center; }
+    .el-yan .kart { flex: 1 1 60px; max-width: 85px; }
+  }
 
   /* ---- Kartlar (Clash Royale tarzı) ---- */
   #el { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
@@ -1025,33 +1061,39 @@
     </div>
     <div class="arena-bilgi" id="arena-yazi"></div>
 
-    <div id="sahne" class="sahne">
-      <!-- Düşman taraf (üstte) -->
-      <div class="taraf" id="dusman-satiri">
-        <div class="can-bar">
-          <div class="can-cubuk"><div id="dusman-can" class="can-dolu"></div></div>
-          <span id="dusman-can-yazi" class="can-yazi">30 / 30</span>
+    <div class="savas-ic">
+      <div id="el-sol" class="el-yan"></div>
+
+      <div id="sahne" class="sahne">
+        <!-- Düşman taraf (üstte) -->
+        <div class="taraf" id="dusman-satiri">
+          <div class="can-bar">
+            <div class="can-cubuk"><div id="dusman-can" class="can-dolu"></div></div>
+            <span id="dusman-can-yazi" class="can-yazi">30 / 30</span>
+          </div>
+          <div class="isim" id="dusman-isim">Düşman Taraf</div>
+          <div class="karakter" id="dusman-karakter">🏳️</div>
         </div>
-        <div class="isim" id="dusman-isim">Düşman Taraf</div>
-        <div class="karakter" id="dusman-karakter">🏳️</div>
+
+        <div class="vs-isaret">⚔️ VS ⚔️</div>
+
+        <!-- Senin tarafın (altta) -->
+        <div class="taraf" id="benim-satiri">
+          <div class="karakter" id="benim-karakter">🏳️</div>
+          <div class="isim" id="benim-isim">Senin Tarafın</div>
+          <div class="can-bar">
+            <div class="can-cubuk"><div id="benim-can" class="can-dolu"></div></div>
+            <span id="benim-can-yazi" class="can-yazi">30 / 30</span>
+          </div>
+        </div>
       </div>
 
-      <div class="vs-isaret">⚔️ VS ⚔️</div>
-
-      <!-- Senin tarafın (altta) -->
-      <div class="taraf" id="benim-satiri">
-        <div class="karakter" id="benim-karakter">🏳️</div>
-        <div class="isim" id="benim-isim">Senin Tarafın</div>
-        <div class="can-bar">
-          <div class="can-cubuk"><div id="benim-can" class="can-dolu"></div></div>
-          <span id="benim-can-yazi" class="can-yazi">30 / 30</span>
-        </div>
-      </div>
+      <div id="el-sag" class="el-yan"></div>
     </div>
 
     <div id="gunluk"></div>
-    <div class="el-baslik">🃏 Kartını seç ve saldır!</div>
-    <div id="el"></div>
+    <div class="el-baslik">🃏 Kartı tıkla veya 1-0 tuşuna bas!</div>
+    <div id="el" style="display:none;"></div>
   </section>
 
   <!-- EKRAN 4: Arena arası zafer -->
@@ -2419,8 +2461,12 @@
       oyun.elKartlari.push({ kart: Object.assign({ isim: kart.ad }, kart), side: "sandik", ref: sid });
     });
 
-    const el = document.getElementById("el");
-    el.innerHTML = "";
+    const elSol = document.getElementById("el-sol");
+    const elSag = document.getElementById("el-sag");
+    const elEski = document.getElementById("el");
+    if (elSol) elSol.innerHTML = "";
+    if (elSag) elSag.innerHTML = "";
+    if (elEski) elEski.innerHTML = "";
     const altinim = toplamAltin();
     oyun.elKartlari.forEach((bilgi, sira) => {
       const kart = bilgi.kart;
@@ -2431,9 +2477,12 @@
         : "Güç " + (kartGuc(bilgi.side, bilgi.ref, kart) + oyun.gucBonus);
       const maliyet = kartMaliyet(kart);
       const yetersiz = altinim < maliyet;
+      const no = sira + 1; // 1..10
+      const numaraEtiket = no === 10 ? "0" : String(no); // klavyede 0 = 10
       const div = document.createElement("div");
       div.className = "kart " + kart.rutbe + (yetersiz ? " yetersiz" : "");
       div.innerHTML =
+        '<div class="no-rozet">' + numaraEtiket + '</div>' +
         '<div class="kart-lv">Lv' + lv + '</div>' +
         '<div class="emoji">' + kart.emoji + '</div>' +
         '<div class="isim">' + (kart.isim || kart.ad) + '</div>' +
@@ -2448,9 +2497,26 @@
         ev.dataTransfer.setData("text/plain", String(sira));
       };
       div.ondragend = () => div.classList.remove("suruklenen");
-      el.appendChild(div);
+      // İlk 5 → sol, kalan → sağ. Yan panel yoksa eski #el'e
+      const hedef = (sira < 5 && elSol) ? elSol : (elSag ? elSag : elEski);
+      if (hedef) hedef.appendChild(div);
     });
   }
+
+  // Klavye kısayolları: 1-9 → kart sırası, 0 → 10. kart
+  document.addEventListener("keydown", (ev) => {
+    if (document.getElementById("ekran-savas")?.classList.contains("aktif") === false) return;
+    // Input odaklıysa müdahale etme
+    if (document.activeElement && (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA")) return;
+    const tus = ev.key;
+    let sira = -1;
+    if (tus >= "1" && tus <= "9") sira = parseInt(tus, 10) - 1;
+    else if (tus === "0") sira = 9;
+    if (sira >= 0 && oyun.elKartlari && sira < oyun.elKartlari.length) {
+      ev.preventDefault();
+      kartOyna(sira);
+    }
+  });
 
   // ---- BİR KART OYNA (KARAKTER SAVAŞI!) ----
   // Sen bir kart oynayınca düşman da aynı anda bir kart çıkarır.
@@ -2473,7 +2539,12 @@
     altinHarca(maliyet);
     sesCal("kart");
     kartKullanildi(bilgi.side, bilgi.ref); // istatistik
-    const kartEl = document.querySelectorAll("#el .kart")[sira];
+    // Sol + sağ + eski #el'den tüm kartları topla (sırayla)
+    const kartEl = [
+      ...document.querySelectorAll("#el-sol .kart"),
+      ...document.querySelectorAll("#el-sag .kart"),
+      ...document.querySelectorAll("#el .kart"),
+    ][sira];
     if (kartEl) { kartEl.classList.remove("oynandi"); void kartEl.offsetWidth; kartEl.classList.add("oynandi"); }
     kartlariDiz();
 
