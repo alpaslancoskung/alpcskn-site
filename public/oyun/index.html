@@ -26,20 +26,47 @@
   body {
     margin: 0;
     font-family: "Segoe UI", system-ui, Arial, sans-serif;
-    background: radial-gradient(circle at 50% -10%, #2f2760, #16112f 55%, #0b0a1c);
-    color: #eef;
+    background: var(--sayfa-arka);
+    color: var(--metin);
     display: flex;
     justify-content: center;
     padding: 14px;
     min-height: 100vh;
   }
+  /* Varsayılan tema: KARANLIK */
+  :root {
+    --sayfa-arka: radial-gradient(circle at 50% -10%, #2f2760, #16112f 55%, #0b0a1c);
+    --metin: #eef;
+    --oyun-arka: linear-gradient(180deg, #241d47, #191433);
+    --oyun-kenar: #4a3f7a;
+  }
+  /* Açık tema */
+  body.tema-acik {
+    --sayfa-arka: linear-gradient(180deg, #e8e4f5, #c5bde0 60%, #a69bd0);
+    --metin: #1a1638;
+    --oyun-arka: linear-gradient(180deg, #ffffff, #ece8f5);
+    --oyun-kenar: #a69bd0;
+  }
+  body.tema-acik p, body.tema-acik h2, body.tema-acik h3 { color: #1a1638; }
+  body.tema-acik .merkez p { color: #4a3f7a; }
+  body.tema-acik .ist-satir, body.tema-acik .destem-kart, body.tema-acik .galeri-kart,
+  body.tema-acik .basarim-satir, body.tema-acik .sandik, body.tema-acik .secim,
+  body.tema-acik .kart-acildi-icerik {
+    background: linear-gradient(180deg, #ffffff, #ece8f5);
+    color: #1a1638;
+    border-color: #a69bd0;
+  }
+  body.tema-acik .ist-satir b, body.tema-acik .ist-baslik,
+  body.tema-acik .destem-kart .ad, body.tema-acik h1 {
+    color: #6a3ac0;
+  }
 
-  /* Oyun çerçevesi (koyu, oyun kutusu gibi) */
+  /* Oyun çerçevesi */
   #oyun {
     width: 100%;
     max-width: 720px;
-    background: linear-gradient(180deg, #241d47, #191433);
-    border: 2px solid #4a3f7a;
+    background: var(--oyun-arka);
+    border: 2px solid var(--oyun-kenar);
     border-radius: 18px;
     padding: 20px;
     box-shadow: 0 12px 44px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.08);
@@ -441,6 +468,35 @@
 
   .buyuk-emoji-orta { font-size: 64px; }
 
+  /* İstatistik satırları */
+  .ist-satir {
+    background: linear-gradient(180deg, #2a2450, #1a1638);
+    border: 2px solid #4a3f7a; border-radius: 10px;
+    padding: 10px 12px; margin: 6px 0; color: #fff;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .ist-satir b { color: #ffe27a; font-size: 18px; }
+  .ist-baslik { color: #ffe27a; margin: 14px 0 6px; }
+
+  /* Kart galerisi grid */
+  .galeri-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 6px; margin: 8px 0;
+  }
+  .galeri-kart {
+    background: linear-gradient(180deg, #2a2450, #1a1638);
+    border: 2px solid #4a3f7a; border-radius: 10px;
+    padding: 8px 4px; text-align: center; color: #fff;
+    font-size: 11px;
+  }
+  .galeri-kart.sahipli.ender    { border-color: #b47cff; box-shadow: 0 0 8px rgba(180,124,255,.3); }
+  .galeri-kart.sahipli.destansi { border-color: #ff8a4a; box-shadow: 0 0 10px rgba(255,138,74,.4); }
+  .galeri-kart.sahipli.siradan  { border-color: #4dd070; box-shadow: 0 0 6px rgba(77,208,112,.3); }
+  .galeri-kart.kilitli { opacity: .35; filter: grayscale(1) brightness(.5); }
+  .galeri-kart .em-g { font-size: 32px; margin: 2px 0; }
+  .galeri-kart .ad-g { font-size: 10px; font-weight: 700; line-height: 1.2; }
+  .galeri-kart .guc-g { font-size: 10px; color: #6facff; }
+
   /* Başarım listesi */
   .basarim-satir {
     display: flex; gap: 10px; align-items: center;
@@ -542,6 +598,21 @@
     box-shadow: 0 1px 3px rgba(0,0,0,.4);
   }
   .kart { position: relative; }
+
+  /* Rütbe rozeti (menüde büyük) */
+  .rutbe-rozet {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    padding: 10px 18px; margin: 8px auto; max-width: 320px;
+    border-radius: 999px; font-weight: 900; font-size: 18px;
+    color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,.7);
+    box-shadow: 0 4px 12px rgba(0,0,0,.5);
+  }
+  .rutbe-rozet .em { font-size: 32px; filter: drop-shadow(0 2px 3px rgba(0,0,0,.5)); }
+  .rutbe-bronz   { background: linear-gradient(180deg, #c88a4a, #7a4e22); border: 2px solid #ffd27a; }
+  .rutbe-gumus   { background: linear-gradient(180deg, #b0b8c5, #6a7585); border: 2px solid #e0e5ec; }
+  .rutbe-altin   { background: linear-gradient(180deg, #ffd75e, #b8822a); border: 2px solid #fff2a0; }
+  .rutbe-platin  { background: linear-gradient(180deg, #a0e8e4, #4a9b96); border: 2px solid #d0faf6; }
+  .rutbe-elmas   { background: linear-gradient(180deg, #ff8aff, #7a3aa0); border: 2px solid #ffb8ff; box-shadow: 0 4px 12px rgba(0,0,0,.5), 0 0 25px rgba(255,138,255,.5); }
 
   /* ---- Elmas & Level rozetleri ---- */
   .elmas-rozet {
@@ -768,6 +839,7 @@
   <section id="ekran-menu" class="ekran aktif merkez">
     <h1>⚔️ Klanlar Savaşı</h1>
     <p>İki taraf, üç arena, tek zafer.<br>Kartın askerin senin — düşmanın askeriyle savaş, kazanan karşı tarafa ulaşır!</p>
+    <div id="rutbe-rozet" class="rutbe-rozet"></div>
     <div class="rozet-satiri">
       <div class="altin-rozet" id="menu-altin">🪙 <span id="menu-altin-yazi">0</span></div>
       <div class="kupa-rozet" id="menu-kupa">🏆 <span id="menu-kupa-yazi">0</span></div>
@@ -783,6 +855,8 @@
       <button class="buyuk" onclick="destemAc()">📋 Destem</button>
       <button class="buyuk" onclick="magazaAc()">🛒 Mağaza</button>
       <button class="buyuk" onclick="basarimAc()">🏅 Başarımlar</button>
+      <button class="buyuk" onclick="istatistikAc()">📊 İstatistik</button>
+      <button class="buyuk" onclick="galeriAc()">📚 Kart Galerisi</button>
       <button class="buyuk" onclick="profilAc()">👤 Profilim</button>
       <div id="taraf-goster" style="display:none;margin-top:10px;color:#eaf7d5;font-size:13px;text-shadow:0 1px 3px #000;"></div>
     </div>
@@ -797,6 +871,25 @@
     </div>
     <p class="merkez" style="color:#cfc9ec;font-size:13px;">Destende <b>tam 10 kart</b> olmalı — <b id="destem-sayac">0/10</b>. Az kartla oyuna giremezsin. "Yükselt" ile güç arttır (max Lv <b>5</b>).</p>
     <div id="destem-liste"></div>
+    <div class="merkez" style="margin-top:14px;">
+      <button onclick="anaMenu()">← Menüye Dön</button>
+    </div>
+  </section>
+
+  <!-- EKRAN: İstatistik -->
+  <section id="ekran-istatistik" class="ekran">
+    <h2>📊 İstatistik</h2>
+    <div id="istatistik-icerik"></div>
+    <div class="merkez" style="margin-top:14px;">
+      <button onclick="anaMenu()">← Menüye Dön</button>
+    </div>
+  </section>
+
+  <!-- EKRAN: Kart Galerisi -->
+  <section id="ekran-galeri" class="ekran">
+    <h2>📚 Kart Galerisi</h2>
+    <p class="merkez" style="color:#cfc9ec;font-size:13px;">Tüm 60 sandık kartı. Sahip olmadıkların gri silüet.</p>
+    <div id="galeri-icerik"></div>
     <div class="merkez" style="margin-top:14px;">
       <button onclick="anaMenu()">← Menüye Dön</button>
     </div>
@@ -858,6 +951,12 @@
       <div style="display:flex;gap:8px;align-items:center;">
         <button id="ses-toggle-btn" onclick="sesToggle()" style="flex:1;">🔊 Ses Açık</button>
         <button onclick="sesCal('kart');setTimeout(()=>sesCal('zafer'),300);">🎵 Test</button>
+      </div>
+
+      <label style="display:block;font-weight:700;margin:16px 0 6px;color:#ffe27a;">🌙 Tema:</label>
+      <div style="display:flex;gap:8px;">
+        <button onclick="temaSec('koyu')" id="tema-koyu-btn" style="flex:1;">🌙 Koyu</button>
+        <button onclick="temaSec('acik')" id="tema-acik-btn" style="flex:1;">☀️ Açık</button>
       </div>
     </div>
     <div class="merkez" style="margin-top:22px;">
@@ -1110,6 +1209,7 @@
     profilOnizlemeGuncelle();
     depolamaDurumKontrol();
     sesButonuGuncelle();
+    temaUygula();
     ekranGoster("ekran-profil");
     setTimeout(() => { const i = document.getElementById("profil-isim-input"); if (i) i.focus(); }, 100);
   }
@@ -1122,6 +1222,21 @@
     sesAcKapa(!sesAcikMi());
     sesButonuGuncelle();
     if (sesAcikMi()) sesCal("tik");
+  }
+  function temaUygula() {
+    const tema = guvenliOku(TEMA_ANAHTARI) || "koyu";
+    if (tema === "acik") document.body.classList.add("tema-acik");
+    else document.body.classList.remove("tema-acik");
+    // Buton seçili işaretle
+    const koyuBtn = document.getElementById("tema-koyu-btn");
+    const acikBtn = document.getElementById("tema-acik-btn");
+    if (koyuBtn) koyuBtn.classList.toggle("secili", tema === "koyu");
+    if (acikBtn) acikBtn.classList.toggle("secili", tema === "acik");
+  }
+  function temaSec(ad) {
+    guvenliYaz(TEMA_ANAHTARI, ad);
+    temaUygula();
+    sesCal("tik");
   }
 
   function profilOnizlemeGuncelle() {
@@ -1363,6 +1478,7 @@
 
   // Sahip olduğun sandık kartları (id listesi)
   const SES_ANAHTARI        = "klanlarSavasiSes"; // "1" = açık, "0" = kapalı
+  const TEMA_ANAHTARI       = "klanlarSavasiTema"; // "koyu" | "acik"
   const SAHIP_KART_ANAHTARI = "klanlarSavasiSahipSandikKartlar";
   function sahipSandikKartIdleri() {
     try { return JSON.parse(guvenliOku(SAHIP_KART_ANAHTARI) || "[]"); }
@@ -1669,6 +1785,103 @@
       liste.appendChild(div);
     });
     ekranGoster("ekran-basarim");
+  }
+
+  // ---- İSTATİSTİK EKRANI ----
+  function istatistikAc() {
+    const bas = basarimSayaclari();
+    const macToplam = bas.macToplam || 0;
+    const macZafer  = bas.macZafer  || 0;
+    const winRate   = macToplam > 0 ? Math.round((macZafer / macToplam) * 100) : 0;
+    const komboMax  = bas.komboMax  || 0;
+    const acilanSandik = bas.acilanSandik || 0;
+
+    // En çok kullanılan kart
+    const ist = kartIstler();
+    let enCokKart = null, enCokSayi = 0, enCokGal = null, enCokWR = 0;
+    Object.keys(ist).forEach(k => {
+      const o = ist[k];
+      if (o.kullanim > enCokSayi) { enCokSayi = o.kullanim; enCokKart = k; }
+      if (o.kullanim >= 3) {
+        const wr = o.galibiyet / o.kullanim;
+        if (wr > enCokWR) { enCokWR = wr; enCokGal = k; }
+      }
+    });
+    function kartAdFromKey(k) {
+      const [side, ref] = k.split("_");
+      if (side === "sandik") {
+        const sk = sandikKartBul(ref);
+        return sk ? (sk.emoji + " " + sk.ad) : k;
+      }
+      const kartlar = side === "kirmizi" ? kirmiziKartlar : maviKartlar;
+      const idx = parseInt(ref, 10);
+      const kart = kartlar[idx];
+      return kart ? (kart.emoji + " " + kart.isim) : k;
+    }
+
+    const sahipKart = sahipSandikKartIdleri().length;
+
+    const el = document.getElementById("istatistik-icerik");
+    el.innerHTML =
+      '<h3 class="ist-baslik">⚔️ Maç</h3>' +
+      '<div class="ist-satir">Toplam Maç<b>' + macToplam + '</b></div>' +
+      '<div class="ist-satir">Galibiyet<b>' + macZafer + '</b></div>' +
+      '<div class="ist-satir">Mağlubiyet<b>' + (macToplam - macZafer) + '</b></div>' +
+      '<div class="ist-satir">Galibiyet Oranı<b>' + winRate + '%</b></div>' +
+      '<div class="ist-satir">En Uzun Kombo<b>🔥 x' + komboMax + '</b></div>' +
+
+      '<h3 class="ist-baslik">💰 Ekonomi</h3>' +
+      '<div class="ist-satir">Altın<b>🪙 ' + toplamAltin() + '</b></div>' +
+      '<div class="ist-satir">Elmas<b>💎 ' + toplamElmas() + '</b></div>' +
+      '<div class="ist-satir">Kupa<b>🏆 ' + toplamKupa() + '</b></div>' +
+      '<div class="ist-satir">Rütbe<b>' + rutbeBul(toplamKupa()).emoji + ' ' + rutbeBul(toplamKupa()).ad + '</b></div>' +
+
+      '<h3 class="ist-baslik">📦 Koleksiyon</h3>' +
+      '<div class="ist-satir">Toplanan Kart<b>' + sahipKart + ' / 60</b></div>' +
+      '<div class="ist-satir">Açılan Sandık<b>' + acilanSandik + '</b></div>' +
+
+      '<h3 class="ist-baslik">🃏 Kart Favorileri</h3>' +
+      '<div class="ist-satir">En Çok Oynanan<b style="font-size:14px;text-align:right;">' + (enCokKart ? kartAdFromKey(enCokKart) + ' (' + enCokSayi + ')' : '—') + '</b></div>' +
+      '<div class="ist-satir">En Yüksek Win Rate<b style="font-size:14px;text-align:right;">' + (enCokGal ? kartAdFromKey(enCokGal) + ' (%' + Math.round(enCokWR * 100) + ')' : '—') + '</b></div>' +
+
+      '<h3 class="ist-baslik">⭐ Oyuncu</h3>' +
+      '<div class="ist-satir">Level<b>Lv ' + seviye() + ' / ' + MAX_LEVEL + '</b></div>' +
+      '<div class="ist-satir">Toplam XP<b>' + toplamXP() + '</b></div>';
+    ekranGoster("ekran-istatistik");
+  }
+
+  // ---- KART GALERİSİ ----
+  function galeriAc() {
+    const hepsi = [...AHSAP_KARTLAR, ...GUMUS_KARTLAR, ...ALTIN_KARTLAR];
+    const sahip = new Set(sahipSandikKartIdleri());
+    const el = document.getElementById("galeri-icerik");
+    el.innerHTML = "";
+    [
+      { ad: "📦 Ahşap Kartlar (Sıradan)", liste: AHSAP_KARTLAR, sinif: "siradan" },
+      { ad: "🎁 Gümüş Kartlar (Ender)",   liste: GUMUS_KARTLAR, sinif: "ender" },
+      { ad: "🏆 Altın Kartlar (Destansı)", liste: ALTIN_KARTLAR, sinif: "destansi" },
+    ].forEach(bolum => {
+      const kazanilan = bolum.liste.filter(k => sahip.has(k.id)).length;
+      const h = document.createElement("h3");
+      h.className = "ist-baslik";
+      h.textContent = bolum.ad + " (" + kazanilan + "/" + bolum.liste.length + ")";
+      el.appendChild(h);
+      const grid = document.createElement("div");
+      grid.className = "galeri-grid";
+      bolum.liste.forEach(kart => {
+        const sahipMi = sahip.has(kart.id);
+        const guc = kart.iyilesme ? "💚 +" + kart.iyilesme : "⚡ " + kart.guc;
+        const d = document.createElement("div");
+        d.className = "galeri-kart " + bolum.sinif + " " + (sahipMi ? "sahipli" : "kilitli");
+        d.innerHTML =
+          '<div class="em-g">' + (sahipMi ? kart.emoji : "❓") + '</div>' +
+          '<div class="ad-g">' + (sahipMi ? kart.ad : "???") + '</div>' +
+          '<div class="guc-g">' + (sahipMi ? guc : "") + '</div>';
+        grid.appendChild(d);
+      });
+      el.appendChild(grid);
+    });
+    ekranGoster("ekran-galeri");
   }
 
   // ---- KART İSTATİSTİKLERİ (kullanım + galibiyet) ----
@@ -2680,6 +2893,32 @@
     const t = toplamKupa();
     const m = document.getElementById("menu-kupa-yazi"); if (m) m.textContent = t;
     const s = document.getElementById("savas-kupa-yazi"); if (s) s.textContent = t;
+    rutbeGoster();
+  }
+
+  // ---- RÜTBE SİSTEMİ (kupaya göre Bronz → Elmas) ----
+  const RUTBELER = [
+    { ad:"Bronz",   emoji:"🥉", min:0,     sinif:"rutbe-bronz" },
+    { ad:"Gümüş",   emoji:"🥈", min:500,   sinif:"rutbe-gumus" },
+    { ad:"Altın",   emoji:"🥇", min:2000,  sinif:"rutbe-altin" },
+    { ad:"Platin",  emoji:"💠", min:5000,  sinif:"rutbe-platin" },
+    { ad:"Elmas",   emoji:"💎", min:10000, sinif:"rutbe-elmas" },
+  ];
+  function rutbeBul(kupa) {
+    let r = RUTBELER[0];
+    RUTBELER.forEach(x => { if (kupa >= x.min) r = x; });
+    return r;
+  }
+  function rutbeGoster() {
+    const el = document.getElementById("rutbe-rozet");
+    if (!el) return;
+    const kupa = toplamKupa();
+    const r = rutbeBul(kupa);
+    const sonrakiIdx = RUTBELER.indexOf(r) + 1;
+    const sonraki = RUTBELER[sonrakiIdx];
+    const ekstra = sonraki ? ' <span style="font-size:12px;opacity:.85;">(' + (sonraki.min - kupa) + ' kupa → ' + sonraki.ad + ')</span>' : '';
+    el.className = "rutbe-rozet " + r.sinif;
+    el.innerHTML = '<span class="em">' + r.emoji + '</span><span>' + r.ad + ' · 🏆 ' + kupa + '</span>' + ekstra;
   }
 
   // ---- BOT LİSTESİ (kupa seviyesine göre eşleştirilir) ----
@@ -2901,6 +3140,7 @@
     kupaGoster();
     elmasGoster();
     levelGoster();
+    temaUygula();
   }
 
   function anaMenu() {
