@@ -1557,6 +1557,42 @@
     ekranGoster("ekran-magaza");
   }
 
+  // Yeni sandık kartını deste'ye yerleştir — doluysa en zayıf taraf kartıyla değiştir
+  function desteyeYerlestir(yeniSandikId) {
+    const takim = oyun.takim || guvenliOku(TAKIM_ANAHTARI);
+    if (takim !== "kirmizi" && takim !== "mavi") return; // taraf yoksa atla
+    const d = tumDestelerObj();
+    if (!Array.isArray(d["sandik"])) d["sandik"] = [];
+    if (d["sandik"].indexOf(yeniSandikId) >= 0) return; // zaten destede
+
+    const tarafAktif = aktifDesteIdx(takim);
+    const sandikAktif = d["sandik"];
+    const toplam = tarafAktif.length + sandikAktif.length;
+
+    if (toplam < DESTE_TAM) {
+      // Yer var → direkt ekle
+      d["sandik"].push(yeniSandikId);
+    } else {
+      // Yer yok → en zayıf AKTİF taraf kartını çıkar
+      const kartlar = takim === "kirmizi" ? kirmiziKartlar : maviKartlar;
+      let enZayifIdx = -1, enZayifGuc = Infinity;
+      tarafAktif.forEach(i => {
+        const k = kartlar[i];
+        if (!k) return;
+        const g = k.iyilesme ? 999 : kartGuc(takim, i, k); // iyileşmeyi koruma
+        if (g < enZayifGuc) { enZayifGuc = g; enZayifIdx = i; }
+      });
+      if (enZayifIdx >= 0) {
+        // Taraf destesini düzenle (default yerine kaydet)
+        if (!Array.isArray(d[takim])) d[takim] = tarafAktif.slice();
+        const yer = d[takim].indexOf(enZayifIdx);
+        if (yer >= 0) d[takim].splice(yer, 1);
+        d["sandik"].push(yeniSandikId);
+      }
+    }
+    desteYaz(d);
+  }
+
   // Duplicate kart telafi altını (rütbeye göre)
   const KART_TELAFI = { siradan: 50, ender: 200, destansi: 600 };
 
@@ -1592,17 +1628,7 @@
         telafi = KART_TELAFI[kart.rutbe] || 50;
         altinEkle(telafi);
       } else {
-        // Yeni kazanılan kartı otomatik ekle — YALNIZCA destede yer varsa (<10)
-        // Aktif takım henüz seçilmemiş olabilir (mağaza direkt açıldıysa), o durumda taraf yok say
-        const takim = oyun.takim || guvenliOku(TAKIM_ANAHTARI);
-        const tarafSayisi = takim ? aktifDesteIdx(takim).length : 0;
-        const sandikSayisi = aktifDesteIdx("sandik").length;
-        if (tarafSayisi + sandikSayisi < DESTE_TAM) {
-          const d = tumDestelerObj();
-          if (!Array.isArray(d["sandik"])) d["sandik"] = [];
-          if (d["sandik"].indexOf(kart.id) < 0) d["sandik"].push(kart.id);
-          desteYaz(d);
-        }
+        desteyeYerlestir(kart.id);
       }
 
       setTimeout(() => {
@@ -1921,16 +1947,7 @@
       telafi = KART_TELAFI[kart.rutbe] || 50;
       altinEkle(telafi);
     } else {
-      // Yer varsa otomatik destege ekle
-      const takim = oyun.takim || guvenliOku(TAKIM_ANAHTARI);
-      const tarafSayisi = takim ? aktifDesteIdx(takim).length : 0;
-      const sandikSayisi = aktifDesteIdx("sandik").length;
-      if (tarafSayisi + sandikSayisi < DESTE_TAM) {
-        const d = tumDestelerObj();
-        if (!Array.isArray(d["sandik"])) d["sandik"] = [];
-        if (d["sandik"].indexOf(kart.id) < 0) d["sandik"].push(kart.id);
-        desteYaz(d);
-      }
+      desteyeYerlestir(kart.id);
     }
     kartAcildiModal(kart, "🎁 Zafer Sandığı", yeniMi, telafi);
   }
@@ -3120,6 +3137,13 @@
     if (!guvenliOku(ALP_HEDIYE4)) {
       elmasYaz(toplamElmas() + 10000);
       guvenliYaz(ALP_HEDIYE4, "1");
+    }
+
+    // Alp'in 5. hediyesi: kupa en az 10.000 (Elmas rütbesi)
+    const ALP_HEDIYE5 = "klanlarSavasiAlpHediye5";
+    if (!guvenliOku(ALP_HEDIYE5)) {
+      if (toplamKupa() < 10000) kupaYaz(10000);
+      guvenliYaz(ALP_HEDIYE5, "1");
     }
 
     // GÜNLÜK GİRİŞ HEDİYESİ — ardışık gün sayısına göre artan
