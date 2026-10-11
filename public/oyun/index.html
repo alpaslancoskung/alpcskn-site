@@ -1200,6 +1200,37 @@
   function _akor(frekanslar, sure, tip, hacim) {
     frekanslar.forEach(f => _ton(f, sure, tip, hacim));
   }
+  // Karta göre tema ses: emoji ya da ad'a göre kategori belirle
+  function sesCalKart(kart) {
+    if (!kart) return;
+    const em = kart.emoji || "";
+    const ad = (kart.isim || kart.ad || "").toLowerCase();
+    if (kart.iyilesme) return sesTema("iyilesme");
+    if ("🔥🌋🐉".includes(em) || /ateş|lav|volkan|ejder|ifrit/.test(ad)) return sesTema("ates");
+    if ("❄️⛄🌙".includes(em) || /buz|kar|ay|soğuk/.test(ad))             return sesTema("buz");
+    if ("🌊🐟🐋🐚".includes(em) || /su|deniz|balık|kraken|dalga/.test(ad)) return sesTema("su");
+    if ("🐺🦁🐯🐧🐞🦋🐛🐿️".includes(em) || /aslan|kurt|kaplan|hayvan/.test(ad)) return sesTema("hayvan");
+    if ("🏹⚔️🗡️🪓⛏️".includes(em) || /ok|kılıç|balta|asker|şövalye|zombi/.test(ad)) return sesTema("silah");
+    if ("🧙🪄🔮✨💎🌟".includes(em) || /büyücü|peri|sihir|kristal|rün|zeki/.test(ad)) return sesTema("buyu");
+    if ("👑🏆🥇🥈🥉".includes(em) || /kral|taç|kupa|madalya|şampiyon/.test(ad)) return sesTema("krali");
+    if (kart.rutbe === "destansi") return sesTema("destansi");
+    return sesTema("silah"); // varsayılan
+  }
+
+  function sesTema(ad) {
+    switch (ad) {
+      case "ates":      _ton(220, 0.3, "sawtooth", 0.25, 80); setTimeout(() => _ton(140, 0.25, "sawtooth", 0.2, 50), 100); break;
+      case "buz":       _ton(1800, 0.15, "sine", 0.2); setTimeout(() => _ton(2400, 0.2, "triangle", 0.18), 100); setTimeout(() => _ton(3000, 0.2, "sine", 0.15), 220); break;
+      case "su":        _ton(300, 0.4, "sine", 0.22, 600); setTimeout(() => _ton(500, 0.3, "sine", 0.18, 250), 150); break;
+      case "hayvan":    _ton(400 + Math.random() * 200, 0.5, "sawtooth", 0.3, 100); break;
+      case "silah":     _ton(1400 + Math.random() * 400, 0.08, "sawtooth", 0.22, 500); setTimeout(() => _ton(1000, 0.12, "square", 0.18), 90); break;
+      case "buyu":      [587, 740, 880, 1175, 1480].forEach((f, i) => setTimeout(() => _ton(f, 0.15, "triangle", 0.2), i * 60)); break;
+      case "krali":     [392, 494, 587, 740].forEach((f, i) => setTimeout(() => _ton(f, 0.3, "triangle", 0.28), i * 100)); break;
+      case "destansi":  _ton(80, 0.6, "sawtooth", 0.3, 40); setTimeout(() => _akor([262, 330, 392, 523], 0.4, "triangle", 0.22), 200); break;
+      case "iyilesme":  _ton(600, 0.2, "sine", 0.2, 1200); setTimeout(() => _ton(1200, 0.15, "sine", 0.15), 180); setTimeout(() => _ton(1600, 0.2, "triangle", 0.15), 320); break;
+    }
+  }
+
   // İsimli ses efektleri
   function sesCal(ad) {
     switch (ad) {
@@ -2536,6 +2567,7 @@
     oyun.kilitli = true;
     altinHarca(maliyet);
     sesCal("kart");
+    sesCalKart(benimKart); // kart temasına göre ses
     kartKullanildi(bilgi.side, bilgi.ref); // istatistik
     // Sol + sağ + eski #el'den tüm kartları topla (sırayla)
     const kartEl = [
@@ -2587,6 +2619,7 @@
     // İki asker sahneye çıksın ve ortaya koşsun
     const benimAsker  = askerOlustur("kos-yukari", benimKart.emoji);
     const dusmanAsker = askerOlustur("kos-asagi",  dusmanKart.emoji);
+    setTimeout(() => sesCalKart(dusmanKart), 400); // düşman kartı sahneye çıkınca ses
 
     gunlugeYaz("⚔️ " + benimIsim + " (⚡" + benimGuc + (benimKritik ? " KRİTİK" : "") +
                ") vs " + dusmanKart.isim + " (⚡" + dusmanGuc + (dusmanKritik ? " KRİTİK" : "") + ")");
