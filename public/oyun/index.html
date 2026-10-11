@@ -952,11 +952,6 @@
     <div id="sandiklar" class="sandiklar"></div>
     <div id="magaza-sonuc" style="display:none;"></div>
 
-    <hr style="border-color:#4a3f7a;margin:20px 0;">
-    <h3 style="color:#ffe27a;text-align:center;">💵 Gerçek Para ile Altın Al</h3>
-    <p class="merkez" style="color:#cfc9ec;font-size:12px;">TL ödemeyle altın paketleri (ödeme sistemi yakında aktif olacak)</p>
-    <div id="altin-paketleri" class="altin-paketleri"></div>
-
     <div class="merkez" style="margin-top:14px;">
       <button onclick="anaMenu()">← Menüye Dön</button>
     </div>
@@ -1595,7 +1590,6 @@
       if (!pahali) d.onclick = () => sandikAc(s);
       kutu.appendChild(d);
     });
-    paraPaketleriniCiz();
     ekranGoster("ekran-magaza");
   }
 
@@ -2346,6 +2340,10 @@
   function ekranGoster(id) {
     document.querySelectorAll(".ekran").forEach(e => e.classList.remove("aktif"));
     document.getElementById(id).classList.add("aktif");
+    // Tüm rozetleri her ekran geçişinde yenile (rütbe dahil)
+    try {
+      altinGoster(); kupaGoster(); elmasGoster(); levelGoster();
+    } catch (e) { /* ignore if elements not ready */ }
   }
 
   // ---- TAKIM SEÇ -> bot eşleşme ekranına git ----
