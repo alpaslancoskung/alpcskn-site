@@ -585,10 +585,29 @@
     box-shadow: 0 4px 0 #1a6030, 0 6px 10px rgba(0,0,0,.35);
   }
 
+  /* Tepki paneli aç/kapa */
+  .tepki-sari { text-align:center; margin:8px 0; }
+  .tepki-ac-btn {
+    font-size:20px; padding:8px 18px; border-radius:20px;
+    background: linear-gradient(180deg, #3a3268, #29234f);
+    color:#fff; border:2px solid var(--altin); font-weight:900;
+    box-shadow: 0 3px 0 rgba(0,0,0,.4);
+    cursor:pointer; letter-spacing:2px;
+  }
+  .tepki-ac-btn:hover { filter: brightness(1.1); }
+  .tepki-ac-btn.acik { background: linear-gradient(180deg, #ffe08a, #f2b23a); color:#3a2600; }
+
   /* Emoji çubuğu ve uçan emoji balonu */
   .emoji-bar {
     display:flex; gap:6px; justify-content:center; flex-wrap:wrap;
-    margin:8px 0;
+    margin:8px auto; padding:10px; max-width:560px;
+    background: rgba(0,0,0,.25); border-radius:14px;
+    border:1px solid var(--oyun-kenar);
+    animation: tepkiBarAc .25s ease-out;
+  }
+  @keyframes tepkiBarAc {
+    from { transform: scaleY(.3); opacity: 0; }
+    to   { transform: scaleY(1); opacity: 1; }
   }
   .emoji-bar button {
     padding:6px 10px; background:linear-gradient(180deg,#3a3268,#29234f);
@@ -1147,7 +1166,10 @@
     </div>
 
     <div id="gunluk"></div>
-    <div class="emoji-bar" id="emoji-bar"></div>
+    <div class="tepki-sari">
+      <button id="tepki-ac" class="tepki-ac-btn" onclick="tepkiBariAcKapa()">💭 ...</button>
+      <div class="emoji-bar" id="emoji-bar" style="display:none;"></div>
+    </div>
     <div class="el-baslik">🃏 Kartı tıkla veya 1-0 tuşuna bas!</div>
     <div id="el" style="display:none;"></div>
   </section>
@@ -3256,11 +3278,25 @@
     });
   }
 
+  function tepkiBariAcKapa() {
+    const bar = document.getElementById("emoji-bar");
+    const btn = document.getElementById("tepki-ac");
+    if (!bar) return;
+    const acikMi = bar.style.display !== "none";
+    bar.style.display = acikMi ? "none" : "flex";
+    if (btn) btn.classList.toggle("acik", !acikMi);
+  }
+
   function tepkiAt(t) {
     if (_tepkiKilit) return;
     _tepkiKilit = true;
     setTimeout(() => _tepkiKilit = false, 1500);
     tepkiUcur(t, false);
+    // Seçim sonrası paneli kapat
+    const bar = document.getElementById("emoji-bar");
+    const btn = document.getElementById("tepki-ac");
+    if (bar) bar.style.display = "none";
+    if (btn) btn.classList.remove("acik");
     if (oyun.mod === "bot" && Math.random() < 0.7) {
       setTimeout(() => {
         const cevap = BOT_CEVAPLAR[Math.floor(Math.random() * BOT_CEVAPLAR.length)];
