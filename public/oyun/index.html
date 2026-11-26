@@ -591,12 +591,42 @@
     margin:8px 0;
   }
   .emoji-bar button {
-    font-size:22px; padding:6px 10px; background:transparent;
+    padding:6px 10px; background:linear-gradient(180deg,#3a3268,#29234f);
     border:1px solid var(--oyun-kenar); border-radius:12px;
-    color:inherit; box-shadow:none; cursor:pointer;
-    transition: transform .1s;
+    color:#fff; box-shadow:0 2px 0 rgba(0,0,0,.3); cursor:pointer;
+    transition: transform .1s; font-weight:700;
   }
-  .emoji-bar button:hover { transform: scale(1.2); }
+  .emoji-bar .tepki-emoji { font-size:22px; padding:4px 10px; }
+  .emoji-bar .tepki-text  { font-size:12px; padding:6px 10px; }
+  .emoji-bar button:hover { transform: scale(1.1); }
+
+  /* Yazılı tepki balonu (sahnede uçar) */
+  .tepki-balon {
+    position: absolute; left:50%;
+    padding: 10px 16px; border-radius: 18px;
+    background: linear-gradient(180deg, #ffe08a, #f2b23a);
+    color: #3a2600; font-weight: 900; font-size: 18px;
+    box-shadow: 0 6px 20px rgba(0,0,0,.6), 0 0 20px rgba(255,210,100,.6);
+    pointer-events: none; z-index: 40; white-space: nowrap;
+    animation: tepkiBalonUc 2s ease-out forwards;
+  }
+  .tepki-balon.ters {
+    background: linear-gradient(180deg, #ff8aa0, #c0392b);
+    color: #fff;
+    animation: tepkiBalonUcTers 2s ease-out forwards;
+  }
+  @keyframes tepkiBalonUc {
+    0%   { bottom: 18%; transform: translateX(-50%) scale(.3) rotate(-10deg); opacity: 0; }
+    15%  { transform: translateX(-50%) scale(1.15) rotate(3deg); opacity: 1; }
+    80%  { bottom: 60%; transform: translateX(-50%) scale(1) rotate(-2deg); opacity: 1; }
+    100% { bottom: 75%; transform: translateX(-50%) scale(.9) rotate(5deg); opacity: 0; }
+  }
+  @keyframes tepkiBalonUcTers {
+    0%   { top: 18%; transform: translateX(-50%) scale(.3) rotate(10deg); opacity: 0; }
+    15%  { transform: translateX(-50%) scale(1.15) rotate(-3deg); opacity: 1; }
+    80%  { top: 60%; transform: translateX(-50%) scale(1) rotate(2deg); opacity: 1; }
+    100% { top: 75%; transform: translateX(-50%) scale(.9) rotate(-5deg); opacity: 0; }
+  }
   .emoji-ucan {
     position: absolute; font-size: 50px;
     pointer-events: none; z-index: 40;
@@ -3174,46 +3204,84 @@
     ekranGoster("ekran-savas");
   }
 
-  // ---- EMOJİ TEPKİ (rakibe) ----
-  const EMOJILER = ["👍", "😎", "🤣", "🤔", "💀", "🔥", "👻", "🫡", "😤", "🥳"];
-  const BOT_EMOJI_CEVAP = ["😏", "😅", "🫠", "😒", "👀", "😂", "😡", "🤨", "😐", "🙄"];
-  let _emojiKilit = false;
+  // ---- EMOJİ + YAZILI TEPKİ (rakibe) ----
+  // type: "emoji" (büyük emoji) veya "text" (konuşma balonu)
+  const TEPKILER = [
+    { tip:"emoji", icerik:"🤣" }, { tip:"emoji", icerik:"😎" },
+    { tip:"emoji", icerik:"🫡" }, { tip:"emoji", icerik:"🤔" },
+    { tip:"emoji", icerik:"💀" }, { tip:"emoji", icerik:"🔥" },
+    { tip:"emoji", icerik:"👻" }, { tip:"emoji", icerik:"🥳" },
+    { tip:"emoji", icerik:"🫠" }, { tip:"emoji", icerik:"👑" },
+    { tip:"text",  icerik:"Bol şans! 🍀" },
+    { tip:"text",  icerik:"HAHAHA 🤣" },
+    { tip:"text",  icerik:"Ezik! 💀" },
+    { tip:"text",  icerik:"Nasıl ya 😱" },
+    { tip:"text",  icerik:"Çok iyi 👏" },
+    { tip:"text",  icerik:"Vay vay vay 👀" },
+    { tip:"text",  icerik:"Kolay geldi 😏" },
+    { tip:"text",  icerik:"Aynen! 👍" },
+    { tip:"text",  icerik:"Of be... 😤" },
+    { tip:"text",  icerik:"Sonunda! 🎉" },
+    { tip:"text",  icerik:"Hadi oradan 🙄" },
+    { tip:"text",  icerik:"Vallahi kıyak 🔥" },
+  ];
+  const BOT_CEVAPLAR = [
+    { tip:"emoji", icerik:"😏" }, { tip:"emoji", icerik:"😅" },
+    { tip:"emoji", icerik:"👀" }, { tip:"emoji", icerik:"🤨" },
+    { tip:"emoji", icerik:"😤" }, { tip:"emoji", icerik:"🙄" },
+    { tip:"text",  icerik:"Hadi bakalım 😤" },
+    { tip:"text",  icerik:"Ben de varım 😏" },
+    { tip:"text",  icerik:"Göreceğiz 👀" },
+    { tip:"text",  icerik:"HAHAHA, SEN?! 🤣" },
+    { tip:"text",  icerik:"Beklerdin... 🤡" },
+    { tip:"text",  icerik:"Daha yeni başlıyorum 🔥" },
+    { tip:"text",  icerik:"Şansa güvenme 😒" },
+    { tip:"text",  icerik:"Pfft 🫠" },
+    { tip:"text",  icerik:"Kazanacağım 💪" },
+    { tip:"text",  icerik:"Dur bakalım 🛑" },
+    { tip:"text",  icerik:"O da kim? 🤨" },
+  ];
+  let _tepkiKilit = false;
 
   function emojiBarCiz() {
     const bar = document.getElementById("emoji-bar");
     if (!bar) return;
     bar.innerHTML = "";
-    EMOJILER.forEach(e => {
+    TEPKILER.forEach(t => {
       const b = document.createElement("button");
-      b.textContent = e;
-      b.onclick = () => emojiAt(e);
+      b.className = "tepki-btn tepki-" + t.tip;
+      b.textContent = t.icerik;
+      b.onclick = () => tepkiAt(t);
       bar.appendChild(b);
     });
   }
 
-  function emojiAt(emoji) {
-    if (_emojiKilit) return; // 1.5s cooldown
-    _emojiKilit = true;
-    setTimeout(() => _emojiKilit = false, 1500);
-    emojiUcur(emoji, false); // sen → düşmana
-    // Bot cevap: %60 ihtimal, 600-1200ms sonra
-    if (oyun.mod === "bot" && Math.random() < 0.6) {
+  function tepkiAt(t) {
+    if (_tepkiKilit) return;
+    _tepkiKilit = true;
+    setTimeout(() => _tepkiKilit = false, 1500);
+    tepkiUcur(t, false);
+    if (oyun.mod === "bot" && Math.random() < 0.7) {
       setTimeout(() => {
-        const cevap = BOT_EMOJI_CEVAP[Math.floor(Math.random() * BOT_EMOJI_CEVAP.length)];
-        emojiUcur(cevap, true); // düşman → sana
-      }, 600 + Math.random() * 600);
+        const cevap = BOT_CEVAPLAR[Math.floor(Math.random() * BOT_CEVAPLAR.length)];
+        tepkiUcur(cevap, true);
+      }, 600 + Math.random() * 700);
     }
   }
 
-  function emojiUcur(emoji, ters) {
+  function tepkiUcur(t, ters) {
     const sahne = document.getElementById("sahne");
     if (!sahne) return;
     const d = document.createElement("div");
-    d.className = "emoji-ucan" + (ters ? " ters" : "");
-    d.textContent = emoji;
+    d.className = (t.tip === "text" ? "tepki-balon" : "emoji-ucan") + (ters ? " ters" : "");
+    d.textContent = t.icerik;
     sahne.appendChild(d);
-    setTimeout(() => d.remove(), 1800);
+    setTimeout(() => d.remove(), 2000);
   }
+
+  // Geriye dönük uyumluluk
+  function emojiAt(e) { tepkiAt({ tip:"emoji", icerik:e }); }
+  function emojiUcur(e, t) { tepkiUcur({ tip:"emoji", icerik:e }, t); }
 
   function komboEfekti(sayi, bonus) {
     const sahne = document.getElementById("sahne");
