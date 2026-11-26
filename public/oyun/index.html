@@ -585,6 +585,36 @@
     box-shadow: 0 4px 0 #1a6030, 0 6px 10px rgba(0,0,0,.35);
   }
 
+  /* Emoji çubuğu ve uçan emoji balonu */
+  .emoji-bar {
+    display:flex; gap:6px; justify-content:center; flex-wrap:wrap;
+    margin:8px 0;
+  }
+  .emoji-bar button {
+    font-size:22px; padding:6px 10px; background:transparent;
+    border:1px solid var(--oyun-kenar); border-radius:12px;
+    color:inherit; box-shadow:none; cursor:pointer;
+    transition: transform .1s;
+  }
+  .emoji-bar button:hover { transform: scale(1.2); }
+  .emoji-ucan {
+    position: absolute; font-size: 50px;
+    pointer-events: none; z-index: 40;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,.6));
+    animation: emojiUc 1.8s ease-out forwards;
+  }
+  .emoji-ucan.ters { animation: emojiUcTers 1.8s ease-out forwards; }
+  @keyframes emojiUc {
+    0%   { bottom: 15%; left: 50%; transform: translateX(-50%) scale(.3) rotate(-15deg); opacity: 0; }
+    20%  { opacity: 1; transform: translateX(-50%) scale(1.3) rotate(0deg); }
+    100% { bottom: 70%; left: 50%; transform: translateX(-50%) scale(.9) rotate(20deg); opacity: 0; }
+  }
+  @keyframes emojiUcTers {
+    0%   { top: 15%; left: 50%; transform: translateX(-50%) scale(.3) rotate(15deg); opacity: 0; }
+    20%  { opacity: 1; transform: translateX(-50%) scale(1.3) rotate(0deg); }
+    100% { top: 70%; left: 50%; transform: translateX(-50%) scale(.9) rotate(-20deg); opacity: 0; }
+  }
+
   /* Kombo balon efekti (savaş sahnesinde) */
   .kombo-balon {
     position: absolute; top: 20%; left: 50%; transform: translateX(-50%);
@@ -1087,6 +1117,7 @@
     </div>
 
     <div id="gunluk"></div>
+    <div class="emoji-bar" id="emoji-bar"></div>
     <div class="el-baslik">🃏 Kartı tıkla veya 1-0 tuşuna bas!</div>
     <div id="el" style="display:none;"></div>
   </section>
@@ -2452,6 +2483,7 @@
     }
     canlariGuncelle();
     kartlariDiz();
+    emojiBarCiz();               // rakibe emoji tepki paneli
     siraGoster("benim");         // savaş başlarken sıra sende
     partikulleriBaslat();        // arenaya göre kar/kum/kıvılcım
     altinGoster();               // savaş üstündeki altın rozeti
@@ -3140,6 +3172,47 @@
     gunlugeYaz("🤖 " + oyun.aktifBot.emoji + " " + oyun.aktifBot.ad + " ile eşleştin! Bol şans.");
     savasiCiz();
     ekranGoster("ekran-savas");
+  }
+
+  // ---- EMOJİ TEPKİ (rakibe) ----
+  const EMOJILER = ["👍", "😎", "🤣", "🤔", "💀", "🔥", "👻", "🫡", "😤", "🥳"];
+  const BOT_EMOJI_CEVAP = ["😏", "😅", "🫠", "😒", "👀", "😂", "😡", "🤨", "😐", "🙄"];
+  let _emojiKilit = false;
+
+  function emojiBarCiz() {
+    const bar = document.getElementById("emoji-bar");
+    if (!bar) return;
+    bar.innerHTML = "";
+    EMOJILER.forEach(e => {
+      const b = document.createElement("button");
+      b.textContent = e;
+      b.onclick = () => emojiAt(e);
+      bar.appendChild(b);
+    });
+  }
+
+  function emojiAt(emoji) {
+    if (_emojiKilit) return; // 1.5s cooldown
+    _emojiKilit = true;
+    setTimeout(() => _emojiKilit = false, 1500);
+    emojiUcur(emoji, false); // sen → düşmana
+    // Bot cevap: %60 ihtimal, 600-1200ms sonra
+    if (oyun.mod === "bot" && Math.random() < 0.6) {
+      setTimeout(() => {
+        const cevap = BOT_EMOJI_CEVAP[Math.floor(Math.random() * BOT_EMOJI_CEVAP.length)];
+        emojiUcur(cevap, true); // düşman → sana
+      }, 600 + Math.random() * 600);
+    }
+  }
+
+  function emojiUcur(emoji, ters) {
+    const sahne = document.getElementById("sahne");
+    if (!sahne) return;
+    const d = document.createElement("div");
+    d.className = "emoji-ucan" + (ters ? " ters" : "");
+    d.textContent = emoji;
+    sahne.appendChild(d);
+    setTimeout(() => d.remove(), 1800);
   }
 
   function komboEfekti(sayi, bonus) {
